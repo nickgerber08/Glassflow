@@ -120,7 +120,7 @@ export default function JobsScreen() {
     setRefreshing(false);
   }, []);
 
-  // Filter jobs by selected date AND status
+  // Filter jobs by selected date, status, AND technician
   const filteredJobs = jobs.filter((job) => {
     // Filter by date - only show jobs with appointment on selected date
     const matchesDate = job.appointment_time 
@@ -130,7 +130,10 @@ export default function JobsScreen() {
     // Filter by status
     const matchesStatus = filter === 'all' || job.status === filter;
     
-    return matchesDate && matchesStatus;
+    // Filter by technician
+    const matchesTech = selectedTech === 'all' || job.assigned_to_name === selectedTech;
+    
+    return matchesDate && matchesStatus && matchesTech;
   });
 
   const handleDateChange = (event: any, date?: Date) => {
