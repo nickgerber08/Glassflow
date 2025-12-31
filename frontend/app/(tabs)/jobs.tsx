@@ -799,7 +799,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 8,
-    alignSelf: 'flex-start',
+    marginRight: 10,
   },
   techFilterText: {
     fontSize: 14,
@@ -809,6 +809,19 @@ const styles = StyleSheet.create({
   techFilterTextActive: {
     color: '#2196F3',
     fontWeight: '600',
+  },
+  creatorFilterTextActive: {
+    color: '#9C27B0',
+    fontWeight: '600',
+  },
+  creatorOptionSelected: {
+    backgroundColor: '#F3E5F5',
+    borderWidth: 2,
+    borderColor: '#9C27B0',
+  },
+  creatorOptionTextActive: {
+    fontWeight: '600',
+    color: '#9C27B0',
   },
   techModalOverlay: {
     flex: 1,
