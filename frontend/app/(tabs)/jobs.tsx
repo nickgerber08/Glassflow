@@ -273,7 +273,10 @@ export default function JobsScreen() {
         
         <TouchableOpacity 
           style={styles.dateDisplay}
-          onPress={() => setShowDatePicker(true)}
+          onPress={() => {
+            setCalendarViewMonth(selectedDate);
+            setShowCalendarModal(true);
+          }}
         >
           <Ionicons name="calendar" size={20} color="#2196F3" />
           <Text style={styles.dateText}>
@@ -290,14 +293,108 @@ export default function JobsScreen() {
         </TouchableOpacity>
       </View>
 
-      {showDatePicker && (
-        <DateTimePicker
-          value={selectedDate}
-          mode="date"
-          display="default"
-          onChange={handleDateChange}
-        />
-      )}
+      {/* Full Calendar Modal */}
+      <Modal
+        visible={showCalendarModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowCalendarModal(false)}
+      >
+        <View style={styles.calendarModalOverlay}>
+          <View style={styles.calendarModalContent}>
+            {/* Calendar Header */}
+            <View style={styles.calendarModalHeader}>
+              <Text style={styles.calendarModalTitle}>Select Date</Text>
+              <TouchableOpacity onPress={() => setShowCalendarModal(false)}>
+                <Ionicons name="close" size={28} color="#333" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Month Navigation */}
+            <View style={styles.calendarMonthNav}>
+              <TouchableOpacity 
+                onPress={() => setCalendarViewMonth(subMonths(calendarViewMonth, 1))}
+                style={styles.calendarNavBtn}
+              >
+                <Ionicons name="chevron-back" size={28} color="#2196F3" />
+              </TouchableOpacity>
+              <Text style={styles.calendarMonthText}>
+                {format(calendarViewMonth, 'MMMM yyyy')}
+              </Text>
+              <TouchableOpacity 
+                onPress={() => setCalendarViewMonth(addMonths(calendarViewMonth, 1))}
+                style={styles.calendarNavBtn}
+              >
+                <Ionicons name="chevron-forward" size={28} color="#2196F3" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Quick Jump Buttons */}
+            <View style={styles.quickJumpRow}>
+              <TouchableOpacity 
+                style={styles.quickJumpBtn}
+                onPress={() => {
+                  setSelectedDate(new Date());
+                  setShowCalendarModal(false);
+                }}
+              >
+                <Text style={styles.quickJumpText}>Today</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.quickJumpBtn}
+                onPress={() => setCalendarViewMonth(new Date())}
+              >
+                <Text style={styles.quickJumpText}>This Month</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Week Days Header */}
+            <View style={styles.calendarWeekDays}>
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                <Text key={day} style={styles.calendarWeekDayText}>{day}</Text>
+              ))}
+            </View>
+
+            {/* Calendar Grid */}
+            <View style={styles.calendarGrid}>
+              {/* Empty cells for days before month starts */}
+              {Array.from({ length: startDayOfWeek }).map((_, index) => (
+                <View key={`empty-${index}`} style={styles.calendarDayCell} />
+              ))}
+              
+              {/* Actual days */}
+              {calendarDays.map((day) => (
+                <TouchableOpacity
+                  key={day.toISOString()}
+                  style={[
+                    styles.calendarDayCell,
+                    isSameDay(day, selectedDate) && styles.calendarDaySelected,
+                    isSameDay(day, new Date()) && styles.calendarDayToday,
+                  ]}
+                  onPress={() => {
+                    setSelectedDate(day);
+                    setShowCalendarModal(false);
+                  }}
+                >
+                  <Text style={[
+                    styles.calendarDayText,
+                    isSameDay(day, selectedDate) && styles.calendarDayTextSelected,
+                    isSameDay(day, new Date()) && !isSameDay(day, selectedDate) && styles.calendarDayTextToday,
+                  ]}>
+                    {format(day, 'd')}
+                  </Text>
+                  {hasJobsOnDay(day) && (
+                    <View style={[
+                      styles.calendarDayDot,
+                      isSameDay(day, selectedDate) && styles.calendarDayDotSelected
+                    ]} />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       <View style={styles.filterWrapper}>
         <ScrollView
