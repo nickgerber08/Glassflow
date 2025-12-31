@@ -501,7 +501,10 @@ export default function CreateJobScreen() {
           disabled={loading}
         >
           {loading ? (
-            <ActivityIndicator color="#fff" />
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator color="#fff" size="small" />
+              <Text style={styles.submitButtonText}>Creating Job...</Text>
+            </View>
           ) : (
             <>
               <Ionicons name="checkmark-circle" size={24} color="#fff" />
