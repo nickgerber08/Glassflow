@@ -357,6 +357,17 @@ export default function CreateJobScreen() {
             />
           </View>
 
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Omega Invoice #</Text>
+            <TextInput
+              style={[styles.input, styles.omegaInput]}
+              value={omegaInvoice}
+              onChangeText={setOmegaInvoice}
+              placeholder="Enter Omega invoice number (optional)"
+              placeholderTextColor="#999"
+            />
+          </View>
+
           {/* Payment Collection Section */}
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Payment Collection</Text>
