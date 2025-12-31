@@ -55,17 +55,17 @@ export default function JobsScreen() {
     }
   }, [sessionToken]);
 
-  // Check for success message from create job
+  // Check for success message from create job - only trigger once
   useEffect(() => {
-    if (params.jobCreated === 'true' && params.customerName) {
+    if (params.jobCreated === 'true' && params.customerName && !showSuccessModal) {
       setSuccessMessage(`Job created for ${params.customerName}`);
       setShowSuccessModal(true);
-      // Auto close after 3 seconds
-      setTimeout(() => {
-        setShowSuccessModal(false);
-      }, 3000);
+      // Refresh jobs list
+      fetchJobs();
+      // Clear the params by navigating without them
+      router.setParams({ jobCreated: '', customerName: '' });
     }
-  }, [params]);
+  }, [params.jobCreated, params.customerName]);
 
   const fetchJobs = async () => {
     try {
