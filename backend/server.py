@@ -409,8 +409,8 @@ async def create_comment(job_id: str, comment_data: JobCommentCreate, request: R
     
     await db.job_comments.insert_one(comment)
     
-    # Emit real-time update
-    await sio.emit('comment_added', comment)
+    # Real-time updates disabled for now
+    # await sio.emit('comment_added', comment)
     
     return JobComment(**comment)
 
