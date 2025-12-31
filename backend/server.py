@@ -344,6 +344,8 @@ async def create_job(job_data: JobCreate, request: Request):
         "vehicle_year": job_data.vehicle_year,
         "vin_or_lp": job_data.vin_or_lp,
         "part_number": job_data.part_number,
+        "payment_type": job_data.payment_type,
+        "amount_to_collect": job_data.amount_to_collect,
         "job_type": job_data.job_type,
         "status": job_data.status,
         "assigned_to": job_data.assigned_to,
