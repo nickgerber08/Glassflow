@@ -457,12 +457,26 @@ export default function JobsScreen() {
           style={styles.techFilterButton}
           onPress={() => setShowTechFilter(true)}
         >
-          <Ionicons name="person" size={18} color={selectedTech === 'all' ? '#666' : '#2196F3'} />
+          <Ionicons name="construct" size={18} color={selectedTech === 'all' ? '#666' : '#2196F3'} />
           <Text style={[
             styles.techFilterText,
             selectedTech !== 'all' && styles.techFilterTextActive
           ]}>
             {selectedTech === 'all' ? 'All Techs' : selectedTech}
+          </Text>
+          <Ionicons name="chevron-down" size={18} color="#666" />
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.techFilterButton}
+          onPress={() => setShowCreatorFilter(true)}
+        >
+          <Ionicons name="create" size={18} color={selectedCreator === 'all' ? '#666' : '#9C27B0'} />
+          <Text style={[
+            styles.techFilterText,
+            selectedCreator !== 'all' && styles.creatorFilterTextActive
+          ]}>
+            {selectedCreator === 'all' ? 'All Creators' : selectedCreator}
           </Text>
           <Ionicons name="chevron-down" size={18} color="#666" />
         </TouchableOpacity>
@@ -525,6 +539,72 @@ export default function JobsScreen() {
                     selectedTech === tech.name && styles.techModalOptionTextActive
                   ]}>{tech.name}</Text>
                   {selectedTech === tech.name && (
+                    <Ionicons name="checkmark-circle" size={24} color="#4CAF50" />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Created By Filter Modal */}
+      <Modal
+        visible={showCreatorFilter}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowCreatorFilter(false)}
+      >
+        <View style={styles.techModalOverlay}>
+          <View style={styles.techModalContent}>
+            <View style={styles.techModalHeader}>
+              <Text style={styles.techModalTitle}>Filter by Creator</Text>
+              <TouchableOpacity onPress={() => setShowCreatorFilter(false)}>
+                <Ionicons name="close" size={28} color="#333" />
+              </TouchableOpacity>
+            </View>
+            
+            <ScrollView style={styles.techModalList}>
+              {/* All option */}
+              <TouchableOpacity
+                style={[
+                  styles.techModalOption,
+                  selectedCreator === 'all' && styles.creatorOptionSelected
+                ]}
+                onPress={() => {
+                  setSelectedCreator('all');
+                  setShowCreatorFilter(false);
+                }}
+              >
+                <Ionicons name="people" size={24} color={selectedCreator === 'all' ? '#9C27B0' : '#666'} />
+                <Text style={[
+                  styles.techModalOptionText,
+                  selectedCreator === 'all' && styles.creatorOptionTextActive
+                ]}>All Creators</Text>
+                {selectedCreator === 'all' && (
+                  <Ionicons name="checkmark-circle" size={24} color="#4CAF50" />
+                )}
+              </TouchableOpacity>
+
+              {/* Individual creators */}
+              {allCreators.map((creator) => (
+                <TouchableOpacity
+                  key={creator}
+                  style={[
+                    styles.techModalOption,
+                    selectedCreator === creator && styles.creatorOptionSelected
+                  ]}
+                  onPress={() => {
+                    setSelectedCreator(creator);
+                    setShowCreatorFilter(false);
+                  }}
+                >
+                  <Ionicons name="create" size={24} color={selectedCreator === creator ? '#9C27B0' : '#666'} />
+                  <Text style={[
+                    styles.techModalOptionText,
+                    selectedCreator === creator && styles.creatorOptionTextActive
+                  ]}>{creator}</Text>
+                  {selectedCreator === creator && (
                     <Ionicons name="checkmark-circle" size={24} color="#4CAF50" />
                   )}
                 </TouchableOpacity>
