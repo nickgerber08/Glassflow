@@ -29,10 +29,10 @@ api_router = APIRouter(prefix="/api")
 sio = socketio.AsyncServer(
     async_mode='asgi',
     cors_allowed_origins='*',
-    logger=True,
-    engineio_logger=True
+    logger=False,
+    engineio_logger=False
 )
-socket_app = socketio.ASGIApp(sio, app)
+# Mount Socket.IO app after including all routes
 
 # Pydantic Models
 class User(BaseModel):
