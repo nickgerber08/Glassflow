@@ -306,15 +306,30 @@ export default function JobsScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Jobs</Text>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => router.push({
-            pathname: '/create-job',
-            params: { preSelectedDate: selectedDate.toISOString() }
-          })}
-        >
-          <Ionicons name="add" size={24} color="#fff" />
-        </TouchableOpacity>
+        <View style={styles.headerButtons}>
+          <TouchableOpacity
+            style={styles.notificationButton}
+            onPress={() => router.push('/notifications')}
+          >
+            <Ionicons name="notifications" size={24} color="#2196F3" />
+            {unreadCount > 0 && (
+              <View style={styles.notificationBadge}>
+                <Text style={styles.notificationBadgeText}>
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => router.push({
+              pathname: '/create-job',
+              params: { preSelectedDate: selectedDate.toISOString() }
+            })}
+          >
+            <Ionicons name="add" size={24} color="#fff" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Date Selector */}
