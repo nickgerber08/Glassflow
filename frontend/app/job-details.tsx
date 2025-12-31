@@ -435,35 +435,126 @@ export default function JobDetailsScreen() {
           </View>
         </View>
 
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Assign Technician</Text>
+        {/* Technician & Part Number Card - Combined for prominence */}
+        <View style={styles.techPartCard}>
+          <View style={styles.techPartHeader}>
+            <Text style={styles.techPartTitle}>Assigned Tech & Part</Text>
+          </View>
+          
+          {/* Technician Section */}
           <TouchableOpacity
-            style={styles.assignmentSelector}
-            onPress={() => {
-              Alert.alert(
-                'Assign Technician',
-                'Select a technician for this job',
-                [
-                  { text: 'Unassigned', onPress: () => updateJobAssignment('') },
-                  ...users.map((u) => ({
-                    text: u.name,
-                    onPress: () => updateJobAssignment(u.user_id),
-                  })),
-                  { text: 'Cancel', style: 'cancel' },
-                ],
-                { cancelable: true }
-              );
-            }}
+            style={styles.techSelector}
+            onPress={() => setShowTechModal(true)}
           >
-            <View style={styles.assignmentContent}>
-              <Ionicons name="person" size={20} color="#2196F3" />
-              <Text style={styles.assignmentText}>
-                {job.assigned_to_name || 'No technician assigned'}
-              </Text>
+            <View style={styles.techRow}>
+              <Ionicons name="person-circle" size={40} color="#2196F3" />
+              <View style={styles.techInfo}>
+                <Text style={styles.techLabel}>Technician</Text>
+                <Text style={styles.techName}>
+                  {job.assigned_to_name || 'Tap to assign'}
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={24} color="#999" />
             </View>
-            <Ionicons name="chevron-down" size={20} color="#999" />
           </TouchableOpacity>
+
+          {/* Part Number Section */}
+          <View style={styles.partNumberSection}>
+            <View style={styles.partNumberHeader}>
+              <Ionicons name="construct" size={24} color="#FF9800" />
+              <Text style={styles.partNumberLabel}>Part Number</Text>
+            </View>
+            {editingPartNumber ? (
+              <View style={styles.partNumberEditRow}>
+                <TextInput
+                  style={styles.partNumberInput}
+                  value={partNumber}
+                  onChangeText={(text) => {
+                    setPartNumber(text);
+                    setJob({ ...job, part_number: text });
+                    setHasChanges(true);
+                  }}
+                  placeholder="Enter part number"
+                  placeholderTextColor="#999"
+                  autoFocus
+                />
+                <TouchableOpacity 
+                  style={styles.partNumberDoneBtn}
+                  onPress={() => setEditingPartNumber(false)}
+                >
+                  <Ionicons name="checkmark" size={24} color="#4CAF50" />
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <TouchableOpacity 
+                style={styles.partNumberDisplay}
+                onPress={() => setEditingPartNumber(true)}
+              >
+                <Text style={[
+                  styles.partNumberValue,
+                  !partNumber && styles.partNumberPlaceholder
+                ]}>
+                  {partNumber || 'Tap to add part number'}
+                </Text>
+                <Ionicons name="pencil" size={20} color="#666" />
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
+
+        {/* Technician Selection Modal */}
+        <Modal
+          visible={showTechModal}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => setShowTechModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.techModalContent}>
+              <View style={styles.techModalHeader}>
+                <Text style={styles.techModalTitle}>Select Technician</Text>
+                <TouchableOpacity onPress={() => setShowTechModal(false)}>
+                  <Ionicons name="close" size={28} color="#333" />
+                </TouchableOpacity>
+              </View>
+              
+              <ScrollView style={styles.techList}>
+                {/* Unassigned Option */}
+                <TouchableOpacity
+                  style={[
+                    styles.techOption,
+                    !job.assigned_to && styles.techOptionSelected
+                  ]}
+                  onPress={() => updateJobAssignment('', '')}
+                >
+                  <Ionicons name="person-outline" size={32} color="#999" />
+                  <Text style={styles.techOptionName}>Unassigned</Text>
+                  {!job.assigned_to && (
+                    <Ionicons name="checkmark-circle" size={24} color="#4CAF50" />
+                  )}
+                </TouchableOpacity>
+
+                {/* All Technicians */}
+                {allTechnicians.map((tech) => (
+                  <TouchableOpacity
+                    key={tech.user_id}
+                    style={[
+                      styles.techOption,
+                      job.assigned_to === tech.user_id && styles.techOptionSelected
+                    ]}
+                    onPress={() => updateJobAssignment(tech.user_id, tech.name)}
+                  >
+                    <Ionicons name="person-circle" size={32} color="#2196F3" />
+                    <Text style={styles.techOptionName}>{tech.name}</Text>
+                    {job.assigned_to === tech.user_id && (
+                      <Ionicons name="checkmark-circle" size={24} color="#4CAF50" />
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Appointment Time</Text>
