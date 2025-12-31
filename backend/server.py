@@ -83,6 +83,7 @@ class JobCreate(BaseModel):
     vehicle_year: str
     vin_or_lp: Optional[str] = None
     part_number: Optional[str] = None
+    omega_invoice: Optional[str] = None
     payment_type: Optional[str] = None  # 'collect' or 'dealership_po'
     amount_to_collect: Optional[float] = None
     job_type: str
