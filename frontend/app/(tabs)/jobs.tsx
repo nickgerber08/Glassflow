@@ -14,6 +14,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useJobStore } from '../../stores/jobStore';
 import { useRouter } from 'expo-router';
 import { FlashList } from '@shopify/flash-list';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { format, isSameDay, parseISO } from 'date-fns';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
@@ -40,6 +42,8 @@ export default function JobsScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<string>('all');
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   useEffect(() => {
     if (sessionToken) {
@@ -73,7 +77,41 @@ export default function JobsScreen() {
     setRefreshing(false);
   }, []);
 
-  const filteredJobs = filter === 'all' ? jobs : jobs.filter((job) => job.status === filter);
+  // Filter jobs by selected date AND status
+  const filteredJobs = jobs.filter((job) => {
+    // Filter by date - only show jobs with appointment on selected date
+    const matchesDate = job.appointment_time 
+      ? isSameDay(parseISO(job.appointment_time), selectedDate)
+      : false;
+    
+    // Filter by status
+    const matchesStatus = filter === 'all' || job.status === filter;
+    
+    return matchesDate && matchesStatus;
+  });
+
+  const handleDateChange = (event: any, date?: Date) => {
+    setShowDatePicker(false);
+    if (date) {
+      setSelectedDate(date);
+    }
+  };
+
+  const goToPreviousDay = () => {
+    const newDate = new Date(selectedDate);
+    newDate.setDate(newDate.getDate() - 1);
+    setSelectedDate(newDate);
+  };
+
+  const goToNextDay = () => {
+    const newDate = new Date(selectedDate);
+    newDate.setDate(newDate.getDate() + 1);
+    setSelectedDate(newDate);
+  };
+
+  const goToToday = () => {
+    setSelectedDate(new Date());
+  };
 
   const renderJob = ({ item }: { item: any }) => (
     <TouchableOpacity
@@ -123,7 +161,7 @@ export default function JobsScreen() {
           <View style={styles.detailRow}>
             <Ionicons name="time" size={16} color="#666" />
             <Text style={styles.detailText}>
-              {new Date(item.appointment_time).toLocaleString()}
+              {format(parseISO(item.appointment_time), 'h:mm a')}
             </Text>
           </View>
         )}
@@ -156,6 +194,40 @@ export default function JobsScreen() {
         </TouchableOpacity>
       </View>
 
+      {/* Date Selector */}
+      <View style={styles.dateSelector}>
+        <TouchableOpacity onPress={goToPreviousDay} style={styles.dateNavButton}>
+          <Ionicons name="chevron-back" size={24} color="#2196F3" />
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.dateDisplay}
+          onPress={() => setShowDatePicker(true)}
+        >
+          <Ionicons name="calendar" size={20} color="#2196F3" />
+          <Text style={styles.dateText}>
+            {format(selectedDate, 'EEE, MMM d, yyyy')}
+          </Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity onPress={goToNextDay} style={styles.dateNavButton}>
+          <Ionicons name="chevron-forward" size={24} color="#2196F3" />
+        </TouchableOpacity>
+        
+        <TouchableOpacity onPress={goToToday} style={styles.todayButton}>
+          <Text style={styles.todayText}>Today</Text>
+        </TouchableOpacity>
+      </View>
+
+      {showDatePicker && (
+        <DateTimePicker
+          value={selectedDate}
+          mode="date"
+          display="default"
+          onChange={handleDateChange}
+        />
+      )}
+
       <View style={styles.filterWrapper}>
         <ScrollView
           horizontal
@@ -169,7 +241,7 @@ export default function JobsScreen() {
             <Text
               style={[styles.filterText, filter === 'all' && styles.filterTextActive]}
             >
-              All ({jobs.length})
+              All ({filteredJobs.length})
             </Text>
           </TouchableOpacity>
           {Object.keys(STATUS_COLORS).map((status) => (
@@ -194,7 +266,7 @@ export default function JobsScreen() {
                 ]}
               >
                 {STATUS_LABELS[status]} (
-                {jobs.filter((j) => j.status === status).length})
+                {filteredJobs.filter((j) => j.status === status).length})
               </Text>
             </TouchableOpacity>
           ))}
@@ -204,12 +276,14 @@ export default function JobsScreen() {
       {filteredJobs.length === 0 ? (
         <View style={styles.emptyState}>
           <Ionicons name="briefcase-outline" size={64} color="#ccc" />
-          <Text style={styles.emptyText}>No jobs found</Text>
+          <Text style={styles.emptyText}>
+            No jobs scheduled for {format(selectedDate, 'MMM d, yyyy')}
+          </Text>
           <TouchableOpacity
             style={styles.emptyButton}
             onPress={() => router.push('/create-job')}
           >
-            <Text style={styles.emptyButtonText}>Create First Job</Text>
+            <Text style={styles.emptyButtonText}>Create Job</Text>
           </TouchableOpacity>
         </View>
       ) : (
@@ -260,6 +334,47 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+  },
+  dateSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#fff',
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  dateNavButton: {
+    padding: 8,
+  },
+  dateDisplay: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E3F2FD',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    flex: 1,
+    marginHorizontal: 8,
+    justifyContent: 'center',
+    gap: 8,
+  },
+  dateText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1976D2',
+  },
+  todayButton: {
+    backgroundColor: '#2196F3',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  todayText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#fff',
   },
   filterWrapper: {
     backgroundColor: '#fff',
@@ -361,10 +476,11 @@ const styles = StyleSheet.create({
     padding: 32,
   },
   emptyText: {
-    fontSize: 18,
+    fontSize: 16,
     color: '#999',
     marginTop: 16,
     marginBottom: 24,
+    textAlign: 'center',
   },
   emptyButton: {
     backgroundColor: '#2196F3',
