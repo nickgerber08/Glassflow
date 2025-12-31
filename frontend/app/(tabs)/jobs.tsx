@@ -15,8 +15,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useJobStore } from '../../stores/jobStore';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { FlashList } from '@shopify/flash-list';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { format, isSameDay, parseISO } from 'date-fns';
+import { format, isSameDay, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths, isSameMonth } from 'date-fns';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
