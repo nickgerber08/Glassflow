@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import io, { Socket } from 'socket.io-client';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
@@ -28,7 +27,6 @@ interface Job {
 interface JobStore {
   jobs: Job[];
   selectedJob: Job | null;
-  socket: Socket | null;
   loading: boolean;
   error: string | null;
   
@@ -38,8 +36,6 @@ interface JobStore {
   addJob: (job: Job) => void;
   updateJob: (jobId: string, updates: Partial<Job>) => void;
   removeJob: (jobId: string) => void;
-  initializeSocket: (token: string) => void;
-  disconnectSocket: () => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
 }
@@ -47,7 +43,6 @@ interface JobStore {
 export const useJobStore = create<JobStore>((set, get) => ({
   jobs: [],
   selectedJob: null,
-  socket: null,
   loading: false,
   error: null,
 
@@ -72,43 +67,6 @@ export const useJobStore = create<JobStore>((set, get) => ({
     jobs: state.jobs.filter((job) => job.job_id !== jobId),
     selectedJob: state.selectedJob?.job_id === jobId ? null : state.selectedJob
   })),
-  
-  initializeSocket: (token) => {
-    const socket = io(BACKEND_URL, {
-      auth: { token },
-      transports: ['websocket', 'polling']
-    });
-
-    socket.on('connect', () => {
-      console.log('Socket connected');
-    });
-
-    socket.on('job_created', (job: Job) => {
-      get().addJob(job);
-    });
-
-    socket.on('job_updated', (job: Job) => {
-      get().updateJob(job.job_id, job);
-    });
-
-    socket.on('job_deleted', ({ job_id }: { job_id: string }) => {
-      get().removeJob(job_id);
-    });
-
-    socket.on('disconnect', () => {
-      console.log('Socket disconnected');
-    });
-
-    set({ socket });
-  },
-  
-  disconnectSocket: () => {
-    const { socket } = get();
-    if (socket) {
-      socket.disconnect();
-      set({ socket: null });
-    }
-  },
   
   setLoading: (loading) => set({ loading }),
   
