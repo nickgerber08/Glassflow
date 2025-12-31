@@ -62,6 +62,7 @@ export default function JobsScreen() {
   useEffect(() => {
     if (sessionToken) {
       fetchJobs();
+      fetchTechnicians();
     }
   }, [sessionToken]);
 
@@ -76,6 +77,22 @@ export default function JobsScreen() {
       router.setParams({ jobCreated: '', customerName: '' });
     }
   }, [params.jobCreated, params.customerName]);
+
+  const fetchTechnicians = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/users`, {
+        headers: {
+          Authorization: `Bearer ${sessionToken}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setAllTechnicians([...DEFAULT_TECHNICIANS, ...data]);
+      }
+    } catch (error) {
+      console.error('Error fetching technicians:', error);
+    }
+  };
 
   const fetchJobs = async () => {
     try {
