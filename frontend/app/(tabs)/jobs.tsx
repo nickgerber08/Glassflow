@@ -327,6 +327,89 @@ export default function JobsScreen() {
         </ScrollView>
       </View>
 
+      {/* Technician Filter */}
+      <View style={styles.techFilterWrapper}>
+        <TouchableOpacity 
+          style={styles.techFilterButton}
+          onPress={() => setShowTechFilter(true)}
+        >
+          <Ionicons name="person" size={18} color={selectedTech === 'all' ? '#666' : '#2196F3'} />
+          <Text style={[
+            styles.techFilterText,
+            selectedTech !== 'all' && styles.techFilterTextActive
+          ]}>
+            {selectedTech === 'all' ? 'All Techs' : selectedTech}
+          </Text>
+          <Ionicons name="chevron-down" size={18} color="#666" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Technician Filter Modal */}
+      <Modal
+        visible={showTechFilter}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowTechFilter(false)}
+      >
+        <View style={styles.techModalOverlay}>
+          <View style={styles.techModalContent}>
+            <View style={styles.techModalHeader}>
+              <Text style={styles.techModalTitle}>Filter by Technician</Text>
+              <TouchableOpacity onPress={() => setShowTechFilter(false)}>
+                <Ionicons name="close" size={28} color="#333" />
+              </TouchableOpacity>
+            </View>
+            
+            <ScrollView style={styles.techModalList}>
+              {/* All option */}
+              <TouchableOpacity
+                style={[
+                  styles.techModalOption,
+                  selectedTech === 'all' && styles.techModalOptionSelected
+                ]}
+                onPress={() => {
+                  setSelectedTech('all');
+                  setShowTechFilter(false);
+                }}
+              >
+                <Ionicons name="people" size={24} color={selectedTech === 'all' ? '#2196F3' : '#666'} />
+                <Text style={[
+                  styles.techModalOptionText,
+                  selectedTech === 'all' && styles.techModalOptionTextActive
+                ]}>All Technicians</Text>
+                {selectedTech === 'all' && (
+                  <Ionicons name="checkmark-circle" size={24} color="#4CAF50" />
+                )}
+              </TouchableOpacity>
+
+              {/* Individual technicians */}
+              {allTechnicians.map((tech) => (
+                <TouchableOpacity
+                  key={tech.user_id}
+                  style={[
+                    styles.techModalOption,
+                    selectedTech === tech.name && styles.techModalOptionSelected
+                  ]}
+                  onPress={() => {
+                    setSelectedTech(tech.name);
+                    setShowTechFilter(false);
+                  }}
+                >
+                  <Ionicons name="person-circle" size={24} color={selectedTech === tech.name ? '#2196F3' : '#666'} />
+                  <Text style={[
+                    styles.techModalOptionText,
+                    selectedTech === tech.name && styles.techModalOptionTextActive
+                  ]}>{tech.name}</Text>
+                  {selectedTech === tech.name && (
+                    <Ionicons name="checkmark-circle" size={24} color="#4CAF50" />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
       {filteredJobs.length === 0 ? (
         <View style={styles.emptyState}>
           <Ionicons name="briefcase-outline" size={64} color="#ccc" />
