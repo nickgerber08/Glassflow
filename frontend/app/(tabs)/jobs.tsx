@@ -931,6 +931,30 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#fff',
   },
+  collectBadge: {
+    backgroundColor: '#4CAF50',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    marginLeft: 6,
+  },
+  collectBadgeText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  poBadge: {
+    backgroundColor: '#9C27B0',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    marginLeft: 6,
+  },
+  poBadgeText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#fff',
+  },
   statusBadge: {
     paddingHorizontal: 14,
     paddingVertical: 6,
