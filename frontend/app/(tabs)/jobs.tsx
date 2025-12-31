@@ -581,6 +581,81 @@ const styles = StyleSheet.create({
   filterTextActive: {
     color: '#fff',
   },
+  techFilterWrapper: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  techFilterButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+  },
+  techFilterText: {
+    fontSize: 14,
+    color: '#666',
+    marginHorizontal: 8,
+  },
+  techFilterTextActive: {
+    color: '#2196F3',
+    fontWeight: '600',
+  },
+  techModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  techModalContent: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    maxHeight: '60%',
+  },
+  techModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  techModalTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#333',
+  },
+  techModalList: {
+    padding: 16,
+  },
+  techModalOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 8,
+    backgroundColor: '#f5f5f5',
+  },
+  techModalOptionSelected: {
+    backgroundColor: '#E3F2FD',
+    borderWidth: 2,
+    borderColor: '#2196F3',
+  },
+  techModalOptionText: {
+    flex: 1,
+    fontSize: 16,
+    color: '#333',
+    marginLeft: 12,
+  },
+  techModalOptionTextActive: {
+    fontWeight: '600',
+    color: '#2196F3',
+  },
   listContent: {
     padding: 16,
   },
