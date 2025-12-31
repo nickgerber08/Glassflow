@@ -87,6 +87,7 @@ class JobCreate(BaseModel):
     appointment_time: Optional[datetime] = None
     notes: Optional[str] = None
     photos: List[str] = []
+    created_by_name: Optional[str] = None  # name of creator
 
 class JobUpdate(BaseModel):
     customer_name: Optional[str] = None
