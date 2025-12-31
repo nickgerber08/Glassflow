@@ -61,6 +61,24 @@ export default function JobsScreen() {
   const [selectedCreator, setSelectedCreator] = useState<string>('all');
   const [showCreatorFilter, setShowCreatorFilter] = useState(false);
   const [allCreators, setAllCreators] = useState<string[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Fetch unread notification count
+  const fetchUnreadCount = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/notifications/unread-count`, {
+        headers: {
+          Authorization: `Bearer ${sessionToken}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUnreadCount(data.unread_count);
+      }
+    } catch (error) {
+      console.error('Error fetching unread count:', error);
+    }
+  };
 
   // Get days for calendar view
   const calendarDays = eachDayOfInterval({
