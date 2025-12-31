@@ -128,13 +128,19 @@ export default function JobDetailsScreen() {
     setHasChanges(true);
   };
 
-  const updateJobAssignment = async (userId: string) => {
-    const assignedUser = users.find(u => u.user_id === userId);
+  const updateJobAssignment = async (techId: string, techName: string) => {
     setJob({ 
       ...job, 
-      assigned_to: userId,
-      assigned_to_name: assignedUser?.name || null 
+      assigned_to: techId,
+      assigned_to_name: techName || null 
     });
+    setHasChanges(true);
+    setShowTechModal(false);
+  };
+
+  const updatePartNumber = (newPartNumber: string) => {
+    setPartNumber(newPartNumber);
+    setJob({ ...job, part_number: newPartNumber });
     setHasChanges(true);
   };
 
