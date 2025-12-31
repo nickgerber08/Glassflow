@@ -1,16 +1,70 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Alert, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useRouter } from 'expo-router';
+import { useState } from 'react';
+
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
 export default function ProfileScreen() {
-  const { user, logout } = useAuth();
+  const { user, logout, sessionToken } = useAuth();
   const router = useRouter();
+  const [showAddTech, setShowAddTech] = useState(false);
+  const [techName, setTechName] = useState('');
+  const [techEmail, setTechEmail] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleLogout = async () => {
     await logout();
     router.replace('/login');
+  };
+
+  const addTechnician = async () => {
+    if (!techName.trim() || !techEmail.trim()) {
+      Alert.alert('Error', 'Please enter both name and email');
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(techEmail)) {
+      Alert.alert('Error', 'Please enter a valid email address');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      // In a real app, you'd create a user account
+      // For now, we'll just create a user record that can be assigned
+      const response = await fetch(`${BACKEND_URL}/api/users/create-tech`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${sessionToken}`,
+        },
+        body: JSON.stringify({
+          name: techName,
+          email: techEmail,
+        }),
+      });
+
+      if (response.ok) {
+        Alert.alert('Success', 'Technician added successfully!');
+        setTechName('');
+        setTechEmail('');
+        setShowAddTech(false);
+      } else {
+        const error = await response.json();
+        Alert.alert('Error', error.detail || 'Failed to add technician');
+      }
+    } catch (error) {
+      console.error('Error adding technician:', error);
+      Alert.alert('Error', 'Failed to add technician');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -41,6 +95,57 @@ export default function ProfileScreen() {
             </Text>
           </View>
         </View>
+
+        {user?.role === 'admin' && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Team Management</Text>
+
+            <TouchableOpacity 
+              style={styles.addTechButton}
+              onPress={() => setShowAddTech(!showAddTech)}
+            >
+              <View style={styles.menuItemLeft}>
+                <Ionicons name="person-add" size={24} color="#2196F3" />
+                <Text style={styles.menuItemText}>Add Technician</Text>
+              </View>
+              <Ionicons name={showAddTech ? 'chevron-up' : 'chevron-down'} size={20} color="#999" />
+            </TouchableOpacity>
+
+            {showAddTech && (
+              <View style={styles.addTechForm}>
+                <Text style={styles.formLabel}>Technician Name</Text>
+                <TextInput
+                  style={styles.input}
+                  value={techName}
+                  onChangeText={setTechName}
+                  placeholder="Enter full name"
+                  placeholderTextColor="#999"
+                />
+
+                <Text style={styles.formLabel}>Email Address</Text>
+                <TextInput
+                  style={styles.input}
+                  value={techEmail}
+                  onChangeText={setTechEmail}
+                  placeholder="Enter email"
+                  placeholderTextColor="#999"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+
+                <TouchableOpacity
+                  style={[styles.submitButton, loading && styles.submitButtonDisabled]}
+                  onPress={addTechnician}
+                  disabled={loading}
+                >
+                  <Text style={styles.submitButtonText}>
+                    {loading ? 'Adding...' : 'Add Technician'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        )}
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Settings</Text>
@@ -201,6 +306,53 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
     marginLeft: 16,
+  },
+  addTechButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f5f5f5',
+    backgroundColor: '#E3F2FD',
+  },
+  addTechForm: {
+    padding: 16,
+    backgroundColor: '#f9f9f9',
+  },
+  formLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#666',
+    marginBottom: 8,
+    marginTop: 8,
+  },
+  input: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: '#333',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    marginBottom: 8,
+  },
+  submitButton: {
+    backgroundColor: '#2196F3',
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  submitButtonDisabled: {
+    opacity: 0.5,
+  },
+  submitButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
   logoutButton: {
     flexDirection: 'row',
