@@ -20,6 +20,13 @@ import { format, isSameDay, parseISO } from 'date-fns';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
+// Default technicians - must match other pages
+const DEFAULT_TECHNICIANS = [
+  { name: 'Iman', user_id: 'default_iman' },
+  { name: 'Enrique', user_id: 'default_enrique' },
+  { name: 'Alan', user_id: 'default_alan' },
+];
+
 const STATUS_COLORS: Record<string, string> = {
   pending: '#FF9800',
   scheduled: '#2196F3',
