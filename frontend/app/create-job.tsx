@@ -9,6 +9,7 @@ import {
   Alert,
   ActivityIndicator,
   Platform,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -32,11 +33,19 @@ const TIME_SLOTS = [
   { label: '1:00 PM - 4:00 PM', value: 'afternoon' },
 ];
 
+// Default technicians
+const DEFAULT_TECHNICIANS = [
+  { name: 'Iman', user_id: 'default_iman' },
+  { name: 'Enrique', user_id: 'default_enrique' },
+  { name: 'Alan', user_id: 'default_alan' },
+];
+
 export default function CreateJobScreen() {
   const { sessionToken, user } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<any[]>([]);
+  const [allTechnicians, setAllTechnicians] = useState<any[]>(DEFAULT_TECHNICIANS);
   
   // Form state
   const [customerName, setCustomerName] = useState('');
@@ -47,9 +56,12 @@ export default function CreateJobScreen() {
   const [vehicleYear, setVehicleYear] = useState('');
   const [jobType, setJobType] = useState('windshield');
   const [assignedTo, setAssignedTo] = useState('');
+  const [assignedToName, setAssignedToName] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [timeSlot, setTimeSlot] = useState('morning');
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showCustomTechModal, setShowCustomTechModal] = useState(false);
+  const [customTechName, setCustomTechName] = useState('');
   const [notes, setNotes] = useState('');
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
 
@@ -69,6 +81,8 @@ export default function CreateJobScreen() {
       if (response.ok) {
         const data = await response.json();
         setUsers(data);
+        // Combine default techs with database techs
+        setAllTechnicians([...DEFAULT_TECHNICIANS, ...data]);
       }
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -96,10 +110,16 @@ export default function CreateJobScreen() {
   };
 
   const handleDateChange = (event: any, selectedDate?: Date) => {
-    setShowDatePicker(Platform.OS === 'ios');
+    if (Platform.OS === 'android') {
+      setShowDatePicker(false);
+    }
     if (selectedDate) {
       setSelectedDate(selectedDate);
     }
+  };
+
+  const confirmIOSDate = () => {
+    setShowDatePicker(false);
   };
 
   const getAppointmentDateTime = () => {
@@ -112,6 +132,25 @@ export default function CreateJobScreen() {
       date.setHours(13, 0, 0, 0);
     }
     return date;
+  };
+
+  const handleTechSelection = (tech: any) => {
+    if (tech.user_id === 'other') {
+      setShowCustomTechModal(true);
+    } else {
+      setAssignedTo(tech.user_id);
+      setAssignedToName(tech.name);
+    }
+  };
+
+  const handleCustomTechSubmit = () => {
+    if (customTechName.trim()) {
+      const customId = `custom_${Date.now()}`;
+      setAssignedTo(customId);
+      setAssignedToName(customTechName.trim());
+      setShowCustomTechModal(false);
+      setCustomTechName('');
+    }
   };
 
   const handleSubmit = async () => {
@@ -143,6 +182,7 @@ export default function CreateJobScreen() {
         job_type: jobType,
         status: 'pending',
         assigned_to: assignedTo || null,
+        assigned_to_name: assignedToName || null,
         appointment_time: appointmentDateTime ? appointmentDateTime.toISOString() : null,
         notes: notes || null,
         photos: [],
@@ -183,22 +223,8 @@ export default function CreateJobScreen() {
           <Ionicons name="arrow-back" size={24} color="#333" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Create Job</Text>
-        <TouchableOpacity 
-          onPress={() => router.push('/(tabs)/profile')} 
-          style={styles.addTechButton}
-        >
-          <Ionicons name="person-add" size={20} color="#2196F3" />
-        </TouchableOpacity>
+        <View style={{ width: 40 }} />
       </View>
-
-      {users.length === 0 && (
-        <View style={styles.warningBanner}>
-          <Ionicons name="alert-circle" size={20} color="#FF9800" />
-          <Text style={styles.warningText}>
-            No technicians found. Tap the + icon above to add technicians in Profile tab.
-          </Text>
-        </View>
-      )}
 
       <KeyboardAwareScrollView
         style={styles.content}
@@ -314,38 +340,46 @@ export default function CreateJobScreen() {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Assign To</Text>
-            <View style={styles.pickerContainer}>
+            <Text style={styles.label}>Assign To Technician</Text>
+            <View style={styles.techGrid}>
+              {allTechnicians.map((tech) => (
+                <TouchableOpacity
+                  key={tech.user_id}
+                  style={[
+                    styles.techChip,
+                    assignedTo === tech.user_id && styles.techChipActive,
+                  ]}
+                  onPress={() => handleTechSelection(tech)}
+                >
+                  <Ionicons 
+                    name="person" 
+                    size={16} 
+                    color={assignedTo === tech.user_id ? '#fff' : '#2196F3'} 
+                  />
+                  <Text
+                    style={[
+                      styles.techChipText,
+                      assignedTo === tech.user_id && styles.techChipTextActive,
+                    ]}
+                  >
+                    {tech.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
               <TouchableOpacity
-                style={styles.picker}
-                onPress={() => {
-                  if (users.length === 0) {
-                    Alert.alert('No Technicians', 'Please add technicians first in the Profile tab.');
-                    return;
-                  }
-                  Alert.alert(
-                    'Assign To',
-                    'Select a technician',
-                    [
-                      { text: 'Unassigned', onPress: () => setAssignedTo('') },
-                      ...users.map((user) => ({
-                        text: user.name,
-                        onPress: () => setAssignedTo(user.user_id),
-                      })),
-                      { text: 'Cancel', style: 'cancel' },
-                    ],
-                    { cancelable: true }
-                  );
-                }}
+                style={[
+                  styles.techChip,
+                  styles.techChipOther,
+                ]}
+                onPress={() => setShowCustomTechModal(true)}
               >
-                <Text style={assignedTo ? styles.pickerText : styles.pickerPlaceholder}>
-                  {assignedTo
-                    ? users.find((u) => u.user_id === assignedTo)?.name
-                    : 'Select technician'}
-                </Text>
-                <Ionicons name="chevron-down" size={20} color="#999" />
+                <Ionicons name="add-circle" size={16} color="#FF9800" />
+                <Text style={styles.techChipOtherText}>Other</Text>
               </TouchableOpacity>
             </View>
+            {assignedToName && !allTechnicians.find(t => t.user_id === assignedTo) && (
+              <Text style={styles.selectedCustomTech}>Selected: {assignedToName}</Text>
+            )}
           </View>
 
           <View style={styles.inputGroup}>
@@ -355,21 +389,18 @@ export default function CreateJobScreen() {
               onPress={() => setShowDatePicker(true)}
             >
               <Ionicons name="calendar" size={20} color="#2196F3" />
-              <Text style={styles.dateButtonText}>
+              <Text style={[styles.dateButtonText, selectedDate && styles.dateButtonTextSelected]}>
                 {selectedDate
-                  ? selectedDate.toLocaleDateString()
-                  : 'Tap to select date'}
+                  ? selectedDate.toLocaleDateString('en-US', { 
+                      weekday: 'short', 
+                      month: 'short', 
+                      day: 'numeric', 
+                      year: 'numeric' 
+                    })
+                  : 'Tap here to select date'}
               </Text>
+              <Ionicons name="chevron-forward" size={20} color="#999" />
             </TouchableOpacity>
-            {showDatePicker && (
-              <DateTimePicker
-                value={selectedDate || new Date()}
-                mode="date"
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                onChange={handleDateChange}
-                minimumDate={new Date()}
-              />
-            )}
           </View>
 
           <View style={styles.inputGroup}>
@@ -431,6 +462,82 @@ export default function CreateJobScreen() {
           )}
         </TouchableOpacity>
       </KeyboardAwareScrollView>
+
+      {/* Date Picker Modal */}
+      {showDatePicker && (
+        <Modal
+          transparent={true}
+          animationType="slide"
+          visible={showDatePicker}
+          onRequestClose={() => setShowDatePicker(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.datePickerContainer}>
+              <View style={styles.datePickerHeader}>
+                <Text style={styles.datePickerTitle}>Select Appointment Date</Text>
+                <TouchableOpacity onPress={() => setShowDatePicker(false)}>
+                  <Ionicons name="close" size={24} color="#333" />
+                </TouchableOpacity>
+              </View>
+              <DateTimePicker
+                value={selectedDate || new Date()}
+                mode="date"
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                onChange={handleDateChange}
+                minimumDate={new Date()}
+                style={styles.datePicker}
+              />
+              {Platform.OS === 'ios' && (
+                <TouchableOpacity 
+                  style={styles.confirmButton}
+                  onPress={confirmIOSDate}
+                >
+                  <Text style={styles.confirmButtonText}>Confirm Date</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+        </Modal>
+      )}
+
+      {/* Custom Tech Modal */}
+      <Modal
+        transparent={true}
+        animationType="fade"
+        visible={showCustomTechModal}
+        onRequestClose={() => setShowCustomTechModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.customTechModal}>
+            <Text style={styles.modalTitle}>Enter Technician Name</Text>
+            <TextInput
+              style={styles.modalInput}
+              value={customTechName}
+              onChangeText={setCustomTechName}
+              placeholder="Enter name"
+              placeholderTextColor="#999"
+              autoFocus
+            />
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.modalButtonCancel]}
+                onPress={() => {
+                  setShowCustomTechModal(false);
+                  setCustomTechName('');
+                }}
+              >
+                <Text style={styles.modalButtonCancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.modalButtonConfirm]}
+                onPress={handleCustomTechSubmit}
+              >
+                <Text style={styles.modalButtonConfirmText}>Add</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -460,29 +567,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: '#333',
-  },
-  addTechButton: {
-    width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#E3F2FD',
-    borderRadius: 20,
-  },
-  warningBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFF3E0',
-    padding: 12,
-    marginHorizontal: 16,
-    marginTop: 12,
-    borderRadius: 8,
-    gap: 8,
-  },
-  warningText: {
-    flex: 1,
-    fontSize: 13,
-    color: '#E65100',
   },
   content: {
     flex: 1,
@@ -550,26 +634,48 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '600',
   },
-  pickerContainer: {
-    backgroundColor: '#f5f5f5',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
+  techGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
   },
-  picker: {
+  techChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: '#E3F2FD',
+    borderWidth: 2,
+    borderColor: '#2196F3',
+    gap: 6,
   },
-  pickerText: {
-    fontSize: 16,
-    color: '#333',
+  techChipActive: {
+    backgroundColor: '#2196F3',
+    borderColor: '#2196F3',
   },
-  pickerPlaceholder: {
-    fontSize: 16,
-    color: '#999',
+  techChipText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#2196F3',
+  },
+  techChipTextActive: {
+    color: '#fff',
+  },
+  techChipOther: {
+    backgroundColor: '#FFF3E0',
+    borderColor: '#FF9800',
+  },
+  techChipOtherText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FF9800',
+  },
+  selectedCustomTech: {
+    marginTop: 8,
+    fontSize: 13,
+    color: '#4CAF50',
+    fontWeight: '600',
   },
   dateButton: {
     flexDirection: 'row',
@@ -577,14 +683,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
     borderRadius: 8,
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderWidth: 1,
+    paddingVertical: 14,
+    borderWidth: 2,
     borderColor: '#e0e0e0',
   },
   dateButtonText: {
+    flex: 1,
     fontSize: 16,
-    color: '#333',
+    color: '#999',
     marginLeft: 12,
+  },
+  dateButtonTextSelected: {
+    color: '#333',
+    fontWeight: '600',
   },
   timeSlotContainer: {
     gap: 8,
@@ -635,5 +746,96 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     marginLeft: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  datePickerContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    width: '90%',
+    maxWidth: 400,
+  },
+  datePickerHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  datePickerTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+  },
+  datePicker: {
+    width: '100%',
+    height: 200,
+  },
+  confirmButton: {
+    backgroundColor: '#2196F3',
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  confirmButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  customTechModal: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 24,
+    width: '85%',
+    maxWidth: 340,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  modalInput: {
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: '#333',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    marginBottom: 20,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  modalButtonCancel: {
+    backgroundColor: '#f5f5f5',
+  },
+  modalButtonCancelText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#666',
+  },
+  modalButtonConfirm: {
+    backgroundColor: '#2196F3',
+  },
+  modalButtonConfirmText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
   },
 });
