@@ -512,8 +512,24 @@ async def create_job(job_data: JobCreate, request: Request):
     
     await db.jobs.insert_one(job)
     
-    # Real-time updates disabled for now
-    # await sio.emit('job_created', job)
+    # Send notifications to all users about the new job
+    appointment_str = ""
+    if job_data.appointment_time:
+        apt_time = job_data.appointment_time
+        if apt_time.hour < 12:
+            appointment_str = " - Today 9-12 AM"
+        else:
+            appointment_str = " - Today 1-4 PM"
+    
+    notification_title = "🚗 New Job Added"
+    notification_body = f"{job_data.customer_name} - {job_data.job_type.replace('_', ' ').title()}{appointment_str}"
+    
+    # Create notifications for all users (don't exclude the creator so they get confirmation too)
+    await create_notification_for_all_users(
+        title=notification_title,
+        body=notification_body,
+        data={"job_id": job_id, "type": "new_job"}
+    )
     
     return Job(**job)
 
