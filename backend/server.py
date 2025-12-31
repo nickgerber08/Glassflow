@@ -106,6 +106,7 @@ class JobUpdate(BaseModel):
     vehicle_year: Optional[str] = None
     vin_or_lp: Optional[str] = None
     part_number: Optional[str] = None
+    omega_invoice: Optional[str] = None
     payment_type: Optional[str] = None
     amount_to_collect: Optional[float] = None
     job_type: Optional[str] = None
