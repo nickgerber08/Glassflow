@@ -64,6 +64,10 @@ export default function JobDetailsScreen() {
   const [showTechModal, setShowTechModal] = useState(false);
   const [partNumber, setPartNumber] = useState(selectedJob?.part_number || '');
   const [editingPartNumber, setEditingPartNumber] = useState(false);
+  const [paymentType, setPaymentType] = useState<string>(selectedJob?.payment_type || '');
+  const [amountToCollect, setAmountToCollect] = useState<string>(
+    selectedJob?.amount_to_collect ? selectedJob.amount_to_collect.toString() : ''
+  );
 
   useEffect(() => {
     if (job) {
