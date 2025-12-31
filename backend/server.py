@@ -259,14 +259,14 @@ async def get_users(request: Request):
     return [User(**user) for user in users]
 
 @api_router.post("/users/create-tech")
-async def create_technician(name: str, email: str, request: Request):
+async def create_technician(tech_data: TechnicianCreate, request: Request):
     """Create a new technician user"""
     current_user = await require_auth(request)
     if current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
     
     # Check if user with email already exists
-    existing = await db.users.find_one({"email": email}, {"_id": 0})
+    existing = await db.users.find_one({"email": tech_data.email}, {"_id": 0})
     if existing:
         raise HTTPException(status_code=400, detail="User with this email already exists")
     
@@ -274,8 +274,8 @@ async def create_technician(name: str, email: str, request: Request):
     user_id = f"user_{uuid.uuid4().hex[:12]}"
     new_tech = {
         "user_id": user_id,
-        "email": email,
-        "name": name,
+        "email": tech_data.email,
+        "name": tech_data.name,
         "picture": None,
         "role": "technician",
         "created_at": datetime.now(timezone.utc)
