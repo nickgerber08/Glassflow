@@ -31,8 +31,6 @@ const DEFAULT_TECHNICIANS = [
   { name: 'Alan', user_id: 'default_alan' },
 ];
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
-
 const STATUS_COLORS: Record<string, string> = {
   pending: '#FF9800',
   scheduled: '#2196F3',
