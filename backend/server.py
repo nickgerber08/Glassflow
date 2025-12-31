@@ -57,6 +57,8 @@ class Job(BaseModel):
     vehicle_year: str
     vin_or_lp: Optional[str] = None
     part_number: Optional[str] = None  # Part number for the job
+    payment_type: Optional[str] = None  # 'collect' or 'dealership_po'
+    amount_to_collect: Optional[float] = None  # Amount tech needs to collect (if payment_type is 'collect')
     job_type: str  # windshield, side_window, rear_window, chip_repair
     status: str = "pending"  # pending, scheduled, in_progress, completed, cancelled
     assigned_to: Optional[str] = None
@@ -80,6 +82,8 @@ class JobCreate(BaseModel):
     vehicle_year: str
     vin_or_lp: Optional[str] = None
     part_number: Optional[str] = None
+    payment_type: Optional[str] = None  # 'collect' or 'dealership_po'
+    amount_to_collect: Optional[float] = None
     job_type: str
     status: str = "pending"
     assigned_to: Optional[str] = None
