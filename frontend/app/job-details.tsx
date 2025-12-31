@@ -519,6 +519,74 @@ export default function JobDetailsScreen() {
           </View>
         </View>
 
+        {/* Payment Collection Card */}
+        <View style={styles.paymentCard}>
+          <View style={styles.paymentHeader}>
+            <Ionicons name="cash" size={24} color="#4CAF50" />
+            <Text style={styles.paymentTitle}>Payment Collection</Text>
+          </View>
+          
+          <View style={styles.paymentOptions}>
+            <TouchableOpacity
+              style={[
+                styles.paymentOption,
+                paymentType === 'collect' && styles.paymentOptionActive
+              ]}
+              onPress={() => updatePayment('collect', amountToCollect)}
+            >
+              <Ionicons 
+                name="cash" 
+                size={20} 
+                color={paymentType === 'collect' ? '#fff' : '#4CAF50'} 
+              />
+              <Text style={[
+                styles.paymentOptionText,
+                paymentType === 'collect' && styles.paymentOptionTextActive
+              ]}>Collect Amount</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={[
+                styles.paymentOption,
+                paymentType === 'dealership_po' && styles.paymentOptionPOActive
+              ]}
+              onPress={() => updatePayment('dealership_po', '')}
+            >
+              <Ionicons 
+                name="business" 
+                size={20} 
+                color={paymentType === 'dealership_po' ? '#fff' : '#9C27B0'} 
+              />
+              <Text style={[
+                styles.paymentOptionText,
+                paymentType === 'dealership_po' && styles.paymentOptionTextActive
+              ]}>Dealership PO</Text>
+            </TouchableOpacity>
+          </View>
+
+          {paymentType === 'collect' && (
+            <View style={styles.amountContainer}>
+              <Text style={styles.dollarSign}>$</Text>
+              <TextInput
+                style={styles.amountInput}
+                value={amountToCollect}
+                onChangeText={(text) => updatePayment('collect', text)}
+                placeholder="0.00"
+                placeholderTextColor="#999"
+                keyboardType="decimal-pad"
+              />
+            </View>
+          )}
+
+          {paymentType === 'dealership_po' && (
+            <View style={styles.poDisplay}>
+              <Ionicons name="business" size={32} color="#9C27B0" />
+              <Text style={styles.poText}>Dealership Purchase Order</Text>
+              <Text style={styles.poSubtext}>No collection required</Text>
+            </View>
+          )}
+        </View>
+
         {/* Technician Selection Modal */}
         <Modal
           visible={showTechModal}
