@@ -382,6 +382,18 @@ const styles = StyleSheet.create({
     color: '#333',
     marginLeft: 6,
   },
+  partNumberBadge: {
+    backgroundColor: '#FF9800',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+    marginLeft: 8,
+  },
+  partNumberText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#fff',
+  },
   jobTime: {
     fontSize: 14,
     fontWeight: '600',
