@@ -55,6 +55,7 @@ class Job(BaseModel):
     vehicle_make: str
     vehicle_model: str
     vehicle_year: str
+    vin_or_lp: Optional[str] = None
     job_type: str  # windshield, side_window, rear_window, chip_repair
     status: str = "pending"  # pending, scheduled, in_progress, completed, cancelled
     assigned_to: Optional[str] = None
@@ -75,9 +76,11 @@ class JobCreate(BaseModel):
     vehicle_make: str
     vehicle_model: str
     vehicle_year: str
+    vin_or_lp: Optional[str] = None
     job_type: str
     status: str = "pending"
     assigned_to: Optional[str] = None
+    assigned_to_name: Optional[str] = None
     appointment_time: Optional[datetime] = None
     notes: Optional[str] = None
     photos: List[str] = []
@@ -91,9 +94,11 @@ class JobUpdate(BaseModel):
     vehicle_make: Optional[str] = None
     vehicle_model: Optional[str] = None
     vehicle_year: Optional[str] = None
+    vin_or_lp: Optional[str] = None
     job_type: Optional[str] = None
     status: Optional[str] = None
     assigned_to: Optional[str] = None
+    assigned_to_name: Optional[str] = None
     appointment_time: Optional[datetime] = None
     notes: Optional[str] = None
     photos: Optional[List[str]] = None
