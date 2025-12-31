@@ -332,6 +332,39 @@ export default function JobDetailsScreen() {
               </View>
             </View>
 
+            {job.vin_or_lp && (
+              <View style={styles.detailRow}>
+                <Ionicons name="barcode" size={20} color="#2196F3" />
+                <View style={styles.detailTextContainer}>
+                  <Text style={styles.detailText}>{job.vin_or_lp}</Text>
+                </View>
+              </View>
+            )}
+
+            {job.assigned_to_name && (
+              <View style={styles.detailRow}>
+                <Ionicons name="person" size={20} color="#2196F3" />
+                <View style={styles.detailTextContainer}>
+                  <Text style={styles.detailText}>Assigned to: {job.assigned_to_name}</Text>
+                </View>
+              </View>
+            )}
+
+            {job.appointment_time && (
+              <View style={styles.detailRow}>
+                <Ionicons name="calendar" size={20} color="#2196F3" />
+                <View style={styles.detailTextContainer}>
+                  <Text style={styles.detailText}>
+                    {format(parseISO(job.appointment_time), 'MMM dd, yyyy')} • {
+                      new Date(job.appointment_time).getHours() === 9 
+                        ? '9:00 AM - 12:00 PM' 
+                        : '1:00 PM - 4:00 PM'
+                    }
+                  </Text>
+                </View>
+              </View>
+            )}
+
             {job.notes && (
               <View style={styles.notesSection}>
                 <Text style={styles.notesLabel}>Notes:</Text>
