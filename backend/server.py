@@ -310,8 +310,8 @@ async def create_job(job_data: JobCreate, request: Request):
     
     await db.jobs.insert_one(job)
     
-    # Emit real-time update
-    await sio.emit('job_created', job)
+    # Real-time updates disabled for now
+    # await sio.emit('job_created', job)
     
     return Job(**job)
 
