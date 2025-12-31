@@ -771,6 +771,11 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     backgroundColor: '#FFF3E0',
   },
+  omegaInput: {
+    borderColor: '#607D8B',
+    borderWidth: 2,
+    backgroundColor: '#ECEFF1',
+  },
   // Payment type styles
   paymentTypeContainer: {
     flexDirection: 'row',
