@@ -758,6 +758,61 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     backgroundColor: '#FFF3E0',
   },
+  // Payment type styles
+  paymentTypeContainer: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 12,
+  },
+  paymentTypeChip: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: '#E8F5E9',
+    borderWidth: 2,
+    borderColor: '#4CAF50',
+    gap: 8,
+  },
+  paymentTypeChipActive: {
+    backgroundColor: '#4CAF50',
+  },
+  paymentTypeChipPOActive: {
+    backgroundColor: '#9C27B0',
+    borderColor: '#9C27B0',
+  },
+  paymentTypeText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+  },
+  paymentTypeTextActive: {
+    color: '#fff',
+  },
+  amountInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E8F5E9',
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: '#4CAF50',
+    paddingHorizontal: 16,
+  },
+  dollarSign: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#4CAF50',
+  },
+  amountInput: {
+    flex: 1,
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#4CAF50',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+  },
   textArea: {
     minHeight: 80,
     textAlignVertical: 'top',
