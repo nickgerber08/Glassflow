@@ -257,4 +257,52 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  webNote: {
+    fontSize: 14,
+    color: '#666',
+    fontStyle: 'italic',
+  },
+  webListContainer: {
+    flex: 1,
+    padding: 16,
+  },
+  webJobCard: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  statusIndicator: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 12,
+  },
+  webJobContent: {
+    flex: 1,
+  },
+  webJobTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
+  },
+  webJobAddress: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
+  },
+  webJobCoords: {
+    fontSize: 12,
+    color: '#999',
+  },
 });
