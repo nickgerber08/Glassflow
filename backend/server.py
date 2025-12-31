@@ -97,6 +97,7 @@ class JobUpdate(BaseModel):
     vehicle_model: Optional[str] = None
     vehicle_year: Optional[str] = None
     vin_or_lp: Optional[str] = None
+    part_number: Optional[str] = None
     job_type: Optional[str] = None
     status: Optional[str] = None
     assigned_to: Optional[str] = None
