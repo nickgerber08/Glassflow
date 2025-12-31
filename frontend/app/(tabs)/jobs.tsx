@@ -7,12 +7,13 @@ import {
   RefreshControl,
   ScrollView,
   ActivityIndicator,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useJobStore } from '../../stores/jobStore';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { FlashList } from '@shopify/flash-list';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { format, isSameDay, parseISO } from 'date-fns';
@@ -39,17 +40,32 @@ export default function JobsScreen() {
   const { sessionToken, user } = useAuth();
   const { jobs, setJobs, setSelectedJob } = useJobStore();
   const router = useRouter();
+  const params = useLocalSearchParams();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<string>('all');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
     if (sessionToken) {
       fetchJobs();
     }
   }, [sessionToken]);
+
+  // Check for success message from create job
+  useEffect(() => {
+    if (params.jobCreated === 'true' && params.customerName) {
+      setSuccessMessage(`Job created for ${params.customerName}`);
+      setShowSuccessModal(true);
+      // Auto close after 3 seconds
+      setTimeout(() => {
+        setShowSuccessModal(false);
+      }, 3000);
+    }
+  }, [params]);
 
   const fetchJobs = async () => {
     try {
@@ -284,7 +300,10 @@ export default function JobsScreen() {
           </Text>
           <TouchableOpacity
             style={styles.emptyButton}
-            onPress={() => router.push('/create-job')}
+            onPress={() => router.push({
+              pathname: '/create-job',
+              params: { preSelectedDate: selectedDate.toISOString() }
+            })}
           >
             <Text style={styles.emptyButtonText}>Create Job</Text>
           </TouchableOpacity>
@@ -301,6 +320,24 @@ export default function JobsScreen() {
           contentContainerStyle={styles.listContent}
         />
       )}
+
+      {/* Success Modal */}
+      <Modal
+        transparent={true}
+        visible={showSuccessModal}
+        animationType="fade"
+        onRequestClose={() => setShowSuccessModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.successModal}>
+            <View style={styles.checkmarkContainer}>
+              <Ionicons name="checkmark-circle" size={80} color="#4CAF50" />
+            </View>
+            <Text style={styles.successTitle}>Job Created!</Text>
+            <Text style={styles.successMessage}>{successMessage}</Text>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -500,5 +537,38 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  successModal: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 32,
+    alignItems: 'center',
+    width: '80%',
+    maxWidth: 320,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 8,
+  },
+  checkmarkContainer: {
+    marginBottom: 16,
+  },
+  successTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 8,
+  },
+  successMessage: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
   },
 });
