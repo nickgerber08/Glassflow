@@ -825,6 +825,32 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
   },
+  closeButton: {
+    padding: 4,
+  },
+  calendarWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 260,
+    backgroundColor: '#fafafa',
+    borderRadius: 12,
+    padding: 10,
+  },
+  selectedDateDisplay: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E3F2FD',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginTop: 16,
+    gap: 8,
+  },
+  selectedDateText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#2196F3',
+  },
   datePickerWrapper: {
     alignItems: 'center',
     justifyContent: 'center',
