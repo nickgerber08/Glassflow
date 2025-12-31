@@ -1,12 +1,23 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Platform, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useJobStore } from '../../stores/jobStore';
 import { useRouter } from 'expo-router';
 import * as Location from 'expo-location';
+
+// Conditional import for react-native-maps (only on mobile)
+let MapView: any = null;
+let Marker: any = null;
+let PROVIDER_GOOGLE: any = null;
+
+if (Platform.OS !== 'web') {
+  const maps = require('react-native-maps');
+  MapView = maps.default;
+  Marker = maps.Marker;
+  PROVIDER_GOOGLE = maps.PROVIDER_GOOGLE;
+}
 
 const STATUS_COLORS: Record<string, string> = {
   pending: '#FF9800',
@@ -51,6 +62,48 @@ export default function MapScreen() {
         <View style={styles.centered}>
           <ActivityIndicator size="large" color="#2196F3" />
         </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Web fallback - show list view with addresses
+  if (Platform.OS === 'web' || !MapView) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Map</Text>
+          <Text style={styles.webNote}>
+            📱 Map view available on mobile devices
+          </Text>
+        </View>
+        <ScrollView style={styles.webListContainer}>
+          {jobs.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Ionicons name="map-outline" size={48} color="#ccc" />
+              <Text style={styles.emptyText}>No jobs to display</Text>
+            </View>
+          ) : (
+            jobs.map((job) => (
+              <TouchableOpacity
+                key={job.job_id}
+                style={styles.webJobCard}
+                onPress={() => {
+                  setSelectedJob(job);
+                  router.push('/job-details');
+                }}
+              >
+                <View style={[styles.statusIndicator, { backgroundColor: STATUS_COLORS[job.status] }]} />
+                <View style={styles.webJobContent}>
+                  <Text style={styles.webJobTitle}>{job.customer_name}</Text>
+                  <Text style={styles.webJobAddress}>{job.address}</Text>
+                  <Text style={styles.webJobCoords}>
+                    📍 {job.lat.toFixed(4)}, {job.lng.toFixed(4)}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))
+          )}
+        </ScrollView>
       </SafeAreaView>
     );
   }
@@ -139,6 +192,11 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 8,
   },
+  webNote: {
+    fontSize: 12,
+    color: '#666',
+    fontStyle: 'italic',
+  },
   legendContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -208,5 +266,48 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  webListContainer: {
+    flex: 1,
+    padding: 16,
+  },
+  webJobCard: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    marginBottom: 12,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  statusIndicator: {
+    width: 4,
+  },
+  webJobContent: {
+    flex: 1,
+    padding: 16,
+  },
+  webJobTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 4,
+  },
+  webJobAddress: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
+  },
+  webJobCoords: {
+    fontSize: 12,
+    color: '#999',
+  },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 48,
   },
 });

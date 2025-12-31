@@ -14,6 +14,22 @@ const STATUS_COLORS: Record<string, string> = {
   cancelled: '#F44336',
 };
 
+// Helper function to group jobs by location
+function groupJobsByLocation(jobs: any[]) {
+  const groups: { [key: string]: any[] } = {};
+  
+  jobs.forEach(job => {
+    // Use address as the grouping key (you could also use lat/lng with rounding)
+    const locationKey = job.address;
+    if (!groups[locationKey]) {
+      groups[locationKey] = [];
+    }
+    groups[locationKey].push(job);
+  });
+  
+  return groups;
+}
+
 export default function CalendarScreen() {
   const { jobs, setSelectedJob } = useJobStore();
   const router = useRouter();
@@ -30,6 +46,10 @@ export default function CalendarScreen() {
       job.appointment_time &&
       isSameDay(parseISO(job.appointment_time), selectedDate)
   );
+
+  // Group jobs by location
+  const groupedJobs = groupJobsByLocation(jobsOnSelectedDate);
+  const locations = Object.keys(groupedJobs);
 
   const hasJobsOnDay = (day: Date) => {
     return jobs.some(
@@ -105,7 +125,10 @@ export default function CalendarScreen() {
           <Text style={styles.jobsListTitle}>
             Jobs on {format(selectedDate, 'MMM dd, yyyy')}
           </Text>
-          <Text style={styles.jobsCount}>{jobsOnSelectedDate.length} jobs</Text>
+          <Text style={styles.jobsCount}>
+            {jobsOnSelectedDate.length} job{jobsOnSelectedDate.length !== 1 ? 's' : ''}
+            {locations.length > 1 && ` at ${locations.length} locations`}
+          </Text>
         </View>
 
         {jobsOnSelectedDate.length === 0 ? (
@@ -114,45 +137,62 @@ export default function CalendarScreen() {
             <Text style={styles.emptyText}>No jobs scheduled for this day</Text>
           </View>
         ) : (
-          jobsOnSelectedDate.map((job) => (
-            <TouchableOpacity
-              key={job.job_id}
-              style={styles.jobCard}
-              onPress={() => {
-                setSelectedJob(job);
-                router.push('/job-details');
-              }}
-            >
-              <View
-                style={[
-                  styles.jobColorBar,
-                  { backgroundColor: STATUS_COLORS[job.status] },
-                ]}
-              />
-              <View style={styles.jobContent}>
-                <View style={styles.jobHeader}>
-                  <Text style={styles.jobTitle}>{job.customer_name}</Text>
-                  <Text style={styles.jobTime}>
-                    {format(parseISO(job.appointment_time!), 'h:mm a')}
+          locations.map((location) => (
+            <View key={location} style={styles.locationGroup}>
+              {/* Location Header */}
+              <View style={styles.locationHeader}>
+                <Ionicons name="location" size={20} color="#2196F3" />
+                <View style={styles.locationHeaderText}>
+                  <Text style={styles.locationAddress}>{location}</Text>
+                  <Text style={styles.locationCount}>
+                    {groupedJobs[location].length} job{groupedJobs[location].length !== 1 ? 's' : ''} at this location
                   </Text>
                 </View>
-                <Text style={styles.jobDetail}>
-                  {job.vehicle_year} {job.vehicle_make} {job.vehicle_model}
-                </Text>
-                <View style={styles.jobRow}>
-                  <Ionicons name="location" size={14} color="#666" />
-                  <Text style={styles.jobAddress} numberOfLines={1}>
-                    {job.address}
-                  </Text>
-                </View>
-                {job.assigned_to_name && (
-                  <View style={styles.jobRow}>
-                    <Ionicons name="person" size={14} color="#666" />
-                    <Text style={styles.jobAssigned}>{job.assigned_to_name}</Text>
-                  </View>
-                )}
               </View>
-            </TouchableOpacity>
+
+              {/* Jobs at this location */}
+              {groupedJobs[location].map((job) => (
+                <TouchableOpacity
+                  key={job.job_id}
+                  style={styles.jobCard}
+                  onPress={() => {
+                    setSelectedJob(job);
+                    router.push('/job-details');
+                  }}
+                >
+                  <View
+                    style={[
+                      styles.jobColorBar,
+                      { backgroundColor: STATUS_COLORS[job.status] },
+                    ]}
+                  />
+                  <View style={styles.jobContent}>
+                    <View style={styles.jobHeader}>
+                      <View style={styles.jobTitleContainer}>
+                        <Ionicons name="person" size={16} color="#666" />
+                        <Text style={styles.jobTitle}>{job.customer_name}</Text>
+                      </View>
+                      <Text style={styles.jobTime}>
+                        {format(parseISO(job.appointment_time!), 'h:mm a')}
+                      </Text>
+                    </View>
+                    <Text style={styles.jobDetail}>
+                      {job.vehicle_year} {job.vehicle_make} {job.vehicle_model}
+                    </Text>
+                    <View style={styles.jobRow}>
+                      <Ionicons name="construct" size={14} color="#666" />
+                      <Text style={styles.jobType}>{job.job_type.replace('_', ' ')}</Text>
+                    </View>
+                    {job.assigned_to_name && (
+                      <View style={styles.jobRow}>
+                        <Ionicons name="person-circle" size={14} color="#666" />
+                        <Text style={styles.jobAssigned}>{job.assigned_to_name}</Text>
+                      </View>
+                    )}
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
           ))
         )}
       </ScrollView>
@@ -273,11 +313,37 @@ const styles = StyleSheet.create({
     marginTop: 16,
     textAlign: 'center',
   },
+  locationGroup: {
+    marginBottom: 24,
+  },
+  locationHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E3F2FD',
+    padding: 12,
+    marginHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  locationHeaderText: {
+    flex: 1,
+    marginLeft: 8,
+  },
+  locationAddress: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1976D2',
+    marginBottom: 2,
+  },
+  locationCount: {
+    fontSize: 12,
+    color: '#1976D2',
+  },
   jobCard: {
     flexDirection: 'row',
     backgroundColor: '#fff',
     marginHorizontal: 16,
-    marginBottom: 12,
+    marginBottom: 8,
     borderRadius: 12,
     overflow: 'hidden',
     shadowColor: '#000',
@@ -299,11 +365,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 8,
   },
+  jobTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
   jobTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: '#333',
-    flex: 1,
+    marginLeft: 6,
   },
   jobTime: {
     fontSize: 14,
@@ -320,11 +391,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 4,
   },
-  jobAddress: {
+  jobType: {
     fontSize: 13,
     color: '#666',
     marginLeft: 4,
-    flex: 1,
+    textTransform: 'capitalize',
   },
   jobAssigned: {
     fontSize: 13,
