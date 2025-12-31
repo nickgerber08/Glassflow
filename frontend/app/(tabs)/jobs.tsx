@@ -328,15 +328,25 @@ export default function JobsScreen() {
         animationType="fade"
         onRequestClose={() => setShowSuccessModal(false)}
       >
-        <View style={styles.modalOverlay}>
+        <TouchableOpacity 
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowSuccessModal(false)}
+        >
           <View style={styles.successModal}>
             <View style={styles.checkmarkContainer}>
               <Ionicons name="checkmark-circle" size={80} color="#4CAF50" />
             </View>
             <Text style={styles.successTitle}>Job Created!</Text>
             <Text style={styles.successMessage}>{successMessage}</Text>
+            <TouchableOpacity 
+              style={styles.dismissButton}
+              onPress={() => setShowSuccessModal(false)}
+            >
+              <Text style={styles.dismissButtonText}>OK</Text>
+            </TouchableOpacity>
           </View>
-        </View>
+        </TouchableOpacity>
       </Modal>
     </SafeAreaView>
   );
