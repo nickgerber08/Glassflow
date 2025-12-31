@@ -161,7 +161,9 @@ export default function JobDetailsScreen() {
         body: JSON.stringify({ 
           status: job.status,
           assigned_to: job.assigned_to,
-          appointment_time: job.appointment_time
+          assigned_to_name: job.assigned_to_name,
+          appointment_time: job.appointment_time,
+          part_number: partNumber || null
         }),
       });
 
@@ -170,6 +172,7 @@ export default function JobDetailsScreen() {
         setJob(updatedJob);
         updateJob(job.job_id, updatedJob);
         setHasChanges(false);
+        setEditingPartNumber(false);
         Alert.alert('Success', 'Job updated successfully');
       }
     } catch (error) {
