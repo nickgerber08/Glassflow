@@ -61,6 +61,7 @@ export default function CreateJobScreen() {
   const [vehicleModel, setVehicleModel] = useState('');
   const [vehicleYear, setVehicleYear] = useState('');
   const [vinOrLp, setVinOrLp] = useState('');
+  const [partNumber, setPartNumber] = useState('');
   const [jobType, setJobType] = useState('windshield');
   const [assignedTo, setAssignedTo] = useState('');
   const [assignedToName, setAssignedToName] = useState('');
