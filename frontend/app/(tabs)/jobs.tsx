@@ -188,7 +188,10 @@ export default function JobsScreen() {
         <Text style={styles.headerTitle}>Jobs</Text>
         <TouchableOpacity
           style={styles.addButton}
-          onPress={() => router.push('/create-job')}
+          onPress={() => router.push({
+            pathname: '/create-job',
+            params: { preSelectedDate: selectedDate.toISOString() }
+          })}
         >
           <Ionicons name="add" size={24} color="#fff" />
         </TouchableOpacity>
