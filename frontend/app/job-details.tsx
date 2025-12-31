@@ -1005,4 +1005,148 @@ const styles = StyleSheet.create({
     color: '#2196F3',
     marginTop: 16,
   },
+  // Tech & Part Number Card Styles
+  techPartCard: {
+    backgroundColor: '#fff',
+    margin: 16,
+    marginTop: 16,
+    marginBottom: 0,
+    padding: 16,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 4,
+    borderWidth: 2,
+    borderColor: '#2196F3',
+  },
+  techPartHeader: {
+    marginBottom: 16,
+  },
+  techPartTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#333',
+  },
+  techSelector: {
+    backgroundColor: '#E3F2FD',
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 16,
+  },
+  techRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  techInfo: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  techLabel: {
+    fontSize: 12,
+    color: '#666',
+  },
+  techName: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#2196F3',
+  },
+  partNumberSection: {
+    backgroundColor: '#FFF3E0',
+    padding: 12,
+    borderRadius: 12,
+  },
+  partNumberHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  partNumberLabel: {
+    fontSize: 12,
+    color: '#666',
+    marginLeft: 8,
+  },
+  partNumberEditRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  partNumberInput: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#FF9800',
+    borderWidth: 2,
+    borderColor: '#FF9800',
+  },
+  partNumberDoneBtn: {
+    marginLeft: 12,
+    padding: 8,
+  },
+  partNumberDisplay: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  partNumberValue: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#FF9800',
+  },
+  partNumberPlaceholder: {
+    fontSize: 16,
+    fontWeight: '400',
+    color: '#999',
+  },
+  // Tech Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  techModalContent: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    maxHeight: '70%',
+  },
+  techModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  techModalTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#333',
+  },
+  techList: {
+    padding: 16,
+  },
+  techOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 8,
+    backgroundColor: '#f5f5f5',
+  },
+  techOptionSelected: {
+    backgroundColor: '#E3F2FD',
+    borderWidth: 2,
+    borderColor: '#2196F3',
+  },
+  techOptionName: {
+    flex: 1,
+    fontSize: 18,
+    fontWeight: '500',
+    color: '#333',
+    marginLeft: 12,
+  },
 });
