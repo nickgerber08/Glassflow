@@ -870,6 +870,10 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 240,
   },
+  iosDatePicker: {
+    width: '100%',
+    height: 216,
+  },
   confirmButton: {
     flexDirection: 'row',
     backgroundColor: '#2196F3',
