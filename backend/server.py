@@ -11,6 +11,7 @@ from typing import List, Optional
 import uuid
 from datetime import datetime, timezone, timedelta
 import httpx
+import asyncio
 # import socketio  # Disabled for now
 
 ROOT_DIR = Path(__file__).parent
@@ -25,6 +26,9 @@ db = client[os.environ['DB_NAME']]
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
 
+# Expo Push Notification URL
+EXPO_PUSH_URL = "https://exp.host/--/api/v2/push/send"
+
 # Note: Socket.IO disabled for initial setup, can be added later if needed
 # sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins='*')
 
@@ -36,7 +40,20 @@ class User(BaseModel):
     name: str
     picture: Optional[str] = None
     role: str = "technician"  # admin or technician
+    push_token: Optional[str] = None  # Expo push token
     created_at: datetime
+
+class Notification(BaseModel):
+    notification_id: str
+    user_id: str  # recipient
+    title: str
+    body: str
+    data: Optional[dict] = None
+    read: bool = False
+    created_at: datetime
+
+class PushTokenRequest(BaseModel):
+    push_token: str
 
 class SessionDataResponse(BaseModel):
     id: str
