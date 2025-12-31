@@ -134,6 +134,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const registerPushToken = async (token: string) => {
+    try {
+      // Only register on physical devices
+      if (!Device.isDevice) {
+        console.log('Push notifications require a physical device');
+        return;
+      }
+
+      // Get push token
+      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+
+      if (existingStatus !== 'granted') {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+
+      if (finalStatus !== 'granted') {
+        console.log('Push notification permission not granted');
+        return;
+      }
+
+      // Get Expo push token
+      const pushTokenData = await Notifications.getExpoPushTokenAsync({
+        projectId: Constants.expoConfig?.extra?.eas?.projectId,
+      });
+      const pushToken = pushTokenData.data;
+
+      // Register token with backend
+      await fetch(`${BACKEND_URL}/api/push-token`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ push_token: pushToken }),
+      });
+
+      console.log('Push token registered:', pushToken);
+    } catch (error) {
+      console.error('Error registering push token:', error);
+    }
+  };
+
   const fetchUser = async (token: string) => {
     try {
       const response = await fetch(`${BACKEND_URL}/api/auth/me`, {
@@ -145,6 +189,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (response.ok) {
         const userData = await response.json();
         setUser(userData);
+        // Register push token after successful user fetch
+        registerPushToken(token);
       } else {
         // Session expired or invalid
         await AsyncStorage.removeItem('session_token');
