@@ -213,8 +213,14 @@ export default function JobsScreen() {
         </View>
         {item.assigned_to_name && (
           <View style={styles.detailRow}>
-            <Ionicons name="person" size={16} color="#666" />
-            <Text style={styles.detailText}>{item.assigned_to_name}</Text>
+            <Ionicons name="construct" size={16} color="#2196F3" />
+            <Text style={styles.detailText}>Tech: {item.assigned_to_name}</Text>
+          </View>
+        )}
+        {item.created_by_name && (
+          <View style={styles.detailRow}>
+            <Ionicons name="create" size={16} color="#9C27B0" />
+            <Text style={styles.detailText}>Created by: {item.created_by_name}</Text>
           </View>
         )}
         {item.appointment_time && (
