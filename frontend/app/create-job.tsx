@@ -191,6 +191,8 @@ export default function CreateJobScreen() {
         vehicle_year: vehicleYear,
         vin_or_lp: vinOrLp || null,
         part_number: partNumber || null,
+        payment_type: paymentType || null,
+        amount_to_collect: paymentType === 'collect' && amountToCollect ? parseFloat(amountToCollect) : null,
         job_type: jobType,
         status: 'pending',
         assigned_to: assignedTo || null,
