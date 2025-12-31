@@ -686,6 +686,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#e0e0e0',
   },
+  partNumberInput: {
+    borderColor: '#FF9800',
+    borderWidth: 2,
+    backgroundColor: '#FFF3E0',
+  },
   textArea: {
     minHeight: 80,
     textAlignVertical: 'top',
