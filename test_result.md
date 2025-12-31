@@ -219,4 +219,4 @@ test_plan:
 
 agent_communication:
     - agent: "testing"
-      message: "✅ BACKEND TESTING COMPLETE: All 8 backend API endpoints tested successfully. Auth flow, Jobs CRUD operations, Users API, and Comments API all working correctly with realistic auto glass job data. Used production URL (https://jobglass.preview.emergentagent.com/api) and MongoDB test data. No critical issues found. Backend is ready for production use."
+      message: "✅ BACKEND TESTING COMPLETE: All 8 backend API endpoints tested successfully. Auth flow, Jobs CRUD operations, Users API, and Comments API all working correctly with realistic auto glass job data. Used production URL (https://autoglass-mobile.preview.emergentagent.com/api) and MongoDB test data. No critical issues found. Backend is ready for production use."
