@@ -106,7 +106,18 @@ export default function JobsScreen() {
     if (sessionToken) {
       fetchJobs();
       fetchTechnicians();
+      fetchUnreadCount();
     }
+  }, [sessionToken]);
+
+  // Refresh unread count periodically
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (sessionToken) {
+        fetchUnreadCount();
+      }
+    }, 30000); // Check every 30 seconds
+    return () => clearInterval(interval);
   }, [sessionToken]);
 
   // Check for success message from create job - only trigger once
@@ -116,6 +127,8 @@ export default function JobsScreen() {
       setShowSuccessModal(true);
       // Refresh jobs list
       fetchJobs();
+      // Refresh notification count
+      fetchUnreadCount();
       // Clear the params by navigating without them
       router.setParams({ jobCreated: '', customerName: '' });
     }
