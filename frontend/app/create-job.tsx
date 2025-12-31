@@ -14,7 +14,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../contexts/AuthContext';
 import { useRouter } from 'expo-router';
-import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -28,8 +27,13 @@ const JOB_TYPES = [
   { label: 'Chip Repair', value: 'chip_repair' },
 ];
 
+const TIME_SLOTS = [
+  { label: '9:00 AM - 12:00 PM', value: 'morning' },
+  { label: '1:00 PM - 4:00 PM', value: 'afternoon' },
+];
+
 export default function CreateJobScreen() {
-  const { sessionToken } = useAuth();
+  const { sessionToken, user } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<any[]>([]);
@@ -43,7 +47,8 @@ export default function CreateJobScreen() {
   const [vehicleYear, setVehicleYear] = useState('');
   const [jobType, setJobType] = useState('windshield');
   const [assignedTo, setAssignedTo] = useState('');
-  const [appointmentTime, setAppointmentTime] = useState<Date | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [timeSlot, setTimeSlot] = useState('morning');
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [notes, setNotes] = useState('');
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -90,6 +95,25 @@ export default function CreateJobScreen() {
     }
   };
 
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    setShowDatePicker(Platform.OS === 'ios');
+    if (selectedDate) {
+      setSelectedDate(selectedDate);
+    }
+  };
+
+  const getAppointmentDateTime = () => {
+    if (!selectedDate) return null;
+    
+    const date = new Date(selectedDate);
+    if (timeSlot === 'morning') {
+      date.setHours(9, 0, 0, 0);
+    } else {
+      date.setHours(13, 0, 0, 0);
+    }
+    return date;
+  };
+
   const handleSubmit = async () => {
     // Validation
     if (!customerName || !phone || !address || !vehicleMake || !vehicleModel || !vehicleYear) {
@@ -105,6 +129,8 @@ export default function CreateJobScreen() {
     setLoading(true);
 
     try {
+      const appointmentDateTime = getAppointmentDateTime();
+      
       const jobData = {
         customer_name: customerName,
         phone: phone,
@@ -117,7 +143,7 @@ export default function CreateJobScreen() {
         job_type: jobType,
         status: 'pending',
         assigned_to: assignedTo || null,
-        appointment_time: appointmentTime ? appointmentTime.toISOString() : null,
+        appointment_time: appointmentDateTime ? appointmentDateTime.toISOString() : null,
         notes: notes || null,
         photos: [],
       };
@@ -157,8 +183,22 @@ export default function CreateJobScreen() {
           <Ionicons name="arrow-back" size={24} color="#333" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Create Job</Text>
-        <View style={{ width: 40 }} />
+        <TouchableOpacity 
+          onPress={() => router.push('/(tabs)/profile')} 
+          style={styles.addTechButton}
+        >
+          <Ionicons name="person-add" size={20} color="#2196F3" />
+        </TouchableOpacity>
       </View>
+
+      {users.length === 0 && (
+        <View style={styles.warningBanner}>
+          <Ionicons name="alert-circle" size={20} color="#FF9800" />
+          <Text style={styles.warningText}>
+            No technicians found. Tap the + icon above to add technicians in Profile tab.
+          </Text>
+        </View>
+      )}
 
       <KeyboardAwareScrollView
         style={styles.content}
@@ -279,6 +319,10 @@ export default function CreateJobScreen() {
               <TouchableOpacity
                 style={styles.picker}
                 onPress={() => {
+                  if (users.length === 0) {
+                    Alert.alert('No Technicians', 'Please add technicians first in the Profile tab.');
+                    return;
+                  }
                   Alert.alert(
                     'Assign To',
                     'Select a technician',
@@ -305,34 +349,57 @@ export default function CreateJobScreen() {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Appointment Time</Text>
+            <Text style={styles.label}>Appointment Date</Text>
             <TouchableOpacity
               style={styles.dateButton}
-              onPress={() => {
-                setAppointmentTime(appointmentTime || new Date());
-                setShowDatePicker(true);
-              }}
+              onPress={() => setShowDatePicker(true)}
             >
               <Ionicons name="calendar" size={20} color="#2196F3" />
               <Text style={styles.dateButtonText}>
-                {appointmentTime
-                  ? appointmentTime.toLocaleString()
-                  : 'Tap to select date and time'}
+                {selectedDate
+                  ? selectedDate.toLocaleDateString()
+                  : 'Tap to select date'}
               </Text>
             </TouchableOpacity>
             {showDatePicker && (
               <DateTimePicker
-                value={appointmentTime || new Date()}
-                mode="datetime"
+                value={selectedDate || new Date()}
+                mode="date"
                 display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                onChange={(event, selectedDate) => {
-                  setShowDatePicker(Platform.OS === 'ios');
-                  if (selectedDate) {
-                    setAppointmentTime(selectedDate);
-                  }
-                }}
+                onChange={handleDateChange}
+                minimumDate={new Date()}
               />
             )}
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Time Window</Text>
+            <View style={styles.timeSlotContainer}>
+              {TIME_SLOTS.map((slot) => (
+                <TouchableOpacity
+                  key={slot.value}
+                  style={[
+                    styles.timeSlotChip,
+                    timeSlot === slot.value && styles.timeSlotChipActive,
+                  ]}
+                  onPress={() => setTimeSlot(slot.value)}
+                >
+                  <Ionicons 
+                    name="time" 
+                    size={16} 
+                    color={timeSlot === slot.value ? '#fff' : '#2196F3'} 
+                  />
+                  <Text
+                    style={[
+                      styles.timeSlotText,
+                      timeSlot === slot.value && styles.timeSlotTextActive,
+                    ]}
+                  >
+                    {slot.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
 
           <View style={styles.inputGroup}>
@@ -393,6 +460,29 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: '#333',
+  },
+  addTechButton: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#E3F2FD',
+    borderRadius: 20,
+  },
+  warningBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF3E0',
+    padding: 12,
+    marginHorizontal: 16,
+    marginTop: 12,
+    borderRadius: 8,
+    gap: 8,
+  },
+  warningText: {
+    flex: 1,
+    fontSize: 13,
+    color: '#E65100',
   },
   content: {
     flex: 1,
@@ -495,6 +585,32 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
     marginLeft: 12,
+  },
+  timeSlotContainer: {
+    gap: 8,
+  },
+  timeSlotChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: '#E3F2FD',
+    borderWidth: 2,
+    borderColor: '#2196F3',
+    gap: 8,
+  },
+  timeSlotChipActive: {
+    backgroundColor: '#2196F3',
+    borderColor: '#2196F3',
+  },
+  timeSlotText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#2196F3',
+  },
+  timeSlotTextActive: {
+    color: '#fff',
   },
   submitButton: {
     flexDirection: 'row',
