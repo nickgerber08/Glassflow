@@ -426,14 +426,14 @@ async def get_comments(job_id: str, request: Request):
     
     return [JobComment(**comment) for comment in comments]
 
-# Socket.IO events
-@sio.event
-async def connect(sid, environ):
-    logging.info(f"Client {sid} connected")
+# Socket.IO events disabled for now
+# @sio.event
+# async def connect(sid, environ):
+#     logging.info(f"Client {sid} connected")
 
-@sio.event
-async def disconnect(sid):
-    logging.info(f"Client {sid} disconnected")
+# @sio.event
+# async def disconnect(sid):
+#     logging.info(f"Client {sid} disconnected")
 
 # Include router
 app.include_router(api_router)
