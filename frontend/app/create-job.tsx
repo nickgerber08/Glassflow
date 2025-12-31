@@ -338,6 +338,18 @@ export default function CreateJobScreen() {
               autoCapitalize="characters"
             />
           </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Part Number</Text>
+            <TextInput
+              style={[styles.input, styles.partNumberInput]}
+              value={partNumber}
+              onChangeText={setPartNumber}
+              placeholder="Enter part number (optional)"
+              placeholderTextColor="#999"
+              autoCapitalize="characters"
+            />
+          </View>
         </View>
 
         <View style={styles.section}>
