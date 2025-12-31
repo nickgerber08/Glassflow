@@ -78,6 +78,7 @@ class JobCreate(BaseModel):
     vehicle_model: str
     vehicle_year: str
     vin_or_lp: Optional[str] = None
+    part_number: Optional[str] = None
     job_type: str
     status: str = "pending"
     assigned_to: Optional[str] = None
