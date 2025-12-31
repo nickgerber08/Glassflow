@@ -692,6 +692,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
   },
+  detailLabel: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 2,
+  },
+  detailTextBold: {
+    fontSize: 16,
+    color: '#333',
+    fontWeight: '600',
+  },
+  timeWindowText: {
+    fontSize: 14,
+    color: '#2196F3',
+    fontWeight: '500',
+    marginTop: 2,
+  },
   notesSection: {
     marginTop: 8,
     padding: 12,
