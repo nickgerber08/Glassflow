@@ -14,7 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../contexts/AuthContext';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Location from 'expo-location';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -43,9 +43,15 @@ const DEFAULT_TECHNICIANS = [
 export default function CreateJobScreen() {
   const { sessionToken, user } = useAuth();
   const router = useRouter();
+  const params = useLocalSearchParams();
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<any[]>([]);
   const [allTechnicians, setAllTechnicians] = useState<any[]>(DEFAULT_TECHNICIANS);
+  
+  // Get pre-selected date from navigation params
+  const preSelectedDate = params.preSelectedDate 
+    ? new Date(params.preSelectedDate as string)
+    : null;
   
   // Form state
   const [customerName, setCustomerName] = useState('');
@@ -58,7 +64,7 @@ export default function CreateJobScreen() {
   const [jobType, setJobType] = useState('windshield');
   const [assignedTo, setAssignedTo] = useState('');
   const [assignedToName, setAssignedToName] = useState('');
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(preSelectedDate);
   const [timeSlot, setTimeSlot] = useState('morning');
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showCustomTechModal, setShowCustomTechModal] = useState(false);
