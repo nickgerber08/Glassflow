@@ -98,6 +98,8 @@ export default function JobDetailsScreen() {
       if (response.ok) {
         const data = await response.json();
         setUsers(data);
+        // Combine default technicians with database users
+        setAllTechnicians([...DEFAULT_TECHNICIANS, ...data]);
       }
     } catch (error) {
       console.error('Error fetching users:', error);
