@@ -55,6 +55,9 @@ export default function JobsScreen() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [selectedTech, setSelectedTech] = useState<string>('all');
+  const [showTechFilter, setShowTechFilter] = useState(false);
+  const [allTechnicians, setAllTechnicians] = useState<any[]>(DEFAULT_TECHNICIANS);
 
   useEffect(() => {
     if (sessionToken) {
