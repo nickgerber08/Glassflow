@@ -206,23 +206,31 @@ export default function CreateJobScreen() {
       });
 
       if (response.ok) {
+        const createdJob = await response.json();
+        console.log('Job created successfully:', createdJob);
+        
+        // Clear loading first
         setLoading(false);
-        // Show success message and wait before navigating
-        Alert.alert(
-          'Success! ✓', 
-          'Job has been created successfully and added to your schedule.',
-          [
-            {
-              text: 'View Jobs',
-              onPress: () => {
-                setTimeout(() => {
+        
+        // Show success alert with better visibility
+        setTimeout(() => {
+          Alert.alert(
+            '✓ Success!', 
+            `Job created for ${customerName} on ${selectedDate?.toLocaleDateString()}`,
+            [
+              {
+                text: 'View Jobs',
+                onPress: () => {
                   router.back();
-                }, 300);
+                },
+                style: 'default'
               },
-            },
-          ],
-          { cancelable: false }
-        );
+            ],
+            { cancelable: false }
+          );
+        }, 100);
+        
+        return; // Prevent further execution
       } else {
         const error = await response.json();
         Alert.alert('Error', error.detail || 'Failed to create job');
