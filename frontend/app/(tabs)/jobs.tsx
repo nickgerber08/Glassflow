@@ -57,6 +57,24 @@ export default function JobsScreen() {
   const [selectedTech, setSelectedTech] = useState<string>('all');
   const [showTechFilter, setShowTechFilter] = useState(false);
   const [allTechnicians, setAllTechnicians] = useState<any[]>(DEFAULT_TECHNICIANS);
+  const [showCalendarModal, setShowCalendarModal] = useState(false);
+  const [calendarViewMonth, setCalendarViewMonth] = useState(new Date());
+
+  // Get days for calendar view
+  const calendarDays = eachDayOfInterval({
+    start: startOfMonth(calendarViewMonth),
+    end: endOfMonth(calendarViewMonth),
+  });
+
+  // Get the day of week the month starts on (0 = Sunday)
+  const startDayOfWeek = startOfMonth(calendarViewMonth).getDay();
+
+  // Check if a day has jobs
+  const hasJobsOnDay = (day: Date) => {
+    return jobs.some(
+      (job) => job.appointment_time && isSameDay(parseISO(job.appointment_time), day)
+    );
+  };
 
   useEffect(() => {
     if (sessionToken) {
