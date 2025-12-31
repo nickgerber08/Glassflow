@@ -171,6 +171,11 @@ export default function CalendarScreen() {
                       <View style={styles.jobTitleContainer}>
                         <Ionicons name="person" size={16} color="#666" />
                         <Text style={styles.jobTitle}>{job.customer_name}</Text>
+                        {job.part_number && (
+                          <View style={styles.partNumberBadge}>
+                            <Text style={styles.partNumberText}>{job.part_number}</Text>
+                          </View>
+                        )}
                       </View>
                       <Text style={styles.jobTime}>
                         {format(parseISO(job.appointment_time!), 'h:mm a')}
