@@ -337,14 +337,16 @@ async def create_job(job_data: JobCreate, request: Request):
         "vehicle_model": job_data.vehicle_model,
         "vehicle_year": job_data.vehicle_year,
         "vin_or_lp": job_data.vin_or_lp,
+        "part_number": job_data.part_number,
         "job_type": job_data.job_type,
         "status": job_data.status,
         "assigned_to": job_data.assigned_to,
-        "assigned_to_name": assigned_to_name,
+        "assigned_to_name": job_data.assigned_to_name or assigned_to_name,
         "appointment_time": job_data.appointment_time,
         "notes": job_data.notes,
         "photos": job_data.photos,
         "created_by": user.user_id,
+        "created_by_name": user.name,  # Automatically set from logged-in user
         "created_at": now,
         "updated_at": now
     }
