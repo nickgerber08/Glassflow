@@ -438,9 +438,6 @@ async def disconnect(sid):
 # Include router
 app.include_router(api_router)
 
-# Mount Socket.IO
-app.mount("/", socketio.ASGIApp(sio))
-
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
