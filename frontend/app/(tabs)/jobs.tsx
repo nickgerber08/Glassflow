@@ -158,7 +158,10 @@ export default function JobsScreen() {
     // Filter by technician
     const matchesTech = selectedTech === 'all' || job.assigned_to_name === selectedTech;
     
-    return matchesDate && matchesStatus && matchesTech;
+    // Filter by creator (sales rep)
+    const matchesCreator = selectedCreator === 'all' || job.created_by_name === selectedCreator;
+    
+    return matchesDate && matchesStatus && matchesTech && matchesCreator;
   });
 
   const goToPreviousDay = () => {
