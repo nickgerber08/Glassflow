@@ -54,6 +54,7 @@ export default function CreateJobScreen() {
   const [vehicleMake, setVehicleMake] = useState('');
   const [vehicleModel, setVehicleModel] = useState('');
   const [vehicleYear, setVehicleYear] = useState('');
+  const [vinOrLp, setVinOrLp] = useState('');
   const [jobType, setJobType] = useState('windshield');
   const [assignedTo, setAssignedTo] = useState('');
   const [assignedToName, setAssignedToName] = useState('');
@@ -113,7 +114,7 @@ export default function CreateJobScreen() {
     if (Platform.OS === 'android') {
       setShowDatePicker(false);
     }
-    if (selectedDate) {
+    if (selectedDate && event.type !== 'dismissed') {
       setSelectedDate(selectedDate);
     }
   };
@@ -179,6 +180,7 @@ export default function CreateJobScreen() {
         vehicle_make: vehicleMake,
         vehicle_model: vehicleModel,
         vehicle_year: vehicleYear,
+        vin_or_lp: vinOrLp || null,
         job_type: jobType,
         status: 'pending',
         assigned_to: assignedTo || null,
@@ -307,6 +309,18 @@ export default function CreateJobScreen() {
               placeholderTextColor="#999"
               keyboardType="numeric"
               maxLength={4}
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>VIN or License Plate</Text>
+            <TextInput
+              style={styles.input}
+              value={vinOrLp}
+              onChangeText={setVinOrLp}
+              placeholder="Enter VIN or LP number (optional)"
+              placeholderTextColor="#999"
+              autoCapitalize="characters"
             />
           </View>
         </View>
@@ -471,22 +485,35 @@ export default function CreateJobScreen() {
           visible={showDatePicker}
           onRequestClose={() => setShowDatePicker(false)}
         >
-          <View style={styles.modalOverlay}>
-            <View style={styles.datePickerContainer}>
+          <TouchableOpacity 
+            style={styles.modalOverlay}
+            activeOpacity={1}
+            onPress={() => setShowDatePicker(false)}
+          >
+            <TouchableOpacity 
+              style={styles.datePickerContainer}
+              activeOpacity={1}
+              onPress={(e) => e.stopPropagation()}
+            >
               <View style={styles.datePickerHeader}>
-                <Text style={styles.datePickerTitle}>Select Appointment Date</Text>
+                <Text style={styles.datePickerTitle}>Select Date</Text>
                 <TouchableOpacity onPress={() => setShowDatePicker(false)}>
-                  <Ionicons name="close" size={24} color="#333" />
+                  <Ionicons name="close-circle" size={28} color="#666" />
                 </TouchableOpacity>
               </View>
-              <DateTimePicker
-                value={selectedDate || new Date()}
-                mode="date"
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                onChange={handleDateChange}
-                minimumDate={new Date()}
-                style={styles.datePicker}
-              />
+              
+              <View style={styles.datePickerWrapper}>
+                <DateTimePicker
+                  value={selectedDate || new Date()}
+                  mode="date"
+                  display={Platform.OS === 'ios' ? 'inline' : 'default'}
+                  onChange={handleDateChange}
+                  minimumDate={new Date()}
+                  textColor="#333"
+                  style={styles.datePicker}
+                />
+              </View>
+              
               {Platform.OS === 'ios' && (
                 <TouchableOpacity 
                   style={styles.confirmButton}
@@ -495,8 +522,8 @@ export default function CreateJobScreen() {
                   <Text style={styles.confirmButtonText}>Confirm Date</Text>
                 </TouchableOpacity>
               )}
-            </View>
-          </View>
+            </TouchableOpacity>
+          </TouchableOpacity>
         </Modal>
       )}
 
@@ -685,7 +712,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderWidth: 2,
-    borderColor: '#e0e0e0',
+    borderColor: '#2196F3',
   },
   dateButtonText: {
     flex: 1,
@@ -749,43 +776,64 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   datePickerContainer: {
     backgroundColor: '#fff',
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 20,
     width: '90%',
     maxWidth: 400,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 8,
   },
   datePickerHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
   },
   datePickerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 20,
+    fontWeight: 'bold',
     color: '#333',
+  },
+  datePickerWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 260,
+    backgroundColor: '#fafafa',
+    borderRadius: 12,
+    padding: 10,
   },
   datePicker: {
     width: '100%',
-    height: 200,
+    height: 240,
   },
   confirmButton: {
     backgroundColor: '#2196F3',
-    paddingVertical: 14,
-    borderRadius: 8,
+    paddingVertical: 16,
+    borderRadius: 12,
     alignItems: 'center',
     marginTop: 16,
+    shadowColor: '#2196F3',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 4,
   },
   confirmButtonText: {
     color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 17,
+    fontWeight: 'bold',
   },
   customTechModal: {
     backgroundColor: '#fff',
