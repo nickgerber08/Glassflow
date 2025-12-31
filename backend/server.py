@@ -370,8 +370,8 @@ async def update_job(job_id: str, job_update: JobUpdate, request: Request):
     # Get updated job
     job = await db.jobs.find_one({"job_id": job_id}, {"_id": 0})
     
-    # Emit real-time update
-    await sio.emit('job_updated', job)
+    # Real-time updates disabled for now
+    # await sio.emit('job_updated', job)
     
     return Job(**job)
 
