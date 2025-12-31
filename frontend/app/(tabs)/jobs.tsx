@@ -156,49 +156,50 @@ export default function JobsScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.filterContainer}
-        contentContainerStyle={styles.filterContent}
-      >
-        <TouchableOpacity
-          style={[styles.filterChip, filter === 'all' && styles.filterChipActive]}
-          onPress={() => setFilter('all')}
+      <View style={styles.filterWrapper}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filterContent}
         >
-          <Text
-            style={[styles.filterText, filter === 'all' && styles.filterTextActive]}
-          >
-            All ({jobs.length})
-          </Text>
-        </TouchableOpacity>
-        {Object.keys(STATUS_COLORS).map((status) => (
           <TouchableOpacity
-            key={status}
-            style={[
-              styles.filterChip,
-              filter === status && styles.filterChipActive,
-            ]}
-            onPress={() => setFilter(status)}
+            style={[styles.filterChip, filter === 'all' && styles.filterChipActive]}
+            onPress={() => setFilter('all')}
           >
-            <View
-              style={[
-                styles.filterDot,
-                { backgroundColor: STATUS_COLORS[status] },
-              ]}
-            />
             <Text
-              style={[
-                styles.filterText,
-                filter === status && styles.filterTextActive,
-              ]}
+              style={[styles.filterText, filter === 'all' && styles.filterTextActive]}
             >
-              {STATUS_LABELS[status]} (
-              {jobs.filter((j) => j.status === status).length})
+              All ({jobs.length})
             </Text>
           </TouchableOpacity>
-        ))}
-      </ScrollView>
+          {Object.keys(STATUS_COLORS).map((status) => (
+            <TouchableOpacity
+              key={status}
+              style={[
+                styles.filterChip,
+                filter === status && styles.filterChipActive,
+              ]}
+              onPress={() => setFilter(status)}
+            >
+              <View
+                style={[
+                  styles.filterDot,
+                  { backgroundColor: STATUS_COLORS[status] },
+                ]}
+              />
+              <Text
+                style={[
+                  styles.filterText,
+                  filter === status && styles.filterTextActive,
+                ]}
+              >
+                {STATUS_LABELS[status]} (
+                {jobs.filter((j) => j.status === status).length})
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
 
       {filteredJobs.length === 0 ? (
         <View style={styles.emptyState}>
@@ -260,40 +261,39 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
-  filterContainer: {
+  filterWrapper: {
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
+    paddingVertical: 6,
   },
   filterContent: {
     paddingHorizontal: 16,
-    paddingVertical: 2,
-    gap: 4,
+    gap: 6,
   },
   filterChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 1,
-    borderRadius: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 6,
     backgroundColor: '#f5f5f5',
-    marginRight: 4,
-    height: 18,
+    marginRight: 6,
+    height: 26,
   },
   filterChipActive: {
     backgroundColor: '#2196F3',
   },
   filterDot: {
-    width: 3,
-    height: 3,
-    borderRadius: 1.5,
-    marginRight: 3,
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    marginRight: 5,
   },
   filterText: {
-    fontSize: 9,
+    fontSize: 11,
     color: '#666',
-    fontWeight: '500',
-    lineHeight: 10,
+    fontWeight: '600',
   },
   filterTextActive: {
     color: '#fff',
