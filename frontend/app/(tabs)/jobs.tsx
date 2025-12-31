@@ -58,6 +58,9 @@ export default function JobsScreen() {
   const [allTechnicians, setAllTechnicians] = useState<any[]>(DEFAULT_TECHNICIANS);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [calendarViewMonth, setCalendarViewMonth] = useState(new Date());
+  const [selectedCreator, setSelectedCreator] = useState<string>('all');
+  const [showCreatorFilter, setShowCreatorFilter] = useState(false);
+  const [allCreators, setAllCreators] = useState<string[]>([]);
 
   // Get days for calendar view
   const calendarDays = eachDayOfInterval({
@@ -74,6 +77,12 @@ export default function JobsScreen() {
       (job) => job.appointment_time && isSameDay(parseISO(job.appointment_time), day)
     );
   };
+
+  // Extract unique creators from jobs
+  useEffect(() => {
+    const creators = [...new Set(jobs.map(j => j.created_by_name).filter(Boolean))];
+    setAllCreators(creators as string[]);
+  }, [jobs]);
 
   useEffect(() => {
     if (sessionToken) {
