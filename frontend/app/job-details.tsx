@@ -590,6 +590,49 @@ export default function JobDetailsScreen() {
           )}
         </View>
 
+        {/* Omega Invoice Card - Only in job details, not on main page */}
+        <View style={styles.omegaCard}>
+          <View style={styles.omegaHeader}>
+            <Ionicons name="document-text" size={24} color="#607D8B" />
+            <Text style={styles.omegaTitle}>Omega Invoice #</Text>
+          </View>
+          
+          {editingOmega ? (
+            <View style={styles.omegaEditRow}>
+              <TextInput
+                style={styles.omegaInput}
+                value={omegaInvoice}
+                onChangeText={(text) => {
+                  setOmegaInvoice(text);
+                  setHasChanges(true);
+                }}
+                placeholder="Enter invoice number"
+                placeholderTextColor="#999"
+                autoFocus
+              />
+              <TouchableOpacity 
+                style={styles.omegaDoneBtn}
+                onPress={() => setEditingOmega(false)}
+              >
+                <Ionicons name="checkmark" size={24} color="#4CAF50" />
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity 
+              style={styles.omegaDisplay}
+              onPress={() => setEditingOmega(true)}
+            >
+              <Text style={[
+                styles.omegaValue,
+                !omegaInvoice && styles.omegaPlaceholder
+              ]}>
+                {omegaInvoice || 'Tap to add invoice number'}
+              </Text>
+              <Ionicons name="pencil" size={20} color="#666" />
+            </TouchableOpacity>
+          )}
+        </View>
+
         {/* Technician Selection Modal */}
         <Modal
           visible={showTechModal}
