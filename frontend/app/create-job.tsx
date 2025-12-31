@@ -192,6 +192,7 @@ export default function CreateJobScreen() {
         vehicle_year: vehicleYear,
         vin_or_lp: vinOrLp || null,
         part_number: partNumber || null,
+        omega_invoice: omegaInvoice || null,
         payment_type: paymentType || null,
         amount_to_collect: paymentType === 'collect' && amountToCollect ? parseFloat(amountToCollect) : null,
         job_type: jobType,
