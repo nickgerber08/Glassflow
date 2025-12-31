@@ -57,6 +57,7 @@ class Job(BaseModel):
     vehicle_year: str
     vin_or_lp: Optional[str] = None
     part_number: Optional[str] = None  # Part number for the job
+    omega_invoice: Optional[str] = None  # Omega invoicing software reference
     payment_type: Optional[str] = None  # 'collect' or 'dealership_po'
     amount_to_collect: Optional[float] = None  # Amount tech needs to collect (if payment_type is 'collect')
     job_type: str  # windshield, side_window, rear_window, chip_repair
