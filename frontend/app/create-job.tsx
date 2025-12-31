@@ -422,11 +422,20 @@ export default function CreateJobScreen() {
                       day: 'numeric', 
                       year: 'numeric' 
                     })
-                  : 'Tap here to select date'}
+                  : 'Tap to select date'}
               </Text>
-              <Ionicons name="chevron-forward" size={20} color="#999" />
             </TouchableOpacity>
           </View>
+
+          {showDatePicker && (
+            <DateTimePicker
+              value={selectedDate || new Date()}
+              mode="date"
+              display="default"
+              onChange={handleDateChange}
+              minimumDate={new Date()}
+            />
+          )}
 
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Time Window</Text>
