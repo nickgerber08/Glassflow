@@ -501,6 +501,18 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     flex: 1,
   },
+  partNumberBadge: {
+    backgroundColor: '#FF9800',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    marginLeft: 8,
+  },
+  partNumberText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#fff',
+  },
   statusBadge: {
     paddingHorizontal: 14,
     paddingVertical: 6,
