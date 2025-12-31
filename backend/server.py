@@ -386,8 +386,8 @@ async def delete_job(job_id: str, request: Request):
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Job not found")
     
-    # Emit real-time update
-    await sio.emit('job_deleted', {"job_id": job_id})
+    # Real-time updates disabled for now
+    # await sio.emit('job_deleted', {"job_id": job_id})
     
     return {"message": "Job deleted successfully"}
 
