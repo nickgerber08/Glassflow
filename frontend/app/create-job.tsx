@@ -489,7 +489,17 @@ export default function CreateJobScreen() {
       </KeyboardAwareScrollView>
 
       {/* Date Picker Modal */}
-      {showDatePicker && (
+      {showDatePicker && Platform.OS === 'android' && (
+        <DateTimePicker
+          value={selectedDate || new Date()}
+          mode="date"
+          display="default"
+          onChange={handleDateChange}
+          minimumDate={new Date()}
+        />
+      )}
+      
+      {showDatePicker && Platform.OS === 'ios' && (
         <Modal
           transparent={true}
           animationType="slide"
@@ -508,17 +518,16 @@ export default function CreateJobScreen() {
                 </TouchableOpacity>
               </View>
               
-              <View style={styles.calendarWrapper}>
-                <DateTimePicker
-                  value={selectedDate || new Date()}
-                  mode="date"
-                  display="default"
-                  onChange={handleDateChange}
-                  minimumDate={new Date()}
-                />
-              </View>
+              <DateTimePicker
+                value={selectedDate || new Date()}
+                mode="date"
+                display="spinner"
+                onChange={handleDateChange}
+                minimumDate={new Date()}
+                style={styles.iosDatePicker}
+              />
               
-              {Platform.OS === 'ios' && selectedDate && (
+              {selectedDate && (
                 <View style={styles.selectedDateDisplay}>
                   <Ionicons name="calendar-outline" size={20} color="#2196F3" />
                   <Text style={styles.selectedDateText}>
@@ -532,15 +541,13 @@ export default function CreateJobScreen() {
                 </View>
               )}
               
-              {Platform.OS === 'ios' && (
-                <TouchableOpacity 
-                  style={styles.confirmButton}
-                  onPress={confirmIOSDate}
-                >
-                  <Ionicons name="checkmark-circle" size={24} color="#fff" />
-                  <Text style={styles.confirmButtonText}>Confirm Date</Text>
-                </TouchableOpacity>
-              )}
+              <TouchableOpacity 
+                style={styles.confirmButton}
+                onPress={confirmIOSDate}
+              >
+                <Ionicons name="checkmark-circle" size={24} color="#fff" />
+                <Text style={styles.confirmButtonText}>Confirm Date</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </Modal>
