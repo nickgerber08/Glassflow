@@ -188,6 +188,7 @@ export default function CreateJobScreen() {
         vehicle_model: vehicleModel,
         vehicle_year: vehicleYear,
         vin_or_lp: vinOrLp || null,
+        part_number: partNumber || null,
         job_type: jobType,
         status: 'pending',
         assigned_to: assignedTo || null,
