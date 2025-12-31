@@ -25,14 +25,9 @@ db = client[os.environ['DB_NAME']]
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
 
-# Socket.IO setup
-sio = socketio.AsyncServer(
-    async_mode='asgi',
-    cors_allowed_origins='*',
-    logger=False,
-    engineio_logger=False
-)
-# Mount Socket.IO app after including all routes
+# Note: Socket.IO disabled for initial setup, can be added later if needed
+# sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins='*')
+
 
 # Pydantic Models
 class User(BaseModel):
