@@ -341,29 +341,38 @@ export default function JobDetailsScreen() {
               </View>
             )}
 
-            {job.assigned_to_name && (
-              <View style={styles.detailRow}>
-                <Ionicons name="person" size={20} color="#2196F3" />
-                <View style={styles.detailTextContainer}>
-                  <Text style={styles.detailText}>Assigned to: {job.assigned_to_name}</Text>
-                </View>
+            {/* Technician Assignment - Always show */}
+            <View style={styles.detailRow}>
+              <Ionicons name="person" size={20} color="#2196F3" />
+              <View style={styles.detailTextContainer}>
+                <Text style={styles.detailLabel}>Technician</Text>
+                <Text style={styles.detailTextBold}>
+                  {job.assigned_to_name || 'Not Assigned'}
+                </Text>
               </View>
-            )}
+            </View>
 
-            {job.appointment_time && (
-              <View style={styles.detailRow}>
-                <Ionicons name="calendar" size={20} color="#2196F3" />
-                <View style={styles.detailTextContainer}>
-                  <Text style={styles.detailText}>
-                    {format(parseISO(job.appointment_time), 'MMM dd, yyyy')} • {
-                      new Date(job.appointment_time).getHours() === 9 
+            {/* Appointment Time Window - Always show */}
+            <View style={styles.detailRow}>
+              <Ionicons name="calendar" size={20} color="#2196F3" />
+              <View style={styles.detailTextContainer}>
+                <Text style={styles.detailLabel}>Appointment</Text>
+                {job.appointment_time ? (
+                  <View>
+                    <Text style={styles.detailTextBold}>
+                      {format(parseISO(job.appointment_time), 'EEEE, MMM dd, yyyy')}
+                    </Text>
+                    <Text style={styles.timeWindowText}>
+                      {new Date(job.appointment_time).getHours() < 12 
                         ? '9:00 AM - 12:00 PM' 
-                        : '1:00 PM - 4:00 PM'
-                    }
-                  </Text>
-                </View>
+                        : '1:00 PM - 4:00 PM'}
+                    </Text>
+                  </View>
+                ) : (
+                  <Text style={styles.detailText}>Not Scheduled</Text>
+                )}
               </View>
-            )}
+            </View>
 
             {job.notes && (
               <View style={styles.notesSection}>
