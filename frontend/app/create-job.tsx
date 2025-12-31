@@ -200,12 +200,23 @@ export default function CreateJobScreen() {
       });
 
       if (response.ok) {
-        Alert.alert('Success', 'Job created successfully', [
-          {
-            text: 'OK',
-            onPress: () => router.back(),
-          },
-        ]);
+        setLoading(false);
+        // Show success message and wait before navigating
+        Alert.alert(
+          'Success! ✓', 
+          'Job has been created successfully and added to your schedule.',
+          [
+            {
+              text: 'View Jobs',
+              onPress: () => {
+                setTimeout(() => {
+                  router.back();
+                }, 300);
+              },
+            },
+          ],
+          { cancelable: false }
+        );
       } else {
         const error = await response.json();
         Alert.alert('Error', error.detail || 'Failed to create job');
