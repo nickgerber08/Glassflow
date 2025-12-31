@@ -354,6 +354,69 @@ export default function CreateJobScreen() {
               autoCapitalize="characters"
             />
           </View>
+
+          {/* Payment Collection Section */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Payment Collection</Text>
+            <View style={styles.paymentTypeContainer}>
+              <TouchableOpacity
+                style={[
+                  styles.paymentTypeChip,
+                  paymentType === 'collect' && styles.paymentTypeChipActive,
+                ]}
+                onPress={() => setPaymentType('collect')}
+              >
+                <Ionicons 
+                  name="cash" 
+                  size={18} 
+                  color={paymentType === 'collect' ? '#fff' : '#4CAF50'} 
+                />
+                <Text style={[
+                  styles.paymentTypeText,
+                  paymentType === 'collect' && styles.paymentTypeTextActive,
+                ]}>
+                  Collect Amount
+                </Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[
+                  styles.paymentTypeChip,
+                  paymentType === 'dealership_po' && styles.paymentTypeChipPOActive,
+                ]}
+                onPress={() => {
+                  setPaymentType('dealership_po');
+                  setAmountToCollect('');
+                }}
+              >
+                <Ionicons 
+                  name="business" 
+                  size={18} 
+                  color={paymentType === 'dealership_po' ? '#fff' : '#9C27B0'} 
+                />
+                <Text style={[
+                  styles.paymentTypeText,
+                  paymentType === 'dealership_po' && styles.paymentTypeTextActive,
+                ]}>
+                  Dealership PO
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {paymentType === 'collect' && (
+              <View style={styles.amountInputContainer}>
+                <Text style={styles.dollarSign}>$</Text>
+                <TextInput
+                  style={styles.amountInput}
+                  value={amountToCollect}
+                  onChangeText={setAmountToCollect}
+                  placeholder="0.00"
+                  placeholderTextColor="#999"
+                  keyboardType="decimal-pad"
+                />
+              </View>
+            )}
+          </View>
         </View>
 
         <View style={styles.section}>
