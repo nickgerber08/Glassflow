@@ -143,6 +143,11 @@ export default function JobsScreen() {
           <Text style={styles.jobTitle} numberOfLines={1}>
             {item.customer_name}
           </Text>
+          {item.part_number && (
+            <View style={styles.partNumberBadge}>
+              <Text style={styles.partNumberText}>{item.part_number}</Text>
+            </View>
+          )}
         </View>
         <View
           style={[
