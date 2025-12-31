@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   Linking,
   Platform,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,6 +21,15 @@ import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { format, parseISO } from 'date-fns';
 import DateTimePicker from '@react-native-community/datetimepicker';
+
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
+
+// Default technicians - must match create-job.tsx
+const DEFAULT_TECHNICIANS = [
+  { name: 'Iman', user_id: 'default_iman' },
+  { name: 'Enrique', user_id: 'default_enrique' },
+  { name: 'Alan', user_id: 'default_alan' },
+];
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
