@@ -1,12 +1,23 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useJobStore } from '../../stores/jobStore';
 import { useRouter } from 'expo-router';
 import * as Location from 'expo-location';
+
+// Conditional import for react-native-maps (only on mobile)
+let MapView: any = null;
+let Marker: any = null;
+let PROVIDER_GOOGLE: any = null;
+
+if (Platform.OS !== 'web') {
+  const maps = require('react-native-maps');
+  MapView = maps.default;
+  Marker = maps.Marker;
+  PROVIDER_GOOGLE = maps.PROVIDER_GOOGLE;
+}
 
 const STATUS_COLORS: Record<string, string> = {
   pending: '#FF9800',
@@ -50,6 +61,43 @@ export default function MapScreen() {
       <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.centered}>
           <ActivityIndicator size="large" color="#2196F3" />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Web fallback - show list view with addresses
+  if (Platform.OS === 'web' || !MapView) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Map</Text>
+          <View style={styles.legendContainer}>
+            <Text style={styles.webNote}>
+              Map view is available on mobile devices. Showing list of job locations:
+            </Text>
+          </View>
+        </View>
+        <View style={styles.webListContainer}>
+          {jobs.map((job) => (
+            <TouchableOpacity
+              key={job.job_id}
+              style={styles.webJobCard}
+              onPress={() => {
+                setSelectedJob(job);
+                router.push('/job-details');
+              }}
+            >
+              <View style={[styles.statusIndicator, { backgroundColor: STATUS_COLORS[job.status] }]} />
+              <View style={styles.webJobContent}>
+                <Text style={styles.webJobTitle}>{job.customer_name}</Text>
+                <Text style={styles.webJobAddress}>{job.address}</Text>
+                <Text style={styles.webJobCoords}>
+                  📍 {job.lat.toFixed(4)}, {job.lng.toFixed(4)}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          ))}
         </View>
       </SafeAreaView>
     );
