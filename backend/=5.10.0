@@ -1,0 +1,30 @@
+Looking in indexes: https://pypi.org/simple, https://d33sy5i8bnduwe.cloudfront.net/simple/
+Collecting httpx
+  Downloading httpx-0.28.1-py3-none-any.whl.metadata (7.1 kB)
+Collecting python-socketio
+  Downloading python_socketio-5.16.0-py3-none-any.whl.metadata (3.2 kB)
+Requirement already satisfied: anyio in /root/.venv/lib/python3.11/site-packages (from httpx) (4.12.0)
+Requirement already satisfied: certifi in /root/.venv/lib/python3.11/site-packages (from httpx) (2025.11.12)
+Collecting httpcore==1.* (from httpx)
+  Downloading httpcore-1.0.9-py3-none-any.whl.metadata (21 kB)
+Requirement already satisfied: idna in /root/.venv/lib/python3.11/site-packages (from httpx) (3.11)
+Requirement already satisfied: h11>=0.16 in /root/.venv/lib/python3.11/site-packages (from httpcore==1.*->httpx) (0.16.0)
+Collecting bidict>=0.21.0 (from python-socketio)
+  Downloading bidict-0.23.1-py3-none-any.whl.metadata (8.7 kB)
+Collecting python-engineio>=4.11.0 (from python-socketio)
+  Downloading python_engineio-4.13.0-py3-none-any.whl.metadata (2.3 kB)
+Collecting simple-websocket>=0.10.0 (from python-engineio>=4.11.0->python-socketio)
+  Downloading simple_websocket-1.1.0-py3-none-any.whl.metadata (1.5 kB)
+Collecting wsproto (from simple-websocket>=0.10.0->python-engineio>=4.11.0->python-socketio)
+  Downloading wsproto-1.3.2-py3-none-any.whl.metadata (5.2 kB)
+Requirement already satisfied: typing_extensions>=4.5 in /root/.venv/lib/python3.11/site-packages (from anyio->httpx) (4.15.0)
+Downloading httpx-0.28.1-py3-none-any.whl (73 kB)
+Downloading httpcore-1.0.9-py3-none-any.whl (78 kB)
+Downloading python_socketio-5.16.0-py3-none-any.whl (79 kB)
+Downloading bidict-0.23.1-py3-none-any.whl (32 kB)
+Downloading python_engineio-4.13.0-py3-none-any.whl (59 kB)
+Downloading simple_websocket-1.1.0-py3-none-any.whl (13 kB)
+Downloading wsproto-1.3.2-py3-none-any.whl (24 kB)
+Installing collected packages: wsproto, httpcore, bidict, simple-websocket, httpx, python-engineio, python-socketio
+
+Successfully installed bidict-0.23.1 httpcore-1.0.9 httpx-0.28.1 python-engineio-4.13.0 python-socketio-5.16.0 simple-websocket-1.1.0 wsproto-1.3.2
