@@ -181,6 +181,7 @@ export default function JobDetailsScreen() {
           assigned_to_name: job.assigned_to_name,
           appointment_time: job.appointment_time,
           part_number: partNumber || null,
+          omega_invoice: omegaInvoice || null,
           payment_type: paymentType || null,
           amount_to_collect: paymentType === 'collect' && amountToCollect ? parseFloat(amountToCollect) : null
         }),
