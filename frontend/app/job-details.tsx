@@ -19,6 +19,7 @@ import { useJobStore } from '../stores/jobStore';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { format, parseISO } from 'date-fns';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
@@ -40,17 +41,22 @@ const STATUS_LABELS: Record<string, string> = {
 
 export default function JobDetailsScreen() {
   const { sessionToken, user } = useAuth();
-  const { selectedJob } = useJobStore();
+  const { selectedJob, updateJob } = useJobStore();
   const router = useRouter();
   const [job, setJob] = useState(selectedJob);
   const [comments, setComments] = useState<any[]>([]);
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [users, setUsers] = useState<any[]>([]);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [tempAppointmentTime, setTempAppointmentTime] = useState<Date | null>(null);
 
   useEffect(() => {
     if (job) {
       fetchComments();
+      fetchUsers();
     }
   }, [job]);
 
@@ -66,6 +72,23 @@ export default function JobDetailsScreen() {
       </SafeAreaView>
     );
   }
+
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/users`, {
+        headers: {
+          Authorization: `Bearer ${sessionToken}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(data);
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  };
 
   const fetchComments = async () => {
     try {
@@ -85,6 +108,26 @@ export default function JobDetailsScreen() {
   };
 
   const updateJobStatus = async (newStatus: string) => {
+    setJob({ ...job, status: newStatus });
+    setHasChanges(true);
+  };
+
+  const updateJobAssignment = async (userId: string) => {
+    const assignedUser = users.find(u => u.user_id === userId);
+    setJob({ 
+      ...job, 
+      assigned_to: userId,
+      assigned_to_name: assignedUser?.name || null 
+    });
+    setHasChanges(true);
+  };
+
+  const updateJobAppointment = (date: Date) => {
+    setJob({ ...job, appointment_time: date.toISOString() });
+    setHasChanges(true);
+  };
+
+  const saveChanges = async () => {
     try {
       setLoading(true);
       const response = await fetch(`${BACKEND_URL}/api/jobs/${job.job_id}`, {
@@ -93,17 +136,23 @@ export default function JobDetailsScreen() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${sessionToken}`,
         },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ 
+          status: job.status,
+          assigned_to: job.assigned_to,
+          appointment_time: job.appointment_time
+        }),
       });
 
       if (response.ok) {
         const updatedJob = await response.json();
         setJob(updatedJob);
-        Alert.alert('Success', 'Job status updated');
+        updateJob(job.job_id, updatedJob);
+        setHasChanges(false);
+        Alert.alert('Success', 'Job updated successfully');
       }
     } catch (error) {
-      console.error('Error updating status:', error);
-      Alert.alert('Error', 'Failed to update status');
+      console.error('Error updating job:', error);
+      Alert.alert('Error', 'Failed to update job');
     } finally {
       setLoading(false);
     }
@@ -226,6 +275,23 @@ export default function JobDetailsScreen() {
         <View style={{ width: 40 }} />
       </View>
 
+      {hasChanges && (
+        <View style={styles.saveBar}>
+          <Text style={styles.saveBarText}>You have unsaved changes</Text>
+          <TouchableOpacity 
+            style={styles.saveButton}
+            onPress={saveChanges}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={styles.saveButtonText}>Save Changes</Text>
+            )}
+          </TouchableOpacity>
+        </View>
+      )}
+
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.card}>
           <View style={styles.cardHeader}>
@@ -266,26 +332,6 @@ export default function JobDetailsScreen() {
               </View>
             </View>
 
-            {job.assigned_to_name && (
-              <View style={styles.detailRow}>
-                <Ionicons name="person" size={20} color="#2196F3" />
-                <View style={styles.detailTextContainer}>
-                  <Text style={styles.detailText}>{job.assigned_to_name}</Text>
-                </View>
-              </View>
-            )}
-
-            {job.appointment_time && (
-              <View style={styles.detailRow}>
-                <Ionicons name="calendar" size={20} color="#2196F3" />
-                <View style={styles.detailTextContainer}>
-                  <Text style={styles.detailText}>
-                    {format(parseISO(job.appointment_time), 'MMM dd, yyyy h:mm a')}
-                  </Text>
-                </View>
-              </View>
-            )}
-
             {job.notes && (
               <View style={styles.notesSection}>
                 <Text style={styles.notesLabel}>Notes:</Text>
@@ -307,7 +353,6 @@ export default function JobDetailsScreen() {
                   job.status === status && { backgroundColor: STATUS_COLORS[status] },
                 ]}
                 onPress={() => updateJobStatus(status)}
-                disabled={loading}
               >
                 <Text
                   style={[
@@ -321,6 +366,73 @@ export default function JobDetailsScreen() {
               </TouchableOpacity>
             ))}
           </View>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Assign Technician</Text>
+          <TouchableOpacity
+            style={styles.assignmentSelector}
+            onPress={() => {
+              Alert.alert(
+                'Assign Technician',
+                'Select a technician for this job',
+                [
+                  { text: 'Unassigned', onPress: () => updateJobAssignment('') },
+                  ...users.map((u) => ({
+                    text: u.name,
+                    onPress: () => updateJobAssignment(u.user_id),
+                  })),
+                  { text: 'Cancel', style: 'cancel' },
+                ],
+                { cancelable: true }
+              );
+            }}
+          >
+            <View style={styles.assignmentContent}>
+              <Ionicons name="person" size={20} color="#2196F3" />
+              <Text style={styles.assignmentText}>
+                {job.assigned_to_name || 'No technician assigned'}
+              </Text>
+            </View>
+            <Ionicons name="chevron-down" size={20} color="#999" />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Appointment Time</Text>
+          <TouchableOpacity
+            style={styles.appointmentSelector}
+            onPress={() => {
+              setTempAppointmentTime(
+                job.appointment_time ? new Date(job.appointment_time) : new Date()
+              );
+              setShowDatePicker(true);
+            }}
+          >
+            <View style={styles.appointmentContent}>
+              <Ionicons name="calendar" size={20} color="#2196F3" />
+              <Text style={styles.appointmentText}>
+                {job.appointment_time
+                  ? format(parseISO(job.appointment_time), 'MMM dd, yyyy h:mm a')
+                  : 'No appointment scheduled'}
+              </Text>
+            </View>
+            <Ionicons name="chevron-down" size={20} color="#999" />
+          </TouchableOpacity>
+
+          {showDatePicker && (
+            <DateTimePicker
+              value={tempAppointmentTime || new Date()}
+              mode="datetime"
+              display="default"
+              onChange={(event, selectedDate) => {
+                setShowDatePicker(Platform.OS === 'ios');
+                if (selectedDate) {
+                  updateJobAppointment(selectedDate);
+                }
+              }}
+            />
+          )}
         </View>
 
         <View style={styles.card}>
@@ -441,6 +553,34 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#333',
   },
+  saveBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#FFF3E0',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#FFB74D',
+  },
+  saveBarText: {
+    fontSize: 14,
+    color: '#E65100',
+    fontWeight: '500',
+  },
+  saveButton: {
+    backgroundColor: '#FF9800',
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    borderRadius: 8,
+    minWidth: 120,
+    alignItems: 'center',
+  },
+  saveButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
   content: {
     flex: 1,
   },
@@ -468,6 +608,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: '#333',
+    marginBottom: 12,
   },
   jobId: {
     fontSize: 14,
@@ -540,6 +681,46 @@ const styles = StyleSheet.create({
   statusButtonText: {
     fontSize: 14,
     fontWeight: '600',
+  },
+  assignmentSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#f5f5f5',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  assignmentContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  assignmentText: {
+    fontSize: 16,
+    color: '#333',
+    marginLeft: 12,
+  },
+  appointmentSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#f5f5f5',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  appointmentContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  appointmentText: {
+    fontSize: 16,
+    color: '#333',
+    marginLeft: 12,
   },
   photoActions: {
     flexDirection: 'row',
