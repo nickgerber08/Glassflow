@@ -209,26 +209,14 @@ export default function CreateJobScreen() {
         const createdJob = await response.json();
         console.log('Job created successfully:', createdJob);
         
-        // Clear loading first
-        setLoading(false);
-        
-        // Show success alert with better visibility
-        setTimeout(() => {
-          Alert.alert(
-            '✓ Success!', 
-            `Job created for ${customerName} on ${selectedDate?.toLocaleDateString()}`,
-            [
-              {
-                text: 'View Jobs',
-                onPress: () => {
-                  router.back();
-                },
-                style: 'default'
-              },
-            ],
-            { cancelable: false }
-          );
-        }, 100);
+        // Navigate back immediately with success params
+        router.replace({
+          pathname: '/(tabs)/jobs',
+          params: { 
+            jobCreated: 'true',
+            customerName: customerName 
+          }
+        });
         
         return; // Prevent further execution
       } else {
