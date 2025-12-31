@@ -302,7 +302,7 @@ const styles = StyleSheet.create({
   jobCard: {
     backgroundColor: '#fff',
     borderRadius: 12,
-    padding: 16,
+    padding: 18,
     marginBottom: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 14,
   },
   jobTitleRow: {
     flexDirection: 'row',
@@ -323,31 +323,31 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   jobTitle: {
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: '600',
     color: '#333',
     marginLeft: 8,
     flex: 1,
   },
   statusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 14,
   },
   statusText: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
     color: '#fff',
   },
   jobDetails: {
-    gap: 8,
+    gap: 10,
   },
   detailRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   detailText: {
-    fontSize: 14,
+    fontSize: 15,
     color: '#666',
     marginLeft: 8,
     flex: 1,
