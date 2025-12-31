@@ -286,6 +286,136 @@ async def logout(request: Request, response: Response):
     response.delete_cookie(key="session_token", path="/")
     return {"message": "Logged out successfully"}
 
+# Push Notification Helper
+async def send_push_notifications(tokens: List[str], title: str, body: str, data: dict = None):
+    """Send push notifications to multiple Expo push tokens"""
+    if not tokens:
+        return
+    
+    messages = []
+    for token in tokens:
+        if token and token.startswith("ExponentPushToken"):
+            message = {
+                "to": token,
+                "sound": "default",
+                "title": title,
+                "body": body,
+            }
+            if data:
+                message["data"] = data
+            messages.append(message)
+    
+    if messages:
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    EXPO_PUSH_URL,
+                    json=messages,
+                    headers={"Content-Type": "application/json"}
+                )
+                logging.info(f"Push notification response: {response.status_code}")
+        except Exception as e:
+            logging.error(f"Error sending push notifications: {e}")
+
+async def create_notification_for_all_users(title: str, body: str, data: dict = None, exclude_user_id: str = None):
+    """Create in-app notifications for all users and send push notifications"""
+    # Get all users
+    users = await db.users.find({}, {"user_id": 1, "push_token": 1}).to_list(1000)
+    
+    now = datetime.now(timezone.utc)
+    notifications = []
+    push_tokens = []
+    
+    for user in users:
+        if exclude_user_id and user["user_id"] == exclude_user_id:
+            continue
+            
+        # Create in-app notification
+        notification = {
+            "notification_id": f"notif_{uuid.uuid4().hex[:12]}",
+            "user_id": user["user_id"],
+            "title": title,
+            "body": body,
+            "data": data,
+            "read": False,
+            "created_at": now
+        }
+        notifications.append(notification)
+        
+        # Collect push tokens
+        if user.get("push_token"):
+            push_tokens.append(user["push_token"])
+    
+    # Insert all notifications
+    if notifications:
+        await db.notifications.insert_many(notifications)
+    
+    # Send push notifications (non-blocking)
+    if push_tokens:
+        asyncio.create_task(send_push_notifications(push_tokens, title, body, data))
+
+# Push Token Registration
+@api_router.post("/push-token")
+async def register_push_token(token_data: PushTokenRequest, request: Request):
+    """Register or update push token for current user"""
+    user = await require_auth(request)
+    
+    await db.users.update_one(
+        {"user_id": user.user_id},
+        {"$set": {"push_token": token_data.push_token}}
+    )
+    
+    return {"message": "Push token registered successfully"}
+
+# Notification Routes
+@api_router.get("/notifications")
+async def get_notifications(request: Request, limit: int = 50):
+    """Get notifications for current user"""
+    user = await require_auth(request)
+    
+    notifications = await db.notifications.find(
+        {"user_id": user.user_id},
+        {"_id": 0}
+    ).sort("created_at", -1).limit(limit).to_list(limit)
+    
+    return notifications
+
+@api_router.get("/notifications/unread-count")
+async def get_unread_count(request: Request):
+    """Get unread notification count for current user"""
+    user = await require_auth(request)
+    
+    count = await db.notifications.count_documents({
+        "user_id": user.user_id,
+        "read": False
+    })
+    
+    return {"unread_count": count}
+
+@api_router.post("/notifications/{notification_id}/read")
+async def mark_notification_read(notification_id: str, request: Request):
+    """Mark a notification as read"""
+    user = await require_auth(request)
+    
+    await db.notifications.update_one(
+        {"notification_id": notification_id, "user_id": user.user_id},
+        {"$set": {"read": True}}
+    )
+    
+    return {"message": "Notification marked as read"}
+
+@api_router.post("/notifications/mark-all-read")
+async def mark_all_notifications_read(request: Request):
+    """Mark all notifications as read for current user"""
+    user = await require_auth(request)
+    
+    await db.notifications.update_many(
+        {"user_id": user.user_id, "read": False},
+        {"$set": {"read": True}}
+    )
+    
+    return {"message": "All notifications marked as read"}
+
 # User Routes
 @api_router.get("/users", response_model=List[User])
 async def get_users(request: Request):
