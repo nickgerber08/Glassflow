@@ -68,6 +68,8 @@ export default function JobDetailsScreen() {
   const [amountToCollect, setAmountToCollect] = useState<string>(
     selectedJob?.amount_to_collect ? selectedJob.amount_to_collect.toString() : ''
   );
+  const [omegaInvoice, setOmegaInvoice] = useState<string>(selectedJob?.omega_invoice || '');
+  const [editingOmega, setEditingOmega] = useState(false);
 
   useEffect(() => {
     if (job) {
