@@ -59,9 +59,13 @@ export default function JobDetailsScreen() {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [users, setUsers] = useState<any[]>([]);
+  const [allTechnicians, setAllTechnicians] = useState<any[]>(DEFAULT_TECHNICIANS);
   const [hasChanges, setHasChanges] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [tempAppointmentTime, setTempAppointmentTime] = useState<Date | null>(null);
+  const [showTechModal, setShowTechModal] = useState(false);
+  const [partNumber, setPartNumber] = useState(selectedJob?.part_number || '');
+  const [editingPartNumber, setEditingPartNumber] = useState(false);
 
   useEffect(() => {
     if (job) {
