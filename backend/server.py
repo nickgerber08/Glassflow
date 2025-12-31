@@ -64,7 +64,8 @@ class Job(BaseModel):
     appointment_time: Optional[datetime] = None
     notes: Optional[str] = None
     photos: List[str] = []  # base64 encoded images
-    created_by: str
+    created_by: str  # user_id of creator
+    created_by_name: Optional[str] = None  # name of creator (sales rep)
     created_at: datetime
     updated_at: datetime
 
