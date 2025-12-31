@@ -146,6 +146,19 @@ export default function JobDetailsScreen() {
     setHasChanges(true);
   };
 
+  const updatePayment = (type: string, amount?: string) => {
+    setPaymentType(type);
+    if (amount !== undefined) {
+      setAmountToCollect(amount);
+    }
+    setJob({ 
+      ...job, 
+      payment_type: type,
+      amount_to_collect: type === 'collect' && amount ? parseFloat(amount) : null
+    });
+    setHasChanges(true);
+  };
+
   const updateJobAppointment = (date: Date) => {
     setJob({ ...job, appointment_time: date.toISOString() });
     setHasChanges(true);
@@ -165,7 +178,9 @@ export default function JobDetailsScreen() {
           assigned_to: job.assigned_to,
           assigned_to_name: job.assigned_to_name,
           appointment_time: job.appointment_time,
-          part_number: partNumber || null
+          part_number: partNumber || null,
+          payment_type: paymentType || null,
+          amount_to_collect: paymentType === 'collect' && amountToCollect ? parseFloat(amountToCollect) : null
         }),
       });
 
