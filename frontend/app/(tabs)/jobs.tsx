@@ -581,4 +581,16 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
   },
+  dismissButton: {
+    marginTop: 20,
+    backgroundColor: '#4CAF50',
+    paddingHorizontal: 40,
+    paddingVertical: 12,
+    borderRadius: 25,
+  },
+  dismissButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
 });
