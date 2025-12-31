@@ -199,6 +199,17 @@ export default function JobsScreen() {
               <Text style={styles.partNumberText}>{item.part_number}</Text>
             </View>
           )}
+          {/* Payment Badge - shows right next to part number */}
+          {item.payment_type === 'collect' && item.amount_to_collect && (
+            <View style={styles.collectBadge}>
+              <Text style={styles.collectBadgeText}>${item.amount_to_collect.toFixed(2)}</Text>
+            </View>
+          )}
+          {item.payment_type === 'dealership_po' && (
+            <View style={styles.poBadge}>
+              <Text style={styles.poBadgeText}>PO</Text>
+            </View>
+          )}
         </View>
         <View
           style={[
