@@ -35,7 +35,7 @@ const STATUS_LABELS: Record<string, string> = {
 
 export default function JobsScreen() {
   const { sessionToken, user } = useAuth();
-  const { jobs, setJobs, setSelectedJob, initializeSocket, disconnectSocket } = useJobStore();
+  const { jobs, setJobs, setSelectedJob } = useJobStore();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -44,12 +44,7 @@ export default function JobsScreen() {
   useEffect(() => {
     if (sessionToken) {
       fetchJobs();
-      initializeSocket(sessionToken);
     }
-
-    return () => {
-      disconnectSocket();
-    };
   }, [sessionToken]);
 
   const fetchJobs = async () => {
