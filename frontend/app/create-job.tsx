@@ -496,45 +496,53 @@ export default function CreateJobScreen() {
           visible={showDatePicker}
           onRequestClose={() => setShowDatePicker(false)}
         >
-          <TouchableOpacity 
-            style={styles.modalOverlay}
-            activeOpacity={1}
-            onPress={() => setShowDatePicker(false)}
-          >
-            <TouchableOpacity 
-              style={styles.datePickerContainer}
-              activeOpacity={1}
-              onPress={(e) => e.stopPropagation()}
-            >
+          <View style={styles.modalOverlay}>
+            <View style={styles.datePickerContainer}>
               <View style={styles.datePickerHeader}>
-                <Text style={styles.datePickerTitle}>Select Date</Text>
-                <TouchableOpacity onPress={() => setShowDatePicker(false)}>
-                  <Ionicons name="close-circle" size={28} color="#666" />
+                <Text style={styles.datePickerTitle}>Select Appointment Date</Text>
+                <TouchableOpacity 
+                  onPress={() => setShowDatePicker(false)}
+                  style={styles.closeButton}
+                >
+                  <Ionicons name="close-circle" size={32} color="#666" />
                 </TouchableOpacity>
               </View>
               
-              <View style={styles.datePickerWrapper}>
+              <View style={styles.calendarWrapper}>
                 <DateTimePicker
                   value={selectedDate || new Date()}
                   mode="date"
-                  display={Platform.OS === 'ios' ? 'inline' : 'default'}
+                  display="default"
                   onChange={handleDateChange}
                   minimumDate={new Date()}
-                  textColor="#333"
-                  style={styles.datePicker}
                 />
               </View>
+              
+              {Platform.OS === 'ios' && selectedDate && (
+                <View style={styles.selectedDateDisplay}>
+                  <Ionicons name="calendar-outline" size={20} color="#2196F3" />
+                  <Text style={styles.selectedDateText}>
+                    {selectedDate.toLocaleDateString('en-US', { 
+                      weekday: 'long',
+                      month: 'long', 
+                      day: 'numeric', 
+                      year: 'numeric' 
+                    })}
+                  </Text>
+                </View>
+              )}
               
               {Platform.OS === 'ios' && (
                 <TouchableOpacity 
                   style={styles.confirmButton}
                   onPress={confirmIOSDate}
                 >
+                  <Ionicons name="checkmark-circle" size={24} color="#fff" />
                   <Text style={styles.confirmButtonText}>Confirm Date</Text>
                 </TouchableOpacity>
               )}
-            </TouchableOpacity>
-          </TouchableOpacity>
+            </View>
+          </View>
         </Modal>
       )}
 
