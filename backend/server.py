@@ -109,6 +109,10 @@ class JobComment(BaseModel):
 class JobCommentCreate(BaseModel):
     comment: str
 
+class TechnicianCreate(BaseModel):
+    name: str
+    email: str
+
 # Auth Helper Functions
 async def get_current_user(request: Request) -> Optional[User]:
     # Try to get session_token from Authorization header first
