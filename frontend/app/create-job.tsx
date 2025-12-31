@@ -308,20 +308,23 @@ export default function CreateJobScreen() {
             <Text style={styles.label}>Appointment Time</Text>
             <TouchableOpacity
               style={styles.dateButton}
-              onPress={() => setShowDatePicker(true)}
+              onPress={() => {
+                setAppointmentTime(appointmentTime || new Date());
+                setShowDatePicker(true);
+              }}
             >
               <Ionicons name="calendar" size={20} color="#2196F3" />
               <Text style={styles.dateButtonText}>
                 {appointmentTime
                   ? appointmentTime.toLocaleString()
-                  : 'Select date and time'}
+                  : 'Tap to select date and time'}
               </Text>
             </TouchableOpacity>
             {showDatePicker && (
               <DateTimePicker
                 value={appointmentTime || new Date()}
                 mode="datetime"
-                display="default"
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                 onChange={(event, selectedDate) => {
                   setShowDatePicker(Platform.OS === 'ios');
                   if (selectedDate) {
