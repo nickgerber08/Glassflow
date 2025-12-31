@@ -904,4 +904,118 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  // Calendar Modal Styles
+  calendarModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  calendarModalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    width: '100%',
+    maxWidth: 380,
+    padding: 16,
+  },
+  calendarModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+    marginBottom: 12,
+  },
+  calendarModalTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#333',
+  },
+  calendarMonthNav: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  calendarNavBtn: {
+    padding: 8,
+  },
+  calendarMonthText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+  },
+  quickJumpRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 12,
+    marginBottom: 16,
+  },
+  quickJumpBtn: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: '#E3F2FD',
+    borderRadius: 20,
+  },
+  quickJumpText: {
+    fontSize: 14,
+    color: '#2196F3',
+    fontWeight: '600',
+  },
+  calendarWeekDays: {
+    flexDirection: 'row',
+    marginBottom: 8,
+  },
+  calendarWeekDayText: {
+    flex: 1,
+    textAlign: 'center',
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#999',
+  },
+  calendarGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  calendarDayCell: {
+    width: '14.28%',
+    aspectRatio: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  calendarDaySelected: {
+    backgroundColor: '#2196F3',
+    borderRadius: 20,
+  },
+  calendarDayToday: {
+    borderWidth: 2,
+    borderColor: '#2196F3',
+    borderRadius: 20,
+  },
+  calendarDayText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  calendarDayTextSelected: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  calendarDayTextToday: {
+    color: '#2196F3',
+    fontWeight: 'bold',
+  },
+  calendarDayDot: {
+    position: 'absolute',
+    bottom: 4,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#2196F3',
+  },
+  calendarDayDotSelected: {
+    backgroundColor: '#fff',
+  },
 });
