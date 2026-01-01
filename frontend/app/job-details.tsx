@@ -446,8 +446,8 @@ export default function JobDetailsScreen() {
                     </Text>
                     <Text style={styles.timeWindowText}>
                       {new Date(job.appointment_time).getHours() < 12 
-                        ? '9:00 AM - 12:00 PM' 
-                        : '1:00 PM - 4:00 PM'}
+                        ? '9-12 AM' 
+                        : '1-4 PM'}
                     </Text>
                   </View>
                 ) : (
@@ -464,6 +464,155 @@ export default function JobDetailsScreen() {
             )}
           </View>
         </View>
+
+        {/* Scheduling Card - Reschedule and 1st Stop */}
+        <View style={styles.schedulingCard}>
+          <View style={styles.schedulingHeader}>
+            <Ionicons name="calendar-outline" size={24} color="#2196F3" />
+            <Text style={styles.schedulingTitle}>Scheduling</Text>
+          </View>
+
+          {/* Reschedule Button */}
+          <TouchableOpacity 
+            style={styles.rescheduleButton}
+            onPress={() => setShowRescheduleCalendar(true)}
+          >
+            <Ionicons name="calendar" size={20} color="#2196F3" />
+            <View style={styles.rescheduleInfo}>
+              <Text style={styles.rescheduleLabel}>Appointment Date</Text>
+              <Text style={styles.rescheduleDate}>
+                {job.appointment_time 
+                  ? format(parseISO(job.appointment_time), 'EEE, MMM dd, yyyy')
+                  : 'Not scheduled'}
+              </Text>
+            </View>
+            <Text style={styles.rescheduleAction}>Change</Text>
+          </TouchableOpacity>
+
+          {/* Time Slot Selection */}
+          <View style={styles.timeSlotSection}>
+            <Text style={styles.timeSlotLabel}>Time Window</Text>
+            <View style={styles.timeSlotButtons}>
+              <TouchableOpacity
+                style={[
+                  styles.timeSlotBtn,
+                  selectedTimeSlot === 'morning' && styles.timeSlotBtnActive
+                ]}
+                onPress={() => {
+                  setSelectedTimeSlot('morning');
+                  if (job.appointment_time) {
+                    const date = new Date(job.appointment_time);
+                    date.setHours(9, 0, 0, 0);
+                    setJob({ ...job, appointment_time: date.toISOString() });
+                    setHasChanges(true);
+                  }
+                }}
+              >
+                <Text style={[
+                  styles.timeSlotBtnText,
+                  selectedTimeSlot === 'morning' && styles.timeSlotBtnTextActive
+                ]}>9-12 AM</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.timeSlotBtn,
+                  selectedTimeSlot === 'afternoon' && styles.timeSlotBtnActive
+                ]}
+                onPress={() => {
+                  setSelectedTimeSlot('afternoon');
+                  if (job.appointment_time) {
+                    const date = new Date(job.appointment_time);
+                    date.setHours(13, 0, 0, 0);
+                    setJob({ ...job, appointment_time: date.toISOString() });
+                    setHasChanges(true);
+                  }
+                }}
+              >
+                <Text style={[
+                  styles.timeSlotBtnText,
+                  selectedTimeSlot === 'afternoon' && styles.timeSlotBtnTextActive
+                ]}>1-4 PM</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* 1st Stop Toggle */}
+          <TouchableOpacity 
+            style={[
+              styles.firstStopToggle,
+              isFirstStop && styles.firstStopToggleActive
+            ]}
+            onPress={toggleFirstStop}
+          >
+            <View style={styles.firstStopLeft}>
+              <Ionicons 
+                name={isFirstStop ? "flag" : "flag-outline"} 
+                size={24} 
+                color={isFirstStop ? "#fff" : "#E53935"} 
+              />
+              <View>
+                <Text style={[
+                  styles.firstStopTitle,
+                  isFirstStop && styles.firstStopTitleActive
+                ]}>1ST STOP</Text>
+                <Text style={[
+                  styles.firstStopSubtitle,
+                  isFirstStop && styles.firstStopSubtitleActive
+                ]}>
+                  {isFirstStop ? 'This is a first stop job' : 'Mark as first stop of the day'}
+                </Text>
+              </View>
+            </View>
+            <View style={[
+              styles.firstStopCheckbox,
+              isFirstStop && styles.firstStopCheckboxActive
+            ]}>
+              {isFirstStop && <Ionicons name="checkmark" size={18} color="#fff" />}
+            </View>
+          </TouchableOpacity>
+          
+          <Text style={styles.firstStopCounter}>
+            {firstStopCount}/3 first stops scheduled for this day
+          </Text>
+        </View>
+
+        {/* Reschedule Date Picker Modal */}
+        {showRescheduleCalendar && (
+          <Modal
+            visible={showRescheduleCalendar}
+            animationType="slide"
+            transparent={true}
+            onRequestClose={() => setShowRescheduleCalendar(false)}
+          >
+            <View style={styles.rescheduleModalOverlay}>
+              <View style={styles.rescheduleModalContent}>
+                <View style={styles.rescheduleModalHeader}>
+                  <Text style={styles.rescheduleModalTitle}>Reschedule Job</Text>
+                  <TouchableOpacity onPress={() => setShowRescheduleCalendar(false)}>
+                    <Ionicons name="close" size={28} color="#333" />
+                  </TouchableOpacity>
+                </View>
+                
+                <DateTimePicker
+                  value={job.appointment_time ? new Date(job.appointment_time) : new Date()}
+                  mode="date"
+                  display="inline"
+                  onChange={(event, date) => {
+                    if (date) {
+                      // Preserve the time slot (morning or afternoon)
+                      const hour = selectedTimeSlot === 'morning' ? 9 : 13;
+                      date.setHours(hour, 0, 0, 0);
+                      setJob({ ...job, appointment_time: date.toISOString() });
+                      setHasChanges(true);
+                      checkFirstStopCount(date.toISOString());
+                      setShowRescheduleCalendar(false);
+                    }
+                  }}
+                />
+              </View>
+            </View>
+          </Modal>
+        )}
 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Update Status</Text>
