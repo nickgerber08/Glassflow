@@ -500,6 +500,7 @@ async def create_job(job_data: JobCreate, request: Request):
         "omega_invoice": job_data.omega_invoice,
         "payment_type": job_data.payment_type,
         "amount_to_collect": job_data.amount_to_collect,
+        "is_first_stop": job_data.is_first_stop,
         "job_type": job_data.job_type,
         "status": job_data.status,
         "assigned_to": job_data.assigned_to,
@@ -512,6 +513,21 @@ async def create_job(job_data: JobCreate, request: Request):
         "created_at": now,
         "updated_at": now
     }
+    
+    # Check first stop limit if marking as first stop
+    if job_data.is_first_stop and job_data.appointment_time:
+        # Get start and end of the appointment day
+        apt_date = job_data.appointment_time.replace(hour=0, minute=0, second=0, microsecond=0)
+        apt_date_end = apt_date + timedelta(days=1)
+        
+        # Count existing first stops for that day
+        first_stop_count = await db.jobs.count_documents({
+            "is_first_stop": True,
+            "appointment_time": {"$gte": apt_date, "$lt": apt_date_end}
+        })
+        
+        if first_stop_count >= 3:
+            raise HTTPException(status_code=400, detail="Maximum 3 first stops already scheduled for this day")
     
     await db.jobs.insert_one(job)
     
@@ -535,6 +551,26 @@ async def create_job(job_data: JobCreate, request: Request):
     )
     
     return Job(**job)
+
+# Endpoint to check first stop count for a given date
+@api_router.get("/jobs/first-stop-count")
+async def get_first_stop_count(request: Request, date: str):
+    """Get count of first stops for a given date"""
+    await require_auth(request)
+    
+    try:
+        target_date = datetime.fromisoformat(date.replace('Z', '+00:00'))
+        day_start = target_date.replace(hour=0, minute=0, second=0, microsecond=0)
+        day_end = day_start + timedelta(days=1)
+        
+        count = await db.jobs.count_documents({
+            "is_first_stop": True,
+            "appointment_time": {"$gte": day_start, "$lt": day_end}
+        })
+        
+        return {"count": count, "max": 3, "can_add": count < 3}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @api_router.get("/jobs", response_model=List[Job])
 async def get_jobs(request: Request, status: Optional[str] = None):
