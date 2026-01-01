@@ -735,6 +735,135 @@ async def get_comments(job_id: str, request: Request):
     
     return [JobComment(**comment) for comment in comments]
 
+# ============== CUSTOMER ENDPOINTS ==============
+
+@api_router.post("/customers", response_model=Customer)
+async def create_customer(customer_data: CustomerCreate, request: Request):
+    """Create a new saved customer"""
+    user = await require_auth(request)
+    
+    # Check if customer with same name and address already exists
+    existing = await db.customers.find_one({
+        "name": customer_data.name,
+        "address": customer_data.address
+    })
+    
+    if existing:
+        # Update the existing customer and return it
+        await db.customers.update_one(
+            {"customer_id": existing["customer_id"]},
+            {"$set": {
+                "phone": customer_data.phone,
+                "lat": customer_data.lat,
+                "lng": customer_data.lng,
+                "updated_at": datetime.now(timezone.utc)
+            }}
+        )
+        updated = await db.customers.find_one({"customer_id": existing["customer_id"]}, {"_id": 0})
+        return Customer(**updated)
+    
+    now = datetime.now(timezone.utc)
+    customer = Customer(
+        customer_id=f"cust_{uuid.uuid4().hex[:12]}",
+        name=customer_data.name,
+        phone=customer_data.phone,
+        address=customer_data.address,
+        lat=customer_data.lat,
+        lng=customer_data.lng,
+        usage_count=0,
+        created_at=now,
+        updated_at=now
+    )
+    
+    await db.customers.insert_one(customer.model_dump())
+    return customer
+
+@api_router.get("/customers", response_model=List[Customer])
+async def get_customers(request: Request, search: Optional[str] = None):
+    """Get all saved customers, optionally filtered by search query"""
+    await require_auth(request)
+    
+    query = {}
+    if search:
+        # Search by name or address (case-insensitive)
+        query = {
+            "$or": [
+                {"name": {"$regex": search, "$options": "i"}},
+                {"address": {"$regex": search, "$options": "i"}}
+            ]
+        }
+    
+    customers = await db.customers.find(
+        query,
+        {"_id": 0}
+    ).sort("name", 1).to_list(500)
+    
+    return [Customer(**c) for c in customers]
+
+@api_router.get("/customers/frequent", response_model=List[Customer])
+async def get_frequent_customers(request: Request, limit: int = 5):
+    """Get most frequently used customers"""
+    await require_auth(request)
+    
+    customers = await db.customers.find(
+        {},
+        {"_id": 0}
+    ).sort("usage_count", -1).limit(limit).to_list(limit)
+    
+    return [Customer(**c) for c in customers]
+
+@api_router.post("/customers/{customer_id}/increment-usage")
+async def increment_customer_usage(customer_id: str, request: Request):
+    """Increment usage count when customer is used for a job"""
+    await require_auth(request)
+    
+    result = await db.customers.update_one(
+        {"customer_id": customer_id},
+        {
+            "$inc": {"usage_count": 1},
+            "$set": {"updated_at": datetime.now(timezone.utc)}
+        }
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    
+    return {"success": True}
+
+@api_router.patch("/customers/{customer_id}", response_model=Customer)
+async def update_customer(customer_id: str, customer_data: CustomerUpdate, request: Request):
+    """Update a saved customer"""
+    await require_auth(request)
+    
+    update_data = {k: v for k, v in customer_data.model_dump().items() if v is not None}
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No update data provided")
+    
+    update_data["updated_at"] = datetime.now(timezone.utc)
+    
+    result = await db.customers.update_one(
+        {"customer_id": customer_id},
+        {"$set": update_data}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    
+    updated = await db.customers.find_one({"customer_id": customer_id}, {"_id": 0})
+    return Customer(**updated)
+
+@api_router.delete("/customers/{customer_id}")
+async def delete_customer(customer_id: str, request: Request):
+    """Delete a saved customer"""
+    await require_auth(request)
+    
+    result = await db.customers.delete_one({"customer_id": customer_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    
+    return {"success": True}
+
 # Socket.IO events disabled for now
 # @sio.event
 # async def connect(sid, environ):
