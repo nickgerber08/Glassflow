@@ -19,6 +19,14 @@ import { useJobStore } from '../../stores/jobStore';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
+// Default technicians list - same as other pages
+const DEFAULT_TECHNICIANS = [
+  { name: 'Enrique', user_id: 'default_enrique' },
+  { name: 'Oscar', user_id: 'default_oscar' },
+  { name: 'Ricardo', user_id: 'default_ricardo' },
+  { name: 'Alfredo', user_id: 'default_alfredo' },
+];
+
 interface Distributor {
   distributor_id: string;
   name: string;
@@ -33,6 +41,8 @@ interface PartJob {
   vehicle_make: string;
   vehicle_model: string;
   distributor: string | null;
+  pickup_tech: string | null;
+  pickup_tech_name: string | null;
   status: string;
   assigned_to_name?: string;
 }
