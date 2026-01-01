@@ -111,6 +111,73 @@ export default function CreateJobScreen() {
     }
   };
 
+  const fetchSavedCustomers = async (search?: string) => {
+    try {
+      const url = search 
+        ? `${BACKEND_URL}/api/customers?search=${encodeURIComponent(search)}`
+        : `${BACKEND_URL}/api/customers`;
+      
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${sessionToken}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSavedCustomers(data);
+      }
+    } catch (error) {
+      console.error('Error fetching customers:', error);
+    }
+  };
+
+  const fetchFrequentCustomers = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/customers/frequent?limit=5`, {
+        headers: {
+          Authorization: `Bearer ${sessionToken}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setFrequentCustomers(data);
+      }
+    } catch (error) {
+      console.error('Error fetching frequent customers:', error);
+    }
+  };
+
+  const selectCustomer = (customer: any) => {
+    setSelectedCustomer(customer);
+    setCustomerName(customer.name);
+    setPhone(customer.phone);
+    setAddress(customer.address);
+    setLocation({ lat: customer.lat, lng: customer.lng });
+    setIsNewCustomer(false);
+    setShowCustomerPicker(false);
+    setCustomerSearch('');
+  };
+
+  const clearSelectedCustomer = () => {
+    setSelectedCustomer(null);
+    setCustomerName('');
+    setPhone('');
+    setAddress('');
+    setIsNewCustomer(true);
+    setSaveCustomerToggle(false);
+  };
+
+  const handleCustomerSearch = (text: string) => {
+    setCustomerSearch(text);
+    if (text.length >= 2) {
+      fetchSavedCustomers(text);
+    } else if (text.length === 0) {
+      fetchSavedCustomers();
+    }
+  };
+
   const getCurrentLocation = async () => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
