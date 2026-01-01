@@ -117,11 +117,28 @@ export default function PartsScreen() {
     }
   }, [sessionToken]);
 
+  const fetchUsers = useCallback(async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/users`, {
+        headers: {
+          Authorization: `Bearer ${sessionToken}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setAllTechnicians([...DEFAULT_TECHNICIANS, ...data]);
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  }, [sessionToken]);
+
   const loadData = useCallback(async () => {
     setLoading(true);
-    await Promise.all([fetchDailyParts(), fetchDistributors()]);
+    await Promise.all([fetchDailyParts(), fetchDistributors(), fetchUsers()]);
     setLoading(false);
-  }, [fetchDailyParts, fetchDistributors]);
+  }, [fetchDailyParts, fetchDistributors, fetchUsers]);
 
   useEffect(() => {
     loadData();
