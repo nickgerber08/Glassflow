@@ -252,6 +252,14 @@ export default function JobsScreen() {
         </View>
       </View>
 
+      {/* 1ST STOP Badge - Show prominently if marked as first stop */}
+      {item.is_first_stop && (
+        <View style={styles.firstStopBanner}>
+          <Ionicons name="flag" size={16} color="#fff" />
+          <Text style={styles.firstStopText}>1ST STOP</Text>
+        </View>
+      )}
+
       <View style={styles.jobDetails}>
         <View style={styles.detailRow}>
           <Ionicons name="location" size={16} color="#666" />
