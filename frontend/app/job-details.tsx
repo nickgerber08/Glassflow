@@ -189,6 +189,19 @@ export default function JobDetailsScreen() {
     setHasChanges(true);
   };
 
+  const toggleFirstStop = async () => {
+    // If trying to enable, check limit
+    if (!isFirstStop) {
+      // Check if we're at max (3) and this job isn't already counted
+      if (firstStopCount >= 3) {
+        Alert.alert('Limit Reached', 'Maximum 3 first stops already scheduled for this day. Remove a first stop from another job first.');
+        return;
+      }
+    }
+    setIsFirstStop(!isFirstStop);
+    setHasChanges(true);
+  };
+
   const saveChanges = async () => {
     try {
       setLoading(true);
@@ -206,7 +219,8 @@ export default function JobDetailsScreen() {
           part_number: partNumber || null,
           omega_invoice: omegaInvoice || null,
           payment_type: paymentType || null,
-          amount_to_collect: paymentType === 'collect' && amountToCollect ? parseFloat(amountToCollect) : null
+          amount_to_collect: paymentType === 'collect' && amountToCollect ? parseFloat(amountToCollect) : null,
+          is_first_stop: isFirstStop
         }),
       });
 
