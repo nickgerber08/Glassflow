@@ -152,6 +152,32 @@ class TechnicianCreate(BaseModel):
     name: str
     email: str
 
+# Customer models for saved customers feature
+class Customer(BaseModel):
+    customer_id: str
+    name: str
+    phone: str
+    address: str
+    lat: float
+    lng: float
+    usage_count: int = 0  # Track how often this customer is used
+    created_at: datetime
+    updated_at: datetime
+
+class CustomerCreate(BaseModel):
+    name: str
+    phone: str
+    address: str
+    lat: float
+    lng: float
+
+class CustomerUpdate(BaseModel):
+    name: Optional[str] = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
+    lat: Optional[float] = None
+    lng: Optional[float] = None
+
 # Auth Helper Functions
 async def get_current_user(request: Request) -> Optional[User]:
     # Try to get session_token from Authorization header first
