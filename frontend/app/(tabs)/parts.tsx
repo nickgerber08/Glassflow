@@ -71,13 +71,16 @@ export default function PartsScreen() {
   const [partsData, setPartsData] = useState<DailyPartsData | null>(null);
   const [distributors, setDistributors] = useState<Distributor[]>([]);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['unassigned']));
+  const [allTechnicians, setAllTechnicians] = useState<any[]>(DEFAULT_TECHNICIANS);
   
   // Modal states
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showDistributorModal, setShowDistributorModal] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
+  const [showTechPickerModal, setShowTechPickerModal] = useState(false);
   const [newDistributorName, setNewDistributorName] = useState('');
   const [selectedJobForAssign, setSelectedJobForAssign] = useState<PartJob | null>(null);
+  const [selectedJobForTech, setSelectedJobForTech] = useState<PartJob | null>(null);
 
   const fetchDailyParts = useCallback(async () => {
     try {
