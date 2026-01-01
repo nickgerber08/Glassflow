@@ -257,6 +257,42 @@ export default function CreateJobScreen() {
     setLoading(true);
 
     try {
+      // If using existing customer, increment usage count
+      if (selectedCustomer) {
+        try {
+          await fetch(`${BACKEND_URL}/api/customers/${selectedCustomer.customer_id}/increment-usage`, {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${sessionToken}`,
+            },
+          });
+        } catch (e) {
+          console.error('Error incrementing customer usage:', e);
+        }
+      }
+      
+      // If saving new customer
+      if (isNewCustomer && saveCustomerToggle && customerName && phone && address) {
+        try {
+          await fetch(`${BACKEND_URL}/api/customers`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${sessionToken}`,
+            },
+            body: JSON.stringify({
+              name: customerName,
+              phone: phone,
+              address: address,
+              lat: location.lat,
+              lng: location.lng,
+            }),
+          });
+        } catch (e) {
+          console.error('Error saving customer:', e);
+        }
+      }
+
       const appointmentDateTime = getAppointmentDateTime();
       
       const jobData = {
