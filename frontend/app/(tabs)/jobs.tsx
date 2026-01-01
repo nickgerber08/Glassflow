@@ -214,30 +214,139 @@ export default function JobsScreen() {
     setSelectedDate(new Date());
   };
 
-  const renderJob = ({ item }: { item: any }) => (
-    <TouchableOpacity
-      style={styles.jobCard}
-      onPress={() => {
-        setSelectedJob(item);
-        router.push('/job-details');
-      }}
-    >
-      <View style={styles.jobHeader}>
-        <View style={styles.jobTitleRow}>
-          <Ionicons name="car-sport" size={20} color="#2196F3" />
-          <Text style={styles.jobTitle} numberOfLines={1}>
-            {item.customer_name}
-          </Text>
-          {item.part_number && (
-            <View style={styles.partNumberBadge}>
-              <Text style={styles.partNumberText}>{item.part_number}</Text>
-            </View>
-          )}
-          {/* Payment Badge - shows right next to part number */}
-          {item.payment_type === 'collect' && item.amount_to_collect && (
-            <View style={styles.collectBadge}>
-              <Text style={styles.collectBadgeText}>${item.amount_to_collect.toFixed(2)}</Text>
-            </View>
+  // Update job status via swipe
+  const updateJobStatusViaSwipe = async (jobId: string, newStatus: string) => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/jobs/${jobId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${sessionToken}`,
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (response.ok) {
+        // Update local state
+        const updatedJobs = jobs.map(job => 
+          job.job_id === jobId ? { ...job, status: newStatus } : job
+        );
+        setJobs(updatedJobs);
+      }
+    } catch (error) {
+      console.error('Error updating job status:', error);
+      Alert.alert('Error', 'Failed to update job status');
+    }
+  };
+
+  // Swipe right action - In Progress
+  const renderRightActions = (progress: Animated.AnimatedInterpolation<number>, dragX: Animated.AnimatedInterpolation<number>, item: any) => {
+    const scale = dragX.interpolate({
+      inputRange: [-100, 0],
+      outputRange: [1, 0.5],
+      extrapolate: 'clamp',
+    });
+
+    // Don't show if already completed
+    if (item.status === 'completed') {
+      return null;
+    }
+
+    return (
+      <TouchableOpacity 
+        style={styles.swipeActionRight}
+        onPress={() => updateJobStatusViaSwipe(item.job_id, 'completed')}
+      >
+        <Animated.View style={[styles.swipeActionContent, { transform: [{ scale }] }]}>
+          <Ionicons name="checkmark-circle" size={32} color="#fff" />
+          <Text style={styles.swipeActionText}>COMPLETE</Text>
+        </Animated.View>
+      </TouchableOpacity>
+    );
+  };
+
+  // Swipe left action - In Progress
+  const renderLeftActions = (progress: Animated.AnimatedInterpolation<number>, dragX: Animated.AnimatedInterpolation<number>, item: any) => {
+    const scale = dragX.interpolate({
+      inputRange: [0, 100],
+      outputRange: [0.5, 1],
+      extrapolate: 'clamp',
+    });
+
+    // Don't show if already in progress or completed
+    if (item.status === 'in_progress' || item.status === 'completed') {
+      return null;
+    }
+
+    return (
+      <TouchableOpacity 
+        style={styles.swipeActionLeft}
+        onPress={() => updateJobStatusViaSwipe(item.job_id, 'in_progress')}
+      >
+        <Animated.View style={[styles.swipeActionContent, { transform: [{ scale }] }]}>
+          <Ionicons name="construct" size={32} color="#fff" />
+          <Text style={styles.swipeActionText}>IN PROGRESS</Text>
+        </Animated.View>
+      </TouchableOpacity>
+    );
+  };
+
+  const renderJob = ({ item }: { item: any }) => {
+    const swipeableRef = useRef<Swipeable>(null);
+
+    const onSwipeLeft = () => {
+      if (item.status !== 'in_progress' && item.status !== 'completed') {
+        updateJobStatusViaSwipe(item.job_id, 'in_progress');
+      }
+      swipeableRef.current?.close();
+    };
+
+    const onSwipeRight = () => {
+      if (item.status !== 'completed') {
+        updateJobStatusViaSwipe(item.job_id, 'completed');
+      }
+      swipeableRef.current?.close();
+    };
+
+    return (
+      <Swipeable
+        ref={swipeableRef}
+        renderLeftActions={(progress, dragX) => renderLeftActions(progress, dragX, item)}
+        renderRightActions={(progress, dragX) => renderRightActions(progress, dragX, item)}
+        onSwipeableOpen={(direction) => {
+          if (direction === 'left') {
+            onSwipeLeft();
+          } else if (direction === 'right') {
+            onSwipeRight();
+          }
+        }}
+        overshootLeft={false}
+        overshootRight={false}
+        friction={2}
+      >
+        <TouchableOpacity
+          style={styles.jobCard}
+          onPress={() => {
+            setSelectedJob(item);
+            router.push('/job-details');
+          }}
+        >
+          <View style={styles.jobHeader}>
+            <View style={styles.jobTitleRow}>
+              <Ionicons name="car-sport" size={20} color="#2196F3" />
+              <Text style={styles.jobTitle} numberOfLines={1}>
+                {item.customer_name}
+              </Text>
+              {item.part_number && (
+                <View style={styles.partNumberBadge}>
+                  <Text style={styles.partNumberText}>{item.part_number}</Text>
+                </View>
+              )}
+              {/* Payment Badge - shows right next to part number */}
+              {item.payment_type === 'collect' && item.amount_to_collect && (
+                <View style={styles.collectBadge}>
+                  <Text style={styles.collectBadgeText}>${item.amount_to_collect.toFixed(2)}</Text>
+                </View>
           )}
           {item.payment_type === 'dealership_po' && (
             <View style={styles.poBadge}>
