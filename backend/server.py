@@ -104,6 +104,7 @@ class JobCreate(BaseModel):
     omega_invoice: Optional[str] = None
     payment_type: Optional[str] = None  # 'collect' or 'dealership_po'
     amount_to_collect: Optional[float] = None
+    is_first_stop: bool = False
     job_type: str
     status: str = "pending"
     assigned_to: Optional[str] = None
@@ -127,6 +128,7 @@ class JobUpdate(BaseModel):
     omega_invoice: Optional[str] = None
     payment_type: Optional[str] = None
     amount_to_collect: Optional[float] = None
+    is_first_stop: Optional[bool] = None
     job_type: Optional[str] = None
     status: Optional[str] = None
     assigned_to: Optional[str] = None
