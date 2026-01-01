@@ -406,8 +406,10 @@ export default function JobsScreen() {
           </View>
         )}
       </View>
-    </TouchableOpacity>
-  );
+        </TouchableOpacity>
+      </Swipeable>
+    );
+  };
 
   if (loading) {
     return (
