@@ -605,6 +605,32 @@ async def update_job(job_id: str, job_update: JobUpdate, request: Request):
     if not update_data:
         raise HTTPException(status_code=400, detail="No fields to update")
     
+    # Get the current job to check first stop logic
+    current_job = await db.jobs.find_one({"job_id": job_id}, {"_id": 0})
+    if not current_job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    # Check first stop limit when marking as first stop
+    if update_data.get("is_first_stop") == True and not current_job.get("is_first_stop"):
+        # Determine the appointment date (use update or existing)
+        apt_time = update_data.get("appointment_time") or current_job.get("appointment_time")
+        if apt_time:
+            if isinstance(apt_time, str):
+                apt_time = datetime.fromisoformat(apt_time.replace('Z', '+00:00'))
+            
+            day_start = apt_time.replace(hour=0, minute=0, second=0, microsecond=0)
+            day_end = day_start + timedelta(days=1)
+            
+            # Count existing first stops for that day (excluding this job)
+            first_stop_count = await db.jobs.count_documents({
+                "is_first_stop": True,
+                "job_id": {"$ne": job_id},
+                "appointment_time": {"$gte": day_start, "$lt": day_end}
+            })
+            
+            if first_stop_count >= 3:
+                raise HTTPException(status_code=400, detail="Maximum 3 first stops already scheduled for this day")
+    
     # Get assigned user name if assigned_to is being updated
     if "assigned_to" in update_data and update_data["assigned_to"]:
         assigned_user = await db.users.find_one(
