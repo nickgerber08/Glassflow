@@ -1112,4 +1112,97 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  // Part item right side styles
+  partItemRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  techBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  techBadgeAssigned: {
+    backgroundColor: '#2196F3',
+  },
+  techBadgeUnassigned: {
+    backgroundColor: '#f0f0f0',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderStyle: 'dashed',
+  },
+  techBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  // Tech Picker Modal styles
+  techPickerModalContent: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: 16,
+    paddingBottom: 40,
+    maxHeight: '70%',
+  },
+  currentTechLabel: {
+    fontSize: 12,
+    color: '#2196F3',
+    marginTop: 6,
+    fontWeight: '500',
+  },
+  techPickerList: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+  },
+  techOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f9f9f9',
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 10,
+    gap: 14,
+  },
+  techOptionActive: {
+    backgroundColor: '#2196F3',
+  },
+  techOptionBadge: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#E3F2FD',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  techOptionBadgeActive: {
+    backgroundColor: '#1976D2',
+  },
+  techOptionBadgeUnassigned: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#f0f0f0',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  techOptionBadgeText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#2196F3',
+  },
+  techOptionBadgeTextActive: {
+    color: '#fff',
+  },
+  techOptionText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#333',
+  },
+  techOptionTextActive: {
+    color: '#fff',
+  },
 });
