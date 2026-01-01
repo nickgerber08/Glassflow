@@ -1217,26 +1217,85 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-  techBadge: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
+  // Tech Label styles (text-based, not badge)
+  techLabel: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
   },
-  techBadgeAssigned: {
-    backgroundColor: '#2196F3',
+  techLabelAssigned: {
+    backgroundColor: '#E3F2FD',
   },
-  techBadgeUnassigned: {
-    backgroundColor: '#f0f0f0',
+  techLabelUnassigned: {
+    backgroundColor: '#f5f5f5',
     borderWidth: 1,
     borderColor: '#ddd',
     borderStyle: 'dashed',
   },
-  techBadgeText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#fff',
+  techLabelText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  techLabelTextAssigned: {
+    color: '#1976D2',
+  },
+  techLabelTextUnassigned: {
+    color: '#999',
+  },
+  // Tech Filter styles
+  techFilterContainer: {
+    marginBottom: 12,
+    position: 'relative',
+    zIndex: 100,
+  },
+  techFilterButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E3F2FD',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    gap: 8,
+  },
+  techFilterButtonText: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1976D2',
+  },
+  techFilterDropdown: {
+    position: 'absolute',
+    top: 48,
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
+    zIndex: 1000,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  techFilterOption: {
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  techFilterOptionActive: {
+    backgroundColor: '#E3F2FD',
+  },
+  techFilterOptionText: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: '#333',
+  },
+  techFilterOptionTextActive: {
+    color: '#1976D2',
+    fontWeight: '600',
   },
   // Tech Picker Modal styles
   techPickerModalContent: {
