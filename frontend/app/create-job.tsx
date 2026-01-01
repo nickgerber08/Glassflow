@@ -369,15 +369,90 @@ export default function CreateJobScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
+        {/* Customer Selection Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Customer Information</Text>
+          <Text style={styles.sectionTitle}>Customer</Text>
+          
+          {/* Show selected customer or selector button */}
+          {selectedCustomer ? (
+            <View style={styles.selectedCustomerCard}>
+              <View style={styles.selectedCustomerInfo}>
+                <Ionicons name="business" size={24} color="#2196F3" />
+                <View style={styles.selectedCustomerText}>
+                  <Text style={styles.selectedCustomerName}>{selectedCustomer.name}</Text>
+                  <Text style={styles.selectedCustomerDetail}>{selectedCustomer.phone}</Text>
+                  <Text style={styles.selectedCustomerDetail} numberOfLines={1}>{selectedCustomer.address}</Text>
+                </View>
+              </View>
+              <TouchableOpacity onPress={clearSelectedCustomer} style={styles.clearCustomerBtn}>
+                <Ionicons name="close-circle" size={24} color="#F44336" />
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity 
+              style={styles.customerSelectorBtn}
+              onPress={() => setShowCustomerPicker(true)}
+            >
+              <Ionicons name="search" size={20} color="#2196F3" />
+              <Text style={styles.customerSelectorText}>Search saved customers...</Text>
+              <Ionicons name="chevron-down" size={20} color="#666" />
+            </TouchableOpacity>
+          )}
+
+          {/* Frequent Customers Quick Select */}
+          {!selectedCustomer && frequentCustomers.length > 0 && (
+            <View style={styles.frequentSection}>
+              <Text style={styles.frequentLabel}>Most Used</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.frequentScroll}>
+                {frequentCustomers.map((customer) => (
+                  <TouchableOpacity
+                    key={customer.customer_id}
+                    style={styles.frequentChip}
+                    onPress={() => selectCustomer(customer)}
+                  >
+                    <Ionicons name="star" size={14} color="#FF9800" />
+                    <Text style={styles.frequentChipText} numberOfLines={1}>{customer.name}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          )}
+
+          {/* New Customer Toggle */}
+          {!selectedCustomer && (
+            <TouchableOpacity 
+              style={styles.newCustomerToggle}
+              onPress={() => setIsNewCustomer(!isNewCustomer)}
+            >
+              <Ionicons 
+                name={isNewCustomer ? "checkbox" : "square-outline"} 
+                size={24} 
+                color={isNewCustomer ? "#2196F3" : "#666"} 
+              />
+              <Text style={styles.newCustomerToggleText}>Enter new customer details</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Customer Information - Manual Entry */}
+        {(isNewCustomer || selectedCustomer) && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              {selectedCustomer ? 'Customer Details (from saved)' : 'New Customer Details'}
+            </Text>
           
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Customer Name *</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, selectedCustomer && styles.inputDisabled]}
               value={customerName}
-              onChangeText={setCustomerName}
+              onChangeText={(text) => {
+                setCustomerName(text);
+                if (selectedCustomer) {
+                  setSelectedCustomer(null);
+                  setIsNewCustomer(true);
+                }
+              }}
               placeholder="Enter customer name"
               placeholderTextColor="#999"
             />
@@ -386,9 +461,15 @@ export default function CreateJobScreen() {
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Phone Number *</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, selectedCustomer && styles.inputDisabled]}
               value={phone}
-              onChangeText={setPhone}
+              onChangeText={(text) => {
+                setPhone(text);
+                if (selectedCustomer) {
+                  setSelectedCustomer(null);
+                  setIsNewCustomer(true);
+                }
+              }}
               placeholder="Enter phone number"
               placeholderTextColor="#999"
               keyboardType="phone-pad"
@@ -398,16 +479,38 @@ export default function CreateJobScreen() {
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Address *</Text>
             <TextInput
-              style={[styles.input, styles.textArea]}
+              style={[styles.input, styles.textArea, selectedCustomer && styles.inputDisabled]}
               value={address}
-              onChangeText={setAddress}
+              onChangeText={(text) => {
+                setAddress(text);
+                if (selectedCustomer) {
+                  setSelectedCustomer(null);
+                  setIsNewCustomer(true);
+                }
+              }}
               placeholder="Enter job address"
               placeholderTextColor="#999"
               multiline
               numberOfLines={3}
             />
           </View>
+
+          {/* Save customer toggle for new customers */}
+          {isNewCustomer && !selectedCustomer && (
+            <TouchableOpacity 
+              style={styles.saveCustomerToggle}
+              onPress={() => setSaveCustomerToggle(!saveCustomerToggle)}
+            >
+              <Ionicons 
+                name={saveCustomerToggle ? "checkbox" : "square-outline"} 
+                size={22} 
+                color={saveCustomerToggle ? "#4CAF50" : "#666"} 
+              />
+              <Text style={styles.saveCustomerText}>Save customer for future jobs</Text>
+            </TouchableOpacity>
+          )}
         </View>
+        )}
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Vehicle Information</Text>
