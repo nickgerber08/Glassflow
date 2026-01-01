@@ -70,13 +70,36 @@ export default function JobDetailsScreen() {
   );
   const [omegaInvoice, setOmegaInvoice] = useState<string>(selectedJob?.omega_invoice || '');
   const [editingOmega, setEditingOmega] = useState(false);
+  const [isFirstStop, setIsFirstStop] = useState<boolean>(selectedJob?.is_first_stop || false);
+  const [firstStopCount, setFirstStopCount] = useState<number>(0);
+  const [showRescheduleCalendar, setShowRescheduleCalendar] = useState(false);
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>(
+    selectedJob?.appointment_time && new Date(selectedJob.appointment_time).getHours() < 12 ? 'morning' : 'afternoon'
+  );
 
   useEffect(() => {
     if (job) {
       fetchComments();
       fetchUsers();
+      if (job.appointment_time) {
+        checkFirstStopCount(job.appointment_time);
+      }
     }
   }, [job]);
+
+  const checkFirstStopCount = async (dateStr: string) => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/jobs/first-stop-count?date=${dateStr}`, {
+        headers: { Authorization: `Bearer ${sessionToken}` },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setFirstStopCount(data.count);
+      }
+    } catch (error) {
+      console.error('Error checking first stop count:', error);
+    }
+  };
 
   if (!job) {
     return (
