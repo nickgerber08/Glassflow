@@ -398,6 +398,12 @@ export default function PartsScreen() {
     iconColor: string
   ) => {
     const isExpanded = expandedSections.has(sectionId);
+    const uniqueTechs = getUniqueTechsFromParts(parts);
+    const filteredParts = filterPartsByTech(parts, sectionId);
+    const selectedTechFilter = techFilters[sectionId] || 'all';
+    const selectedTechName = selectedTechFilter === 'all' 
+      ? 'All' 
+      : uniqueTechs.find(t => t.id === selectedTechFilter)?.name || 'All';
     
     return (
       <View key={sectionId} style={styles.distributorSection}>
@@ -421,10 +427,72 @@ export default function PartsScreen() {
         
         {isExpanded && (
           <View style={styles.sectionContent}>
-            {parts.length === 0 ? (
-              <Text style={styles.emptyText}>No parts</Text>
+            {/* Tech Filter Dropdown */}
+            {parts.length > 0 && uniqueTechs.length > 0 && (
+              <View style={styles.techFilterContainer}>
+                <TouchableOpacity
+                  style={styles.techFilterButton}
+                  onPress={() => setShowTechFilterDropdown(
+                    showTechFilterDropdown === sectionId ? null : sectionId
+                  )}
+                >
+                  <Ionicons name="person" size={16} color="#2196F3" />
+                  <Text style={styles.techFilterButtonText}>
+                    {selectedTechName}
+                    {selectedTechFilter !== 'all' && ` (${filteredParts.length})`}
+                  </Text>
+                  <Ionicons 
+                    name={showTechFilterDropdown === sectionId ? 'chevron-up' : 'chevron-down'} 
+                    size={16} 
+                    color="#666" 
+                  />
+                </TouchableOpacity>
+
+                {/* Dropdown Menu */}
+                {showTechFilterDropdown === sectionId && (
+                  <View style={styles.techFilterDropdown}>
+                    <TouchableOpacity
+                      style={[
+                        styles.techFilterOption,
+                        selectedTechFilter === 'all' && styles.techFilterOptionActive
+                      ]}
+                      onPress={() => setTechFilter(sectionId, 'all')}
+                    >
+                      <Text style={[
+                        styles.techFilterOptionText,
+                        selectedTechFilter === 'all' && styles.techFilterOptionTextActive
+                      ]}>
+                        All ({parts.length})
+                      </Text>
+                    </TouchableOpacity>
+                    {uniqueTechs.map((tech) => (
+                      <TouchableOpacity
+                        key={tech.id}
+                        style={[
+                          styles.techFilterOption,
+                          selectedTechFilter === tech.id && styles.techFilterOptionActive
+                        ]}
+                        onPress={() => setTechFilter(sectionId, tech.id)}
+                      >
+                        <Text style={[
+                          styles.techFilterOptionText,
+                          selectedTechFilter === tech.id && styles.techFilterOptionTextActive
+                        ]}>
+                          {tech.name} ({tech.count})
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+              </View>
+            )}
+
+            {filteredParts.length === 0 ? (
+              <Text style={styles.emptyText}>
+                {parts.length > 0 ? 'No parts for this tech' : 'No parts'}
+              </Text>
             ) : (
-              parts.map(renderPartItem)
+              filteredParts.map(renderPartItem)
             )}
           </View>
         )}
