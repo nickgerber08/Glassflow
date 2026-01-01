@@ -134,6 +134,8 @@ class JobUpdate(BaseModel):
     amount_to_collect: Optional[float] = None
     is_first_stop: Optional[bool] = None
     distributor: Optional[str] = None
+    pickup_tech: Optional[str] = None
+    pickup_tech_name: Optional[str] = None
     job_type: Optional[str] = None
     status: Optional[str] = None
     assigned_to: Optional[str] = None
