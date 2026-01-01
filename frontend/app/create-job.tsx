@@ -76,9 +76,20 @@ export default function CreateJobScreen() {
   const [notes, setNotes] = useState('');
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
 
+  // Saved customers state
+  const [savedCustomers, setSavedCustomers] = useState<any[]>([]);
+  const [frequentCustomers, setFrequentCustomers] = useState<any[]>([]);
+  const [showCustomerPicker, setShowCustomerPicker] = useState(false);
+  const [customerSearch, setCustomerSearch] = useState('');
+  const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
+  const [saveCustomerToggle, setSaveCustomerToggle] = useState(false);
+  const [isNewCustomer, setIsNewCustomer] = useState(true);
+
   useEffect(() => {
     fetchUsers();
     getCurrentLocation();
+    fetchSavedCustomers();
+    fetchFrequentCustomers();
   }, []);
 
   const fetchUsers = async () => {
