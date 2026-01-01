@@ -1877,4 +1877,78 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#333',
   },
+  // Calendar styles for reschedule modal
+  calendarMonthNav: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  calendarNavBtn: {
+    padding: 8,
+  },
+  calendarMonthText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+  },
+  quickJumpRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 12,
+    marginBottom: 16,
+  },
+  quickJumpBtn: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: '#E3F2FD',
+    borderRadius: 20,
+  },
+  quickJumpText: {
+    fontSize: 14,
+    color: '#2196F3',
+    fontWeight: '600',
+  },
+  calendarWeekDays: {
+    flexDirection: 'row',
+    marginBottom: 8,
+  },
+  calendarWeekDayText: {
+    flex: 1,
+    textAlign: 'center',
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#999',
+  },
+  calendarGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  calendarDayCell: {
+    width: '14.28%',
+    aspectRatio: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  calendarDaySelected: {
+    backgroundColor: '#2196F3',
+    borderRadius: 20,
+  },
+  calendarDayToday: {
+    borderWidth: 2,
+    borderColor: '#2196F3',
+    borderRadius: 20,
+  },
+  calendarDayText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  calendarDayTextSelected: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  calendarDayTextToday: {
+    color: '#2196F3',
+    fontWeight: 'bold',
+  },
 });
