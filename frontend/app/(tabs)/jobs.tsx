@@ -289,7 +289,7 @@ export default function JobsScreen() {
           <View style={styles.detailRow}>
             <Ionicons name="time" size={16} color="#666" />
             <Text style={styles.detailText}>
-              {format(parseISO(item.appointment_time), 'h:mm a')}
+              {new Date(item.appointment_time).getHours() < 12 ? '9-12 AM' : '1-4 PM'}
             </Text>
           </View>
         )}
