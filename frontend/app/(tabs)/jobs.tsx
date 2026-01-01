@@ -291,123 +291,18 @@ export default function JobsScreen() {
     );
   };
 
-  const renderJob = ({ item }: { item: any }) => {
-    const swipeableRef = useRef<Swipeable>(null);
-
-    const onSwipeLeft = () => {
-      if (item.status !== 'in_progress' && item.status !== 'completed') {
-        updateJobStatusViaSwipe(item.job_id, 'in_progress');
-      }
-      swipeableRef.current?.close();
-    };
-
-    const onSwipeRight = () => {
-      if (item.status !== 'completed') {
-        updateJobStatusViaSwipe(item.job_id, 'completed');
-      }
-      swipeableRef.current?.close();
-    };
-
-    return (
-      <Swipeable
-        ref={swipeableRef}
-        renderLeftActions={(progress, dragX) => renderLeftActions(progress, dragX, item)}
-        renderRightActions={(progress, dragX) => renderRightActions(progress, dragX, item)}
-        onSwipeableOpen={(direction) => {
-          if (direction === 'left') {
-            onSwipeLeft();
-          } else if (direction === 'right') {
-            onSwipeRight();
-          }
-        }}
-        overshootLeft={false}
-        overshootRight={false}
-        friction={2}
-      >
-        <TouchableOpacity
-          style={styles.jobCard}
-          onPress={() => {
-            setSelectedJob(item);
-            router.push('/job-details');
-          }}
-        >
-          <View style={styles.jobHeader}>
-            <View style={styles.jobTitleRow}>
-              <Ionicons name="car-sport" size={20} color="#2196F3" />
-              <Text style={styles.jobTitle} numberOfLines={1}>
-                {item.customer_name}
-              </Text>
-              {item.part_number && (
-                <View style={styles.partNumberBadge}>
-                  <Text style={styles.partNumberText}>{item.part_number}</Text>
-                </View>
-              )}
-              {item.payment_type === 'collect' && item.amount_to_collect && (
-                <View style={styles.collectBadge}>
-                  <Text style={styles.collectBadgeText}>${item.amount_to_collect.toFixed(2)}</Text>
-                </View>
-              )}
-              {item.payment_type === 'dealership_po' && (
-                <View style={styles.poBadge}>
-                  <Text style={styles.poBadgeText}>PO</Text>
-                </View>
-              )}
-            </View>
-            <View
-              style={[
-                styles.statusBadge,
-                { backgroundColor: STATUS_COLORS[item.status] },
-              ]}
-            >
-              <Text style={styles.statusText}>{STATUS_LABELS[item.status]}</Text>
-            </View>
-          </View>
-
-          {item.is_first_stop && (
-            <View style={styles.firstStopBanner}>
-              <Ionicons name="flag" size={16} color="#fff" />
-              <Text style={styles.firstStopText}>1ST STOP</Text>
-            </View>
-          )}
-
-          <View style={styles.jobDetails}>
-            <View style={styles.detailRow}>
-              <Ionicons name="location" size={16} color="#666" />
-              <Text style={styles.detailText} numberOfLines={1}>
-                {item.address}
-              </Text>
-            </View>
-            <View style={styles.detailRow}>
-              <Ionicons name="car" size={16} color="#666" />
-              <Text style={styles.detailText}>
-                {item.vehicle_year} {item.vehicle_make} {item.vehicle_model}
-              </Text>
-            </View>
-            {item.assigned_to_name && (
-              <View style={styles.detailRow}>
-                <Ionicons name="construct" size={16} color="#2196F3" />
-                <Text style={styles.detailText}>Tech: {item.assigned_to_name}</Text>
-              </View>
-            )}
-            {item.created_by_name && (
-              <View style={styles.detailRow}>
-                <Ionicons name="create" size={16} color="#9C27B0" />
-                <Text style={styles.detailText}>Created by: {item.created_by_name}</Text>
-              </View>
-            )}
-            {item.appointment_time && (
-              <View style={styles.detailRow}>
-                <Ionicons name="time" size={16} color="#666" />
-                <Text style={styles.detailText}>
-                  {new Date(item.appointment_time).getHours() < 12 ? '9-12 AM' : '1-4 PM'}
-                </Text>
-              </View>
-            )}
-          </View>
-        </TouchableOpacity>
-      </Swipeable>
-    );
-  };
+  const renderJob = ({ item }: { item: any }) => (
+    <JobCard
+      item={item}
+      onPress={() => {
+        setSelectedJob(item);
+        router.push('/job-details');
+      }}
+      onUpdateStatus={updateJobStatusViaSwipe}
+      renderLeftActions={renderLeftActions}
+      renderRightActions={renderRightActions}
+    />
+  );
 
   if (loading) {
     return (
