@@ -78,7 +78,9 @@ class Job(BaseModel):
     payment_type: Optional[str] = None  # 'collect' or 'dealership_po'
     amount_to_collect: Optional[float] = None  # Amount tech needs to collect (if payment_type is 'collect')
     is_first_stop: bool = False  # Mark as first stop of the day for a technician
-    distributor: Optional[str] = None  # Distributor name for the part
+    distributor: Optional[str] = None  # Distributor ID for the part
+    pickup_tech: Optional[str] = None  # Tech ID who will pick up the part
+    pickup_tech_name: Optional[str] = None  # Tech name who will pick up the part
     job_type: str  # windshield, side_window, rear_window, chip_repair
     status: str = "pending"  # pending, scheduled, in_progress, completed, cancelled
     assigned_to: Optional[str] = None
