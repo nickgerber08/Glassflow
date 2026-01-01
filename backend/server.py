@@ -106,6 +106,7 @@ class JobCreate(BaseModel):
     payment_type: Optional[str] = None  # 'collect' or 'dealership_po'
     amount_to_collect: Optional[float] = None
     is_first_stop: bool = False
+    distributor: Optional[str] = None
     job_type: str
     status: str = "pending"
     assigned_to: Optional[str] = None
