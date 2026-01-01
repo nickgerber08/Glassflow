@@ -13,7 +13,7 @@ import sys
 import os
 
 # Get backend URL from frontend .env
-BACKEND_URL = "https://autoglass-mobile.preview.emergentagent.com/api"
+BACKEND_URL = "https://autoglass-app.preview.emergentagent.com/api"
 
 class BackendTester:
     def __init__(self):
