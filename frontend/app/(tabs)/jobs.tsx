@@ -848,7 +848,8 @@ export default function JobsScreen() {
           </View>
         </TouchableOpacity>
       </Modal>
-    </SafeAreaView>
+      </SafeAreaView>
+    </GestureHandlerRootView>
   );
 }
 
