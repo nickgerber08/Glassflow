@@ -342,70 +342,68 @@ export default function JobsScreen() {
                   <Text style={styles.partNumberText}>{item.part_number}</Text>
                 </View>
               )}
-              {/* Payment Badge - shows right next to part number */}
               {item.payment_type === 'collect' && item.amount_to_collect && (
                 <View style={styles.collectBadge}>
                   <Text style={styles.collectBadgeText}>${item.amount_to_collect.toFixed(2)}</Text>
                 </View>
-          )}
-          {item.payment_type === 'dealership_po' && (
-            <View style={styles.poBadge}>
-              <Text style={styles.poBadgeText}>PO</Text>
+              )}
+              {item.payment_type === 'dealership_po' && (
+                <View style={styles.poBadge}>
+                  <Text style={styles.poBadgeText}>PO</Text>
+                </View>
+              )}
+            </View>
+            <View
+              style={[
+                styles.statusBadge,
+                { backgroundColor: STATUS_COLORS[item.status] },
+              ]}
+            >
+              <Text style={styles.statusText}>{STATUS_LABELS[item.status]}</Text>
+            </View>
+          </View>
+
+          {item.is_first_stop && (
+            <View style={styles.firstStopBanner}>
+              <Ionicons name="flag" size={16} color="#fff" />
+              <Text style={styles.firstStopText}>1ST STOP</Text>
             </View>
           )}
-        </View>
-        <View
-          style={[
-            styles.statusBadge,
-            { backgroundColor: STATUS_COLORS[item.status] },
-          ]}
-        >
-          <Text style={styles.statusText}>{STATUS_LABELS[item.status]}</Text>
-        </View>
-      </View>
 
-      {/* 1ST STOP Badge - Show prominently if marked as first stop */}
-      {item.is_first_stop && (
-        <View style={styles.firstStopBanner}>
-          <Ionicons name="flag" size={16} color="#fff" />
-          <Text style={styles.firstStopText}>1ST STOP</Text>
-        </View>
-      )}
-
-      <View style={styles.jobDetails}>
-        <View style={styles.detailRow}>
-          <Ionicons name="location" size={16} color="#666" />
-          <Text style={styles.detailText} numberOfLines={1}>
-            {item.address}
-          </Text>
-        </View>
-        <View style={styles.detailRow}>
-          <Ionicons name="car" size={16} color="#666" />
-          <Text style={styles.detailText}>
-            {item.vehicle_year} {item.vehicle_make} {item.vehicle_model}
-          </Text>
-        </View>
-        {item.assigned_to_name && (
-          <View style={styles.detailRow}>
-            <Ionicons name="construct" size={16} color="#2196F3" />
-            <Text style={styles.detailText}>Tech: {item.assigned_to_name}</Text>
+          <View style={styles.jobDetails}>
+            <View style={styles.detailRow}>
+              <Ionicons name="location" size={16} color="#666" />
+              <Text style={styles.detailText} numberOfLines={1}>
+                {item.address}
+              </Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Ionicons name="car" size={16} color="#666" />
+              <Text style={styles.detailText}>
+                {item.vehicle_year} {item.vehicle_make} {item.vehicle_model}
+              </Text>
+            </View>
+            {item.assigned_to_name && (
+              <View style={styles.detailRow}>
+                <Ionicons name="construct" size={16} color="#2196F3" />
+                <Text style={styles.detailText}>Tech: {item.assigned_to_name}</Text>
+              </View>
+            )}
+            {item.created_by_name && (
+              <View style={styles.detailRow}>
+                <Ionicons name="create" size={16} color="#9C27B0" />
+                <Text style={styles.detailText}>Created by: {item.created_by_name}</Text>
+              </View>
+            )}
+            {item.appointment_time && (
+              <View style={styles.detailRow}>
+                <Ionicons name="time" size={16} color="#666" />
+                <Text style={styles.detailText}>
+                  {new Date(item.appointment_time).getHours() < 12 ? '9-12 AM' : '1-4 PM'}
+                </Text>
+              </View>
+            )}
           </View>
-        )}
-        {item.created_by_name && (
-          <View style={styles.detailRow}>
-            <Ionicons name="create" size={16} color="#9C27B0" />
-            <Text style={styles.detailText}>Created by: {item.created_by_name}</Text>
-          </View>
-        )}
-        {item.appointment_time && (
-          <View style={styles.detailRow}>
-            <Ionicons name="time" size={16} color="#666" />
-            <Text style={styles.detailText}>
-              {new Date(item.appointment_time).getHours() < 12 ? '9-12 AM' : '1-4 PM'}
-            </Text>
-          </View>
-        )}
-      </View>
         </TouchableOpacity>
       </Swipeable>
     );
