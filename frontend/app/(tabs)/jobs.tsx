@@ -1376,4 +1376,36 @@ const styles = StyleSheet.create({
   calendarDayDotSelected: {
     backgroundColor: '#fff',
   },
+  // Swipe action styles
+  swipeActionLeft: {
+    backgroundColor: '#9C27B0',
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+    paddingHorizontal: 20,
+    marginBottom: 12,
+    borderTopLeftRadius: 12,
+    borderBottomLeftRadius: 12,
+    minWidth: 100,
+  },
+  swipeActionRight: {
+    backgroundColor: '#4CAF50',
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    paddingHorizontal: 20,
+    marginBottom: 12,
+    borderTopRightRadius: 12,
+    borderBottomRightRadius: 12,
+    minWidth: 100,
+  },
+  swipeActionContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+  },
+  swipeActionText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '700',
+    marginTop: 4,
+  },
 });
