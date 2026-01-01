@@ -181,6 +181,15 @@ class CustomerUpdate(BaseModel):
     lat: Optional[float] = None
     lng: Optional[float] = None
 
+# Distributor models
+class Distributor(BaseModel):
+    distributor_id: str
+    name: str
+    created_at: datetime
+
+class DistributorCreate(BaseModel):
+    name: str
+
 # Auth Helper Functions
 async def get_current_user(request: Request) -> Optional[User]:
     # Try to get session_token from Authorization header first
