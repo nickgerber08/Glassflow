@@ -308,6 +308,41 @@ export default function PartsScreen() {
     return name.substring(0, 2).toUpperCase();
   };
 
+  // Get unique techs from a list of parts
+  const getUniqueTechsFromParts = (parts: PartJob[]) => {
+    const techMap = new Map<string, { id: string; name: string; count: number }>();
+    parts.forEach((part) => {
+      if (part.pickup_tech && part.pickup_tech_name) {
+        const existing = techMap.get(part.pickup_tech);
+        if (existing) {
+          existing.count++;
+        } else {
+          techMap.set(part.pickup_tech, {
+            id: part.pickup_tech,
+            name: part.pickup_tech_name,
+            count: 1,
+          });
+        }
+      }
+    });
+    return Array.from(techMap.values());
+  };
+
+  // Filter parts by selected tech
+  const filterPartsByTech = (parts: PartJob[], sectionId: string) => {
+    const selectedTech = techFilters[sectionId];
+    if (!selectedTech || selectedTech === 'all') {
+      return parts;
+    }
+    return parts.filter((part) => part.pickup_tech === selectedTech);
+  };
+
+  // Set tech filter for a section
+  const setTechFilter = (sectionId: string, techId: string) => {
+    setTechFilters((prev) => ({ ...prev, [sectionId]: techId }));
+    setShowTechFilterDropdown(null);
+  };
+
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('en-US', {
       weekday: 'short',
