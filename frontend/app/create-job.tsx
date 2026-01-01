@@ -916,6 +916,101 @@ export default function CreateJobScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Customer Picker Modal */}
+      <Modal
+        transparent={true}
+        animationType="slide"
+        visible={showCustomerPicker}
+        onRequestClose={() => setShowCustomerPicker(false)}
+      >
+        <View style={styles.customerPickerOverlay}>
+          <View style={styles.customerPickerModal}>
+            <View style={styles.customerPickerHeader}>
+              <Text style={styles.customerPickerTitle}>Select Customer</Text>
+              <TouchableOpacity 
+                onPress={() => {
+                  setShowCustomerPicker(false);
+                  setCustomerSearch('');
+                }}
+              >
+                <Ionicons name="close-circle" size={28} color="#666" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Search Input */}
+            <View style={styles.customerSearchContainer}>
+              <Ionicons name="search" size={20} color="#999" />
+              <TextInput
+                style={styles.customerSearchInput}
+                value={customerSearch}
+                onChangeText={handleCustomerSearch}
+                placeholder="Search by name or address..."
+                placeholderTextColor="#999"
+                autoFocus
+              />
+              {customerSearch.length > 0 && (
+                <TouchableOpacity onPress={() => {
+                  setCustomerSearch('');
+                  fetchSavedCustomers();
+                }}>
+                  <Ionicons name="close" size={20} color="#999" />
+                </TouchableOpacity>
+              )}
+            </View>
+
+            {/* Customer List */}
+            <ScrollView style={styles.customerList} showsVerticalScrollIndicator={false}>
+              {savedCustomers.length === 0 ? (
+                <View style={styles.noCustomersContainer}>
+                  <Ionicons name="people-outline" size={48} color="#ccc" />
+                  <Text style={styles.noCustomersText}>
+                    {customerSearch ? 'No matching customers found' : 'No saved customers yet'}
+                  </Text>
+                  <Text style={styles.noCustomersSubtext}>
+                    Create jobs and save customers to see them here
+                  </Text>
+                </View>
+              ) : (
+                savedCustomers.map((customer) => (
+                  <TouchableOpacity
+                    key={customer.customer_id}
+                    style={styles.customerListItem}
+                    onPress={() => selectCustomer(customer)}
+                  >
+                    <View style={styles.customerListIcon}>
+                      <Ionicons name="business" size={24} color="#2196F3" />
+                    </View>
+                    <View style={styles.customerListInfo}>
+                      <Text style={styles.customerListName}>{customer.name}</Text>
+                      <Text style={styles.customerListPhone}>{customer.phone}</Text>
+                      <Text style={styles.customerListAddress} numberOfLines={1}>{customer.address}</Text>
+                    </View>
+                    {customer.usage_count > 0 && (
+                      <View style={styles.usageCountBadge}>
+                        <Text style={styles.usageCountText}>{customer.usage_count}</Text>
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                ))
+              )}
+            </ScrollView>
+
+            {/* New Customer Option */}
+            <TouchableOpacity 
+              style={styles.newCustomerOption}
+              onPress={() => {
+                setShowCustomerPicker(false);
+                setIsNewCustomer(true);
+                setCustomerSearch('');
+              }}
+            >
+              <Ionicons name="add-circle" size={24} color="#4CAF50" />
+              <Text style={styles.newCustomerOptionText}>Enter new customer manually</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
