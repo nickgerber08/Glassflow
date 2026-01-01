@@ -980,6 +980,22 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
   },
+  firstStopBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E53935',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+    marginBottom: 12,
+    gap: 6,
+  },
+  firstStopText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '700',
+  },
   jobHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
