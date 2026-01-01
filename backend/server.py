@@ -876,6 +876,126 @@ async def delete_customer(customer_id: str, request: Request):
     
     return {"success": True}
 
+# ============== DISTRIBUTOR ENDPOINTS ==============
+
+@api_router.get("/distributors", response_model=List[Distributor])
+async def get_distributors(request: Request):
+    """Get all distributors"""
+    await require_auth(request)
+    
+    distributors = await db.distributors.find(
+        {},
+        {"_id": 0}
+    ).sort("name", 1).to_list(100)
+    
+    return [Distributor(**d) for d in distributors]
+
+@api_router.post("/distributors", response_model=Distributor)
+async def create_distributor(distributor_data: DistributorCreate, request: Request):
+    """Create a new distributor"""
+    await require_auth(request)
+    
+    # Check if distributor with same name already exists
+    existing = await db.distributors.find_one({"name": distributor_data.name})
+    if existing:
+        raise HTTPException(status_code=400, detail="Distributor with this name already exists")
+    
+    distributor = Distributor(
+        distributor_id=f"dist_{uuid.uuid4().hex[:12]}",
+        name=distributor_data.name,
+        created_at=datetime.now(timezone.utc)
+    )
+    
+    await db.distributors.insert_one(distributor.model_dump())
+    return distributor
+
+@api_router.delete("/distributors/{distributor_id}")
+async def delete_distributor(distributor_id: str, request: Request):
+    """Delete a distributor"""
+    await require_auth(request)
+    
+    result = await db.distributors.delete_one({"distributor_id": distributor_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Distributor not found")
+    
+    # Also clear distributor from any jobs that had it assigned
+    await db.jobs.update_many(
+        {"distributor": distributor_id},
+        {"$set": {"distributor": None}}
+    )
+    
+    return {"success": True}
+
+@api_router.get("/parts/daily")
+async def get_daily_parts(request: Request, date: str):
+    """Get parts needed for a specific date, grouped by distributor"""
+    await require_auth(request)
+    
+    # Parse the date
+    try:
+        target_date = datetime.fromisoformat(date.replace('Z', '+00:00'))
+    except:
+        target_date = datetime.now(timezone.utc)
+    
+    # Get start and end of the target day
+    start_of_day = target_date.replace(hour=0, minute=0, second=0, microsecond=0)
+    end_of_day = target_date.replace(hour=23, minute=59, second=59, microsecond=999999)
+    
+    # Get all jobs for that day that have a part number
+    jobs = await db.jobs.find(
+        {
+            "appointment_time": {"$gte": start_of_day, "$lte": end_of_day},
+            "part_number": {"$ne": None, "$exists": True},
+            "status": {"$ne": "cancelled"}
+        },
+        {"_id": 0}
+    ).to_list(500)
+    
+    # Filter out jobs with empty part numbers
+    jobs_with_parts = [j for j in jobs if j.get("part_number")]
+    
+    # Group by distributor
+    grouped = {}
+    unassigned = []
+    
+    for job in jobs_with_parts:
+        distributor = job.get("distributor")
+        if distributor:
+            if distributor not in grouped:
+                grouped[distributor] = []
+            grouped[distributor].append(job)
+        else:
+            unassigned.append(job)
+    
+    # Get distributor names
+    distributor_ids = list(grouped.keys())
+    distributors = await db.distributors.find(
+        {"distributor_id": {"$in": distributor_ids}},
+        {"_id": 0}
+    ).to_list(100)
+    
+    distributor_map = {d["distributor_id"]: d["name"] for d in distributors}
+    
+    # Build result
+    result = {
+        "date": date,
+        "total_parts": len(jobs_with_parts),
+        "total_jobs": len(jobs),
+        "distributor_count": len(grouped) + (1 if unassigned else 0),
+        "by_distributor": [
+            {
+                "distributor_id": dist_id,
+                "distributor_name": distributor_map.get(dist_id, "Unknown"),
+                "parts": grouped[dist_id]
+            }
+            for dist_id in grouped
+        ],
+        "unassigned": unassigned
+    }
+    
+    return result
+
 # Socket.IO events disabled for now
 # @sio.event
 # async def connect(sid, environ):
