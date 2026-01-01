@@ -371,26 +371,20 @@ export default function PartsScreen() {
         </View>
       </TouchableOpacity>
       <View style={styles.partItemRight}>
-        {/* Tech Badge */}
+        {/* Tech Name Label */}
         <TouchableOpacity 
           style={[
-            styles.techBadge,
-            job.pickup_tech_name ? styles.techBadgeAssigned : styles.techBadgeUnassigned
+            styles.techLabel,
+            job.pickup_tech_name ? styles.techLabelAssigned : styles.techLabelUnassigned
           ]}
           onPress={() => openTechPicker(job)}
         >
-          {job.pickup_tech_name ? (
-            <Text style={styles.techBadgeText}>{getTechInitials(job.pickup_tech_name)}</Text>
-          ) : (
-            <Ionicons name="person-add" size={14} color="#999" />
-          )}
-        </TouchableOpacity>
-        {/* Distributor Button */}
-        <TouchableOpacity 
-          style={styles.assignBtn}
-          onPress={() => openAssignModal(job)}
-        >
-          <Ionicons name="storefront-outline" size={16} color="#4CAF50" />
+          <Text style={[
+            styles.techLabelText,
+            job.pickup_tech_name ? styles.techLabelTextAssigned : styles.techLabelTextUnassigned
+          ]}>
+            {job.pickup_tech_name || 'Assign'}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
