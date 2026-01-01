@@ -602,22 +602,97 @@ export default function JobDetailsScreen() {
                   </TouchableOpacity>
                 </View>
                 
-                <DateTimePicker
-                  value={job.appointment_time ? new Date(job.appointment_time) : new Date()}
-                  mode="date"
-                  display="inline"
-                  onChange={(event, date) => {
-                    if (date) {
-                      // Preserve the time slot (morning or afternoon)
+                {/* Month Navigation */}
+                <View style={styles.calendarMonthNav}>
+                  <TouchableOpacity 
+                    onPress={() => setCalendarViewMonth(subMonths(calendarViewMonth, 1))}
+                    style={styles.calendarNavBtn}
+                  >
+                    <Ionicons name="chevron-back" size={28} color="#2196F3" />
+                  </TouchableOpacity>
+                  <Text style={styles.calendarMonthText}>
+                    {format(calendarViewMonth, 'MMMM yyyy')}
+                  </Text>
+                  <TouchableOpacity 
+                    onPress={() => setCalendarViewMonth(addMonths(calendarViewMonth, 1))}
+                    style={styles.calendarNavBtn}
+                  >
+                    <Ionicons name="chevron-forward" size={28} color="#2196F3" />
+                  </TouchableOpacity>
+                </View>
+
+                {/* Quick Jump */}
+                <View style={styles.quickJumpRow}>
+                  <TouchableOpacity 
+                    style={styles.quickJumpBtn}
+                    onPress={() => {
+                      const today = new Date();
                       const hour = selectedTimeSlot === 'morning' ? 9 : 13;
-                      date.setHours(hour, 0, 0, 0);
-                      setJob({ ...job, appointment_time: date.toISOString() });
+                      today.setHours(hour, 0, 0, 0);
+                      setJob({ ...job, appointment_time: today.toISOString() });
                       setHasChanges(true);
-                      checkFirstStopCount(date.toISOString());
+                      checkFirstStopCount(today.toISOString());
                       setShowRescheduleCalendar(false);
-                    }
-                  }}
-                />
+                    }}
+                  >
+                    <Text style={styles.quickJumpText}>Today</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={styles.quickJumpBtn}
+                    onPress={() => setCalendarViewMonth(new Date())}
+                  >
+                    <Text style={styles.quickJumpText}>This Month</Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Week Days Header */}
+                <View style={styles.calendarWeekDays}>
+                  {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                    <Text key={day} style={styles.calendarWeekDayText}>{day}</Text>
+                  ))}
+                </View>
+
+                {/* Calendar Grid */}
+                <View style={styles.calendarGrid}>
+                  {/* Empty cells for days before month starts */}
+                  {Array.from({ length: startDayOfWeek }).map((_, index) => (
+                    <View key={`empty-${index}`} style={styles.calendarDayCell} />
+                  ))}
+                  
+                  {/* Actual days */}
+                  {calendarDays.map((day) => {
+                    const isSelected = job.appointment_time && isSameDay(day, new Date(job.appointment_time));
+                    const isToday = isSameDay(day, new Date());
+                    
+                    return (
+                      <TouchableOpacity
+                        key={day.toISOString()}
+                        style={[
+                          styles.calendarDayCell,
+                          isSelected && styles.calendarDaySelected,
+                          isToday && !isSelected && styles.calendarDayToday,
+                        ]}
+                        onPress={() => {
+                          const newDate = new Date(day);
+                          const hour = selectedTimeSlot === 'morning' ? 9 : 13;
+                          newDate.setHours(hour, 0, 0, 0);
+                          setJob({ ...job, appointment_time: newDate.toISOString() });
+                          setHasChanges(true);
+                          checkFirstStopCount(newDate.toISOString());
+                          setShowRescheduleCalendar(false);
+                        }}
+                      >
+                        <Text style={[
+                          styles.calendarDayText,
+                          isSelected && styles.calendarDayTextSelected,
+                          isToday && !isSelected && styles.calendarDayTextToday,
+                        ]}>
+                          {format(day, 'd')}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
               </View>
             </View>
           </Modal>
