@@ -72,6 +72,8 @@ export default function PartsScreen() {
   const [distributors, setDistributors] = useState<Distributor[]>([]);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['unassigned']));
   const [allTechnicians, setAllTechnicians] = useState<any[]>(DEFAULT_TECHNICIANS);
+  const [techFilters, setTechFilters] = useState<{ [sectionId: string]: string }>({});
+  const [showTechFilterDropdown, setShowTechFilterDropdown] = useState<string | null>(null);
   
   // Modal states
   const [showDatePicker, setShowDatePicker] = useState(false);
