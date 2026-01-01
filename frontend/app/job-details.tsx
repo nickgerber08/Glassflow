@@ -72,9 +72,19 @@ export default function JobDetailsScreen() {
   const [isFirstStop, setIsFirstStop] = useState<boolean>(selectedJob?.is_first_stop || false);
   const [firstStopCount, setFirstStopCount] = useState<number>(0);
   const [showRescheduleCalendar, setShowRescheduleCalendar] = useState(false);
+  const [calendarViewMonth, setCalendarViewMonth] = useState<Date>(
+    selectedJob?.appointment_time ? new Date(selectedJob.appointment_time) : new Date()
+  );
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>(
     selectedJob?.appointment_time && new Date(selectedJob.appointment_time).getHours() < 12 ? 'morning' : 'afternoon'
   );
+
+  // Calendar days for the reschedule modal
+  const calendarDays = eachDayOfInterval({
+    start: startOfMonth(calendarViewMonth),
+    end: endOfMonth(calendarViewMonth),
+  });
+  const startDayOfWeek = startOfMonth(calendarViewMonth).getDay();
 
   useEffect(() => {
     if (job) {
