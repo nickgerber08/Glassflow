@@ -19,8 +19,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useJobStore } from '../stores/jobStore';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import { format, parseISO } from 'date-fns';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths, isSameDay } from 'date-fns';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
