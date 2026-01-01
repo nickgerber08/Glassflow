@@ -263,6 +263,49 @@ export default function PartsScreen() {
     setShowAssignModal(true);
   };
 
+  const openTechPicker = (job: PartJob) => {
+    setSelectedJobForTech(job);
+    setShowTechPickerModal(true);
+  };
+
+  const assignPickupTech = async (techId: string, techName: string) => {
+    if (!selectedJobForTech) return;
+
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/jobs/${selectedJobForTech.job_id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${sessionToken}`,
+        },
+        body: JSON.stringify({ 
+          pickup_tech: techId || null,
+          pickup_tech_name: techName || null
+        }),
+      });
+
+      if (response.ok) {
+        setShowTechPickerModal(false);
+        setSelectedJobForTech(null);
+        await fetchDailyParts();
+      } else {
+        Alert.alert('Error', 'Failed to assign pickup tech');
+      }
+    } catch (error) {
+      console.error('Error assigning pickup tech:', error);
+      Alert.alert('Error', 'Failed to assign pickup tech');
+    }
+  };
+
+  const getTechInitials = (name: string) => {
+    if (!name) return '?';
+    const parts = name.split(' ');
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
+
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('en-US', {
       weekday: 'short',
@@ -277,12 +320,11 @@ export default function PartsScreen() {
   };
 
   const renderPartItem = (job: PartJob) => (
-    <TouchableOpacity
-      key={job.job_id}
-      style={styles.partItem}
-      onPress={() => openAssignModal(job)}
-    >
-      <View style={styles.partItemMain}>
+    <View key={job.job_id} style={styles.partItem}>
+      <TouchableOpacity 
+        style={styles.partItemMain}
+        onPress={() => openAssignModal(job)}
+      >
         <Text style={styles.partNumber}>{job.part_number}</Text>
         <View style={styles.partDetails}>
           <Text style={styles.customerName}>{job.customer_name}</Text>
@@ -290,14 +332,31 @@ export default function PartsScreen() {
             '{job.vehicle_year.slice(-2)} {job.vehicle_make} {job.vehicle_model}
           </Text>
         </View>
-      </View>
-      <TouchableOpacity 
-        style={styles.assignBtn}
-        onPress={() => openAssignModal(job)}
-      >
-        <Ionicons name="swap-horizontal" size={18} color="#2196F3" />
       </TouchableOpacity>
-    </TouchableOpacity>
+      <View style={styles.partItemRight}>
+        {/* Tech Badge */}
+        <TouchableOpacity 
+          style={[
+            styles.techBadge,
+            job.pickup_tech_name ? styles.techBadgeAssigned : styles.techBadgeUnassigned
+          ]}
+          onPress={() => openTechPicker(job)}
+        >
+          {job.pickup_tech_name ? (
+            <Text style={styles.techBadgeText}>{getTechInitials(job.pickup_tech_name)}</Text>
+          ) : (
+            <Ionicons name="person-add" size={14} color="#999" />
+          )}
+        </TouchableOpacity>
+        {/* Distributor Button */}
+        <TouchableOpacity 
+          style={styles.assignBtn}
+          onPress={() => openAssignModal(job)}
+        >
+          <Ionicons name="storefront-outline" size={16} color="#4CAF50" />
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 
   const renderDistributorSection = (
