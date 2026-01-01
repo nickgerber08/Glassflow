@@ -660,6 +660,89 @@ export default function PartsScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Tech Picker Modal */}
+      <Modal
+        visible={showTechPickerModal}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => setShowTechPickerModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.techPickerModalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Assign Pickup Tech</Text>
+              <TouchableOpacity onPress={() => setShowTechPickerModal(false)}>
+                <Ionicons name="close-circle" size={28} color="#666" />
+              </TouchableOpacity>
+            </View>
+
+            {selectedJobForTech && (
+              <View style={styles.selectedPartInfo}>
+                <Text style={styles.selectedPartNumber}>
+                  {selectedJobForTech.part_number}
+                </Text>
+                <Text style={styles.selectedPartCustomer}>
+                  {selectedJobForTech.customer_name}
+                </Text>
+                {selectedJobForTech.pickup_tech_name && (
+                  <Text style={styles.currentTechLabel}>
+                    Current: {selectedJobForTech.pickup_tech_name}
+                  </Text>
+                )}
+              </View>
+            )}
+
+            <ScrollView style={styles.techPickerList}>
+              {/* Unassign Option */}
+              <TouchableOpacity
+                style={styles.techOption}
+                onPress={() => assignPickupTech('', '')}
+              >
+                <View style={styles.techOptionBadgeUnassigned}>
+                  <Ionicons name="close" size={16} color="#999" />
+                </View>
+                <Text style={styles.techOptionText}>Unassign (No tech)</Text>
+              </TouchableOpacity>
+
+              {allTechnicians.map((tech) => (
+                <TouchableOpacity
+                  key={tech.user_id}
+                  style={[
+                    styles.techOption,
+                    selectedJobForTech?.pickup_tech === tech.user_id && styles.techOptionActive,
+                  ]}
+                  onPress={() => assignPickupTech(tech.user_id, tech.name)}
+                >
+                  <View
+                    style={[
+                      styles.techOptionBadge,
+                      selectedJobForTech?.pickup_tech === tech.user_id && styles.techOptionBadgeActive,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.techOptionBadgeText,
+                        selectedJobForTech?.pickup_tech === tech.user_id && styles.techOptionBadgeTextActive,
+                      ]}
+                    >
+                      {getTechInitials(tech.name)}
+                    </Text>
+                  </View>
+                  <Text
+                    style={[
+                      styles.techOptionText,
+                      selectedJobForTech?.pickup_tech === tech.user_id && styles.techOptionTextActive,
+                    ]}
+                  >
+                    {tech.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
