@@ -131,6 +131,7 @@ class JobUpdate(BaseModel):
     payment_type: Optional[str] = None
     amount_to_collect: Optional[float] = None
     is_first_stop: Optional[bool] = None
+    distributor: Optional[str] = None
     job_type: Optional[str] = None
     status: Optional[str] = None
     assigned_to: Optional[str] = None
