@@ -398,7 +398,7 @@ export default function JobDetailsScreen() {
           <View style={styles.cardHeader}>
             <View>
               <Text style={styles.jobId}>#{job.job_id.slice(-8)}</Text>
-              <Text style={styles.customerName}>{job.customer_name}</Text>
+              <Text style={styles.customerName}>{customerName || job.customer_name}</Text>
             </View>
             <View
               style={[styles.statusBadge, { backgroundColor: STATUS_COLORS[job.status] }]}
@@ -409,21 +409,101 @@ export default function JobDetailsScreen() {
 
           <View style={styles.divider} />
 
+          {/* Customer Info Section - Editable */}
           <View style={styles.detailSection}>
-            <View style={styles.detailRow}>
-              <Ionicons name="call" size={20} color="#2196F3" />
-              <TouchableOpacity onPress={callCustomer} style={styles.detailTextContainer}>
-                <Text style={styles.detailText}>{job.phone}</Text>
+            <View style={styles.sectionHeaderRow}>
+              <Text style={styles.sectionLabel}>Customer Info</Text>
+              <TouchableOpacity 
+                style={styles.editToggleBtn}
+                onPress={() => setEditingCustomer(!editingCustomer)}
+              >
+                <Ionicons 
+                  name={editingCustomer ? "checkmark-circle" : "pencil"} 
+                  size={20} 
+                  color={editingCustomer ? "#4CAF50" : "#2196F3"} 
+                />
+                <Text style={[styles.editToggleText, editingCustomer && styles.editToggleTextActive]}>
+                  {editingCustomer ? "Done" : "Edit"}
+                </Text>
               </TouchableOpacity>
             </View>
 
-            <View style={styles.detailRow}>
-              <Ionicons name="location" size={20} color="#2196F3" />
-              <TouchableOpacity onPress={openNavigation} style={styles.detailTextContainer}>
-                <Text style={styles.detailText}>{job.address}</Text>
-              </TouchableOpacity>
-            </View>
+            {editingCustomer ? (
+              <View style={styles.editCustomerSection}>
+                <View style={styles.editFieldGroup}>
+                  <Text style={styles.editFieldLabel}>Customer Name</Text>
+                  <TextInput
+                    style={styles.editFieldInput}
+                    value={customerName}
+                    onChangeText={(text) => {
+                      setCustomerName(text);
+                      setHasChanges(true);
+                    }}
+                    placeholder="Customer name"
+                    placeholderTextColor="#999"
+                  />
+                </View>
+                <View style={styles.editFieldGroup}>
+                  <Text style={styles.editFieldLabel}>Phone Number</Text>
+                  <TextInput
+                    style={styles.editFieldInput}
+                    value={customerPhone}
+                    onChangeText={(text) => {
+                      setCustomerPhone(text);
+                      setHasChanges(true);
+                    }}
+                    placeholder="Phone number"
+                    placeholderTextColor="#999"
+                    keyboardType="phone-pad"
+                  />
+                </View>
+                <View style={styles.editFieldGroup}>
+                  <Text style={styles.editFieldLabel}>Address</Text>
+                  <TextInput
+                    style={[styles.editFieldInput, styles.editFieldInputMultiline]}
+                    value={customerAddress}
+                    onChangeText={(text) => {
+                      setCustomerAddress(text);
+                      setHasChanges(true);
+                    }}
+                    placeholder="Address"
+                    placeholderTextColor="#999"
+                    multiline
+                    numberOfLines={2}
+                  />
+                </View>
+              </View>
+            ) : (
+              <>
+                <View style={styles.detailRow}>
+                  <Ionicons name="person" size={20} color="#2196F3" />
+                  <View style={styles.detailTextContainer}>
+                    <Text style={styles.detailText}>{customerName || job.customer_name}</Text>
+                  </View>
+                </View>
 
+                <View style={styles.detailRow}>
+                  <Ionicons name="call" size={20} color="#2196F3" />
+                  <TouchableOpacity onPress={callCustomer} style={styles.detailTextContainer}>
+                    <Text style={styles.detailText}>{customerPhone || job.phone}</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.detailRow}>
+                  <Ionicons name="location" size={20} color="#2196F3" />
+                  <TouchableOpacity onPress={openNavigation} style={styles.detailTextContainer}>
+                    <Text style={styles.detailText}>{customerAddress || job.address}</Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
+          </View>
+
+          <View style={styles.divider} />
+
+          {/* Vehicle Info Section */}
+          <View style={styles.detailSection}>
+            <Text style={styles.sectionLabel}>Vehicle Info</Text>
             <View style={styles.detailRow}>
               <Ionicons name="car" size={20} color="#2196F3" />
               <View style={styles.detailTextContainer}>
