@@ -2041,4 +2041,64 @@ const styles = StyleSheet.create({
     color: '#2196F3',
     fontWeight: 'bold',
   },
+  // Customer editing styles
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  sectionLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#666',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  editToggleBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E3F2FD',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 4,
+  },
+  editToggleText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#2196F3',
+  },
+  editToggleTextActive: {
+    color: '#4CAF50',
+  },
+  editCustomerSection: {
+    backgroundColor: '#F5F5F5',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 8,
+  },
+  editFieldGroup: {
+    marginBottom: 12,
+  },
+  editFieldLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#666',
+    marginBottom: 6,
+  },
+  editFieldInput: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: '#333',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  editFieldInputMultiline: {
+    minHeight: 60,
+    textAlignVertical: 'top',
+  },
 });
