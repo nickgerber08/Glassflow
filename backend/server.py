@@ -936,25 +936,50 @@ async def get_daily_parts(request: Request, date: str):
     """Get parts needed for a specific date, grouped by distributor"""
     await require_auth(request)
     
-    # Parse the date
+    # Parse the date - extract just the date portion (YYYY-MM-DD) to avoid timezone issues
     try:
-        target_date = datetime.fromisoformat(date.replace('Z', '+00:00'))
-    except:
-        target_date = datetime.now(timezone.utc)
+        # Handle ISO format with time/timezone
+        if 'T' in date:
+            date_part = date.split('T')[0]
+        else:
+            date_part = date
+        
+        # Parse as local date (just year-month-day)
+        year, month, day = map(int, date_part.split('-'))
+        
+        # Create start and end of day in UTC for that calendar date
+        # We compare based on the date portion only
+        start_of_day = datetime(year, month, day, 0, 0, 0, tzinfo=timezone.utc)
+        end_of_day = datetime(year, month, day, 23, 59, 59, 999999, tzinfo=timezone.utc)
+    except Exception as e:
+        print(f"Date parse error: {e}, using today")
+        now = datetime.now(timezone.utc)
+        start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        end_of_day = now.replace(hour=23, minute=59, second=59, microsecond=999999)
     
-    # Get start and end of the target day
-    start_of_day = target_date.replace(hour=0, minute=0, second=0, microsecond=0)
-    end_of_day = target_date.replace(hour=23, minute=59, second=59, microsecond=999999)
-    
-    # Get all jobs for that day that have a part number
-    jobs = await db.jobs.find(
+    # Get all jobs - we'll filter by date string comparison for accuracy
+    all_jobs = await db.jobs.find(
         {
-            "appointment_time": {"$gte": start_of_day, "$lte": end_of_day},
             "part_number": {"$ne": None, "$exists": True},
             "status": {"$ne": "cancelled"}
         },
         {"_id": 0}
-    ).to_list(500)
+    ).to_list(1000)
+    
+    # Filter jobs by matching the date portion of appointment_time
+    target_date_str = f"{year:04d}-{month:02d}-{day:02d}"
+    jobs = []
+    for job in all_jobs:
+        apt_time = job.get("appointment_time")
+        if apt_time:
+            # Handle both string and datetime formats
+            if isinstance(apt_time, str):
+                job_date_str = apt_time.split('T')[0]
+            else:
+                job_date_str = apt_time.strftime('%Y-%m-%d')
+            
+            if job_date_str == target_date_str:
+                jobs.append(job)
     
     # Filter out jobs with empty part numbers
     jobs_with_parts = [j for j in jobs if j.get("part_number")]
