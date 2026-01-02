@@ -19,12 +19,11 @@ import { useJobStore } from '../../stores/jobStore';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
-// Default technicians list - same as other pages
+// Default technicians list - must match create-job.tsx
 const DEFAULT_TECHNICIANS = [
+  { name: 'Iman', user_id: 'default_iman' },
   { name: 'Enrique', user_id: 'default_enrique' },
-  { name: 'Oscar', user_id: 'default_oscar' },
-  { name: 'Ricardo', user_id: 'default_ricardo' },
-  { name: 'Alfredo', user_id: 'default_alfredo' },
+  { name: 'Alan', user_id: 'default_alan' },
 ];
 
 interface Distributor {
