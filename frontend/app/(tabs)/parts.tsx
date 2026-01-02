@@ -85,7 +85,12 @@ export default function PartsScreen() {
 
   const fetchDailyParts = useCallback(async () => {
     try {
-      const dateStr = selectedDate.toISOString();
+      // Send date as YYYY-MM-DD to avoid timezone issues
+      const year = selectedDate.getFullYear();
+      const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+      const day = String(selectedDate.getDate()).padStart(2, '0');
+      const dateStr = `${year}-${month}-${day}`;
+      
       const response = await fetch(`${BACKEND_URL}/api/parts/daily?date=${dateStr}`, {
         headers: {
           Authorization: `Bearer ${sessionToken}`,
