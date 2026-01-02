@@ -235,7 +235,10 @@ export default function JobDetailsScreen() {
           omega_invoice: omegaInvoice || null,
           payment_type: paymentType || null,
           amount_to_collect: paymentType === 'collect' && amountToCollect ? parseFloat(amountToCollect) : null,
-          is_first_stop: isFirstStop
+          is_first_stop: isFirstStop,
+          customer_name: customerName,
+          phone: customerPhone,
+          address: customerAddress,
         }),
       });
 
@@ -245,6 +248,7 @@ export default function JobDetailsScreen() {
         updateJob(job.job_id, updatedJob);
         setHasChanges(false);
         setEditingPartNumber(false);
+        setEditingCustomer(false);
         Alert.alert('Success', 'Job updated successfully');
       }
     } catch (error) {
