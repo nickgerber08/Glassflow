@@ -78,6 +78,12 @@ export default function JobDetailsScreen() {
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>(
     selectedJob?.appointment_time && new Date(selectedJob.appointment_time).getHours() < 12 ? 'morning' : 'afternoon'
   );
+  
+  // Customer editing state
+  const [editingCustomer, setEditingCustomer] = useState(false);
+  const [customerName, setCustomerName] = useState(selectedJob?.customer_name || '');
+  const [customerPhone, setCustomerPhone] = useState(selectedJob?.phone || '');
+  const [customerAddress, setCustomerAddress] = useState(selectedJob?.address || '');
 
   // Calendar days for the reschedule modal
   const calendarDays = eachDayOfInterval({
