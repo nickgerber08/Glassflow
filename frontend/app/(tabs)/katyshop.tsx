@@ -1234,6 +1234,92 @@ export default function KatyshopScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Reschedule Modal */}
+      <Modal
+        visible={showRescheduleModal}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => setShowRescheduleModal(false)}
+      >
+        <View style={styles.calendarOverlay}>
+          <View style={styles.calendarModal}>
+            <Text style={styles.rescheduleTitle}>Reschedule Job</Text>
+            <Text style={styles.rescheduleSubtitle}>Select a new date for this job</Text>
+            
+            <View style={styles.calendarHeader}>
+              <TouchableOpacity onPress={() => {
+                const newMonth = new Date(rescheduleDate);
+                newMonth.setMonth(newMonth.getMonth() - 1);
+                setRescheduleDate(newMonth);
+              }}>
+                <Ionicons name="chevron-back" size={28} color="#2196F3" />
+              </TouchableOpacity>
+              <Text style={styles.calendarMonthTitle}>
+                {rescheduleDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+              </Text>
+              <TouchableOpacity onPress={() => {
+                const newMonth = new Date(rescheduleDate);
+                newMonth.setMonth(newMonth.getMonth() + 1);
+                setRescheduleDate(newMonth);
+              }}>
+                <Ionicons name="chevron-forward" size={28} color="#2196F3" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Weekday headers */}
+            <View style={styles.calendarWeekdays}>
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                <Text key={day} style={styles.calendarWeekdayText}>{day}</Text>
+              ))}
+            </View>
+
+            {/* Calendar days */}
+            <View style={styles.calendarDaysGrid}>
+              {getMonthDays(rescheduleDate).map((day, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    styles.calendarDay,
+                    day && isSameDay(day, rescheduleDate) && styles.calendarDaySelected,
+                    day && isSameDay(day, new Date()) && styles.calendarDayToday,
+                  ]}
+                  onPress={() => day && setRescheduleDate(day)}
+                  disabled={!day}
+                >
+                  {day && (
+                    <Text
+                      style={[
+                        styles.calendarDayText,
+                        isSameDay(day, rescheduleDate) && styles.calendarDayTextSelected,
+                        isSameDay(day, new Date()) && !isSameDay(day, rescheduleDate) && styles.calendarDayTextToday,
+                      ]}
+                    >
+                      {day.getDate()}
+                    </Text>
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* Action buttons */}
+            <View style={styles.rescheduleActions}>
+              <TouchableOpacity 
+                style={styles.rescheduleCancelBtn}
+                onPress={() => setShowRescheduleModal(false)}
+              >
+                <Text style={styles.rescheduleCancelBtnText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.rescheduleConfirmBtn}
+                onPress={() => rescheduleJob(rescheduleDate)}
+              >
+                <Text style={styles.rescheduleConfirmBtnText}>Reschedule</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
