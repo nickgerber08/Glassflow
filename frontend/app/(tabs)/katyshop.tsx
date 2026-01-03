@@ -565,16 +565,18 @@ export default function KatyshopScreen() {
         <Text style={styles.jobCount}>{jobs.length} jobs</Text>
       </View>
 
-      {/* Block Schedule */}
-      <ScrollView
-        style={styles.scheduleContainer}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      >
-        {TIME_SLOTS.map((time, index) => renderTimeBlock(time, index))}
-        <View style={{ height: 100 }} />
-      </ScrollView>
+      {/* Block Schedule with Swipe Gesture */}
+      <View style={styles.scheduleWrapper} {...panResponder.panHandlers}>
+        <ScrollView
+          style={styles.scheduleContainer}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
+          {TIME_SLOTS.map((time, index) => renderTimeBlock(time, index))}
+          <View style={{ height: 100 }} />
+        </ScrollView>
+      </View>
 
       {/* Add Job Modal */}
       <Modal
