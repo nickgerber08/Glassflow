@@ -1086,6 +1086,223 @@ async def get_daily_parts(request: Request, date: str):
     
     return result
 
+# ============== SERVICE ADVISOR ENDPOINTS ==============
+
+@api_router.get("/service-advisors", response_model=List[ServiceAdvisor])
+async def get_service_advisors(request: Request):
+    """Get all service advisors"""
+    await require_auth(request)
+    
+    advisors = await db.service_advisors.find(
+        {},
+        {"_id": 0}
+    ).sort("name", 1).to_list(100)
+    
+    return [ServiceAdvisor(**a) for a in advisors]
+
+@api_router.post("/service-advisors", response_model=ServiceAdvisor)
+async def create_service_advisor(advisor_data: ServiceAdvisorCreate, request: Request):
+    """Create a new service advisor"""
+    await require_auth(request)
+    
+    # Check if advisor with same name already exists
+    existing = await db.service_advisors.find_one({"name": advisor_data.name})
+    if existing:
+        raise HTTPException(status_code=400, detail="Service advisor with this name already exists")
+    
+    advisor = ServiceAdvisor(
+        advisor_id=f"adv_{uuid.uuid4().hex[:12]}",
+        name=advisor_data.name,
+        created_at=datetime.now(timezone.utc)
+    )
+    
+    await db.service_advisors.insert_one(advisor.model_dump())
+    return advisor
+
+@api_router.delete("/service-advisors/{advisor_id}")
+async def delete_service_advisor(advisor_id: str, request: Request):
+    """Delete a service advisor"""
+    await require_auth(request)
+    
+    result = await db.service_advisors.delete_one({"advisor_id": advisor_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Service advisor not found")
+    
+    return {"success": True}
+
+# ============== KATYSHOP JOB ENDPOINTS ==============
+
+@api_router.get("/katyshop/jobs", response_model=List[KatyshopJob])
+async def get_katyshop_jobs(request: Request, date: Optional[str] = None):
+    """Get Katyshop jobs, optionally filtered by date"""
+    await require_auth(request)
+    
+    query = {}
+    if date:
+        query["date"] = date
+    
+    jobs = await db.katyshop_jobs.find(
+        query,
+        {"_id": 0}
+    ).sort([("date", 1), ("start_time", 1)]).to_list(500)
+    
+    return [KatyshopJob(**j) for j in jobs]
+
+@api_router.post("/katyshop/jobs", response_model=KatyshopJob)
+async def create_katyshop_job(job_data: KatyshopJobCreate, request: Request):
+    """Create a new Katyshop job"""
+    user = await require_auth(request)
+    
+    now = datetime.now(timezone.utc)
+    job = KatyshopJob(
+        job_id=f"katy_{uuid.uuid4().hex[:12]}",
+        vehicle_year=job_data.vehicle_year,
+        vehicle_model=job_data.vehicle_model,
+        vehicle_make=job_data.vehicle_make,
+        part_number=job_data.part_number,
+        needs_calibration=job_data.needs_calibration,
+        customer_type=job_data.customer_type,
+        service_advisor_id=job_data.service_advisor_id,
+        service_advisor_name=job_data.service_advisor_name,
+        date=job_data.date,
+        start_time=job_data.start_time,
+        end_time=job_data.end_time,
+        status="scheduled",
+        assigned_to="sina",
+        assigned_to_name="Sina",
+        created_by=user["user_id"],
+        created_by_name=user.get("name", "Unknown"),
+        notes=job_data.notes,
+        created_at=now,
+        updated_at=now
+    )
+    
+    await db.katyshop_jobs.insert_one(job.model_dump())
+    
+    # Send notification to Sina (dedicated tech)
+    try:
+        # Find Sina's user record to get push token
+        sina_user = await db.users.find_one({"name": {"$regex": "sina", "$options": "i"}})
+        
+        # Create notification record
+        notification = {
+            "notification_id": f"notif_{uuid.uuid4().hex[:12]}",
+            "user_id": "sina",  # For Sina
+            "title": "New Katyshop Job",
+            "body": f"{job_data.vehicle_year} {job_data.vehicle_model} - {job_data.start_time} to {job_data.end_time}",
+            "job_id": job.job_id,
+            "job_type": "katyshop",
+            "read": False,
+            "created_at": now
+        }
+        await db.notifications.insert_one(notification)
+        
+        # Send push notification if Sina has a push token
+        if sina_user and sina_user.get("push_token"):
+            try:
+                from exponent_server_sdk import PushClient, PushMessage
+                push_client = PushClient()
+                push_client.publish(
+                    PushMessage(
+                        to=sina_user["push_token"],
+                        title="New Katyshop Job",
+                        body=f"{job_data.vehicle_year} {job_data.vehicle_model} - {job_data.start_time} to {job_data.end_time}",
+                        data={"job_id": job.job_id, "type": "katyshop_new"}
+                    )
+                )
+            except Exception as e:
+                logging.error(f"Failed to send push to Sina: {e}")
+    except Exception as e:
+        logging.error(f"Error creating notification for Sina: {e}")
+    
+    return job
+
+@api_router.get("/katyshop/jobs/{job_id}", response_model=KatyshopJob)
+async def get_katyshop_job(job_id: str, request: Request):
+    """Get a specific Katyshop job"""
+    await require_auth(request)
+    
+    job = await db.katyshop_jobs.find_one({"job_id": job_id}, {"_id": 0})
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    return KatyshopJob(**job)
+
+@api_router.patch("/katyshop/jobs/{job_id}", response_model=KatyshopJob)
+async def update_katyshop_job(job_id: str, job_data: KatyshopJobUpdate, request: Request):
+    """Update a Katyshop job"""
+    user = await require_auth(request)
+    
+    # Get existing job
+    existing_job = await db.katyshop_jobs.find_one({"job_id": job_id})
+    if not existing_job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    old_status = existing_job.get("status")
+    
+    update_data = {k: v for k, v in job_data.model_dump().items() if v is not None}
+    update_data["updated_at"] = datetime.now(timezone.utc)
+    
+    await db.katyshop_jobs.update_one(
+        {"job_id": job_id},
+        {"$set": update_data}
+    )
+    
+    # If status changed to completed, notify the creator
+    new_status = job_data.status
+    if new_status == "completed" and old_status != "completed":
+        try:
+            creator_id = existing_job.get("created_by")
+            creator_name = existing_job.get("created_by_name", "Unknown")
+            
+            # Create notification for creator
+            notification = {
+                "notification_id": f"notif_{uuid.uuid4().hex[:12]}",
+                "user_id": creator_id,
+                "title": "Katyshop Job Completed",
+                "body": f"{existing_job['vehicle_year']} {existing_job['vehicle_model']} is ready - Completed by Sina",
+                "job_id": job_id,
+                "job_type": "katyshop",
+                "read": False,
+                "created_at": datetime.now(timezone.utc)
+            }
+            await db.notifications.insert_one(notification)
+            
+            # Send push notification to creator
+            creator_user = await db.users.find_one({"user_id": creator_id})
+            if creator_user and creator_user.get("push_token"):
+                try:
+                    from exponent_server_sdk import PushClient, PushMessage
+                    push_client = PushClient()
+                    push_client.publish(
+                        PushMessage(
+                            to=creator_user["push_token"],
+                            title="Katyshop Job Completed",
+                            body=f"{existing_job['vehicle_year']} {existing_job['vehicle_model']} is ready",
+                            data={"job_id": job_id, "type": "katyshop_completed"}
+                        )
+                    )
+                except Exception as e:
+                    logging.error(f"Failed to send push to creator: {e}")
+        except Exception as e:
+            logging.error(f"Error creating completion notification: {e}")
+    
+    updated_job = await db.katyshop_jobs.find_one({"job_id": job_id}, {"_id": 0})
+    return KatyshopJob(**updated_job)
+
+@api_router.delete("/katyshop/jobs/{job_id}")
+async def delete_katyshop_job(job_id: str, request: Request):
+    """Delete a Katyshop job"""
+    await require_auth(request)
+    
+    result = await db.katyshop_jobs.delete_one({"job_id": job_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    return {"success": True}
+
 # Socket.IO events disabled for now
 # @sio.event
 # async def connect(sid, environ):
