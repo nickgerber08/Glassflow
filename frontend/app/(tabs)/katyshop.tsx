@@ -2252,6 +2252,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
   },
+  createdByRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  createdByOrderInfo: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#4CAF50',
+  },
   detailValueHighlight: {
     fontSize: 20,
     fontWeight: '700',
