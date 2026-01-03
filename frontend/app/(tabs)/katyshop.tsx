@@ -1261,6 +1261,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#1976D2',
   },
+  scheduleWrapper: {
+    flex: 1,
+  },
   scheduleContainer: {
     flex: 1,
     marginTop: 16,
