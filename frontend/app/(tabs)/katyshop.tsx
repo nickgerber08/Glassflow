@@ -649,10 +649,16 @@ export default function KatyshopScreen() {
                   <Text style={styles.jobBlockVehicle} numberOfLines={1}>
                     {job.vehicle_year} {job.vehicle_make || ''} {job.vehicle_model}
                   </Text>
-                  {/* Row 2: Part # (RED) | ADV: Name | Calibration */}
+                  {/* Row 2: Part # with Order Info | Calibration */}
                   <View style={styles.jobBlockRow}>
                     <Text style={styles.jobBlockPart}>{job.part_number}</Text>
-                    <Text style={styles.jobBlockAdvisor}>ADV: {job.service_advisor_name}</Text>
+                    {job.parts_order_status === 'ordered' && job.parts_distributor ? (
+                      <Text style={styles.jobBlockOrderInfo}>
+                        {job.parts_distributor} - {formatTime(job.parts_eta || '')}
+                      </Text>
+                    ) : (
+                      <Text style={styles.jobBlockAdvisor}>ADV: {job.service_advisor_name}</Text>
+                    )}
                     {job.needs_calibration && (
                       <Text style={styles.jobBlockCalibration}>Calibration</Text>
                     )}
