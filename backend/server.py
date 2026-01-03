@@ -194,6 +194,67 @@ class Distributor(BaseModel):
 class DistributorCreate(BaseModel):
     name: str
 
+# Service Advisor models (for Katyshop)
+class ServiceAdvisor(BaseModel):
+    advisor_id: str
+    name: str
+    created_at: datetime
+
+class ServiceAdvisorCreate(BaseModel):
+    name: str
+
+# Katyshop Job models
+class KatyshopJob(BaseModel):
+    job_id: str
+    vehicle_year: str
+    vehicle_model: str
+    vehicle_make: Optional[str] = None  # Optional
+    part_number: str  # Required
+    needs_calibration: bool = False
+    customer_type: str  # 'waiter' or 'drop_off'
+    service_advisor_id: str
+    service_advisor_name: str
+    date: str  # YYYY-MM-DD
+    start_time: str  # HH:MM (24hr)
+    end_time: str  # HH:MM (24hr)
+    status: str = "scheduled"  # scheduled, in_progress, completed
+    assigned_to: str = "sina"  # Always Sina
+    assigned_to_name: str = "Sina"
+    created_by: str
+    created_by_name: Optional[str] = None
+    notes: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+
+class KatyshopJobCreate(BaseModel):
+    vehicle_year: str
+    vehicle_model: str
+    vehicle_make: Optional[str] = None
+    part_number: str
+    needs_calibration: bool = False
+    customer_type: str  # 'waiter' or 'drop_off'
+    service_advisor_id: str
+    service_advisor_name: str
+    date: str  # YYYY-MM-DD
+    start_time: str  # HH:MM
+    end_time: str  # HH:MM
+    notes: Optional[str] = None
+
+class KatyshopJobUpdate(BaseModel):
+    vehicle_year: Optional[str] = None
+    vehicle_model: Optional[str] = None
+    vehicle_make: Optional[str] = None
+    part_number: Optional[str] = None
+    needs_calibration: Optional[bool] = None
+    customer_type: Optional[str] = None
+    service_advisor_id: Optional[str] = None
+    service_advisor_name: Optional[str] = None
+    date: Optional[str] = None
+    start_time: Optional[str] = None
+    end_time: Optional[str] = None
+    status: Optional[str] = None
+    notes: Optional[str] = None
+
 # Auth Helper Functions
 async def get_current_user(request: Request) -> Optional[User]:
     # Try to get session_token from Authorization header first
