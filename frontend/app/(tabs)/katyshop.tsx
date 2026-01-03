@@ -1246,7 +1246,7 @@ const styles = StyleSheet.create({
   },
   timeRow: {
     flexDirection: 'row',
-    height: 50,
+    height: HOUR_HEIGHT,
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
   },
