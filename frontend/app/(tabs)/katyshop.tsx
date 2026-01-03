@@ -1660,4 +1660,129 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#F44336',
   },
+  // Date picker button in form
+  datePickerBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E3F2FD',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    gap: 10,
+  },
+  datePickerBtnText: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1976D2',
+  },
+  // Calendar modal styles
+  calendarOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  calendarModal: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    width: '100%',
+    maxWidth: 360,
+    padding: 20,
+  },
+  calendarHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  calendarMonthTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#333',
+  },
+  calendarWeekdays: {
+    flexDirection: 'row',
+    marginBottom: 10,
+  },
+  calendarWeekdayText: {
+    flex: 1,
+    textAlign: 'center',
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#999',
+  },
+  calendarDaysGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  calendarDay: {
+    width: '14.28%',
+    aspectRatio: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 20,
+  },
+  calendarDaySelected: {
+    backgroundColor: '#2196F3',
+  },
+  calendarDayToday: {
+    borderWidth: 2,
+    borderColor: '#2196F3',
+  },
+  calendarDayText: {
+    fontSize: 15,
+    color: '#333',
+  },
+  calendarDayTextSelected: {
+    color: '#fff',
+    fontWeight: '700',
+  },
+  calendarDayTextToday: {
+    color: '#2196F3',
+    fontWeight: '600',
+  },
+  calendarQuickActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+    gap: 12,
+  },
+  calendarQuickBtn: {
+    flex: 1,
+    backgroundColor: '#E3F2FD',
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  calendarQuickBtnText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#2196F3',
+  },
+  calendarCloseBtn: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  calendarCloseBtnText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#666',
+  },
+  calendarDoneBtn: {
+    backgroundColor: '#4CAF50',
+    borderRadius: 10,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  calendarDoneBtnText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#fff',
+  },
 });
