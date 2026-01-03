@@ -317,7 +317,7 @@ export default function KatyshopScreen() {
           customer_type: formCustomerType,
           service_advisor_id: formAdvisorId,
           service_advisor_name: formAdvisorName,
-          date: formatDateForApi(selectedDate),
+          date: formatDateForApi(formDate),
           start_time: formStartTime,
           end_time: formEndTime,
           notes: formNotes || null,
