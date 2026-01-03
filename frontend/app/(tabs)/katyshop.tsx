@@ -1086,10 +1086,55 @@ export default function KatyshopScreen() {
                     </Text>
                   </View>
 
-                  {/* Part Number */}
+                  {/* Part Number with Order Info */}
                   <View style={styles.detailSection}>
                     <Text style={styles.detailSectionTitle}>Part Number</Text>
-                    <Text style={styles.detailValueHighlight}>{selectedJob.part_number}</Text>
+                    <View style={styles.partNumberRow}>
+                      <Text style={styles.detailValueHighlight}>{selectedJob.part_number}</Text>
+                      {selectedJob.parts_order_status === 'ordered' && selectedJob.parts_distributor && (
+                        <Text style={styles.partOrderInfo}>
+                          {selectedJob.parts_distributor} - {formatTime(selectedJob.parts_eta || '')}
+                        </Text>
+                      )}
+                    </View>
+                    
+                    {/* Parts Order Actions */}
+                    {selectedJob.parts_order_status === 'none' || !selectedJob.parts_order_status ? (
+                      <TouchableOpacity
+                        style={styles.requestPartBtn}
+                        onPress={() => {
+                          setPartsInvoice('');
+                          setShowPartsRequestModal(true);
+                        }}
+                      >
+                        <Ionicons name="cart-outline" size={18} color="#2196F3" />
+                        <Text style={styles.requestPartBtnText}>Request Part</Text>
+                      </TouchableOpacity>
+                    ) : selectedJob.parts_order_status === 'requested' ? (
+                      <View style={styles.partsStatusContainer}>
+                        <View style={styles.partsRequestedBadge}>
+                          <Ionicons name="time-outline" size={16} color="#FF9800" />
+                          <Text style={styles.partsRequestedText}>Part Requested (Invoice #{selectedJob.omega_invoice})</Text>
+                        </View>
+                        {user?.role === 'admin' && (
+                          <TouchableOpacity
+                            style={styles.respondPartBtn}
+                            onPress={() => {
+                              setPartsDistributor('');
+                              setPartsEta('09:00');
+                              setShowPartsResponseModal(true);
+                            }}
+                          >
+                            <Text style={styles.respondPartBtnText}>Respond</Text>
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                    ) : (
+                      <View style={styles.partsOrderedBadge}>
+                        <Ionicons name="checkmark-circle" size={16} color="#4CAF50" />
+                        <Text style={styles.partsOrderedText}>Part Ordered</Text>
+                      </View>
+                    )}
                   </View>
 
                   {/* Calibration */}
