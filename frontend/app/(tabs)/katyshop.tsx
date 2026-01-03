@@ -1273,13 +1273,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: 8,
-  },
-  jobBlockTime: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#666',
-    minWidth: 75,
+    gap: 6,
   },
   statusDot: {
     width: 10,
@@ -1288,23 +1282,26 @@ const styles = StyleSheet.create({
   },
   jobBlockVehicle: {
     flex: 1,
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
     color: '#333',
   },
   jobBlockPart: {
-    fontSize: 12,
+    fontSize: 13,
     color: '#E53935',
     fontWeight: '700',
   },
+  calibrationIcon: {
+    fontSize: 12,
+  },
   jobBlockCustomerType: {
-    fontSize: 11,
-    color: '#666',
-    minWidth: 70,
+    fontSize: 12,
+    color: '#555',
+    fontWeight: '500',
   },
   jobBlockAdvisor: {
     flex: 1,
-    fontSize: 11,
+    fontSize: 12,
     color: '#666',
   },
   // Modal styles
