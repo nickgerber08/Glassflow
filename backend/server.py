@@ -1426,8 +1426,8 @@ async def respond_to_part_request(job_id: str, parts_response: PartsResponseCrea
             {"job_id": job_id, "type": "parts_ordered"}
         )
     
-    # Return updated job
-    updated_job = await db.katyshop_jobs.find_one({"job_id": job_id})
+    # Return updated job without _id
+    updated_job = await db.katyshop_jobs.find_one({"job_id": job_id}, {"_id": 0})
     return updated_job
 
 # Socket.IO events disabled for now
