@@ -629,7 +629,11 @@ export default function KatyshopScreen() {
       </View>
 
       {/* Block Schedule with Swipe Gesture */}
-      <View style={styles.scheduleWrapper} {...panResponder.panHandlers}>
+      <View 
+        style={styles.scheduleWrapper} 
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         <ScrollView
           style={styles.scheduleContainer}
           refreshControl={
