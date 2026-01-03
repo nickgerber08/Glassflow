@@ -1277,37 +1277,37 @@ const styles = StyleSheet.create({
   jobBlockRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     gap: 6,
-  },
-  statusDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
   },
   jobBlockVehicle: {
     flex: 1,
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '600',
     color: '#333',
   },
   jobBlockPart: {
-    fontSize: 13,
+    fontSize: 12,
     color: '#E53935',
     fontWeight: '700',
   },
-  calibrationIcon: {
-    fontSize: 12,
-  },
   jobBlockCustomerType: {
-    fontSize: 12,
-    color: '#555',
-    fontWeight: '500',
+    fontSize: 11,
   },
   jobBlockAdvisor: {
-    flex: 1,
-    fontSize: 12,
+    fontSize: 11,
     color: '#666',
+    fontWeight: '500',
+  },
+  jobBlockCreator: {
+    fontSize: 11,
+    color: '#1976D2',
+    fontWeight: '600',
+  },
+  jobBlockCalibration: {
+    fontSize: 11,
+    color: '#FF9800',
+    fontWeight: '600',
+    marginLeft: 8,
   },
   // Modal styles
   modalOverlay: {
