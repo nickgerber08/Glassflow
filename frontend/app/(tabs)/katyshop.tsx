@@ -1591,6 +1591,161 @@ export default function KatyshopScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Parts Request Modal - Tech enters invoice # */}
+      <Modal
+        visible={showPartsRequestModal}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => setShowPartsRequestModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.partsModal}>
+            <Text style={styles.partsModalTitle}>Request Part</Text>
+            <Text style={styles.partsModalSubtitle}>
+              Part: {selectedJob?.part_number}
+            </Text>
+            
+            <View style={styles.formField}>
+              <Text style={styles.formLabel}>Omega Invoice # *</Text>
+              <TextInput
+                style={styles.formInput}
+                placeholder="Enter invoice number"
+                placeholderTextColor="#999"
+                value={partsInvoice}
+                onChangeText={setPartsInvoice}
+                keyboardType="number-pad"
+              />
+            </View>
+
+            <View style={styles.partsModalActions}>
+              <TouchableOpacity 
+                style={styles.rescheduleCancelBtn}
+                onPress={() => setShowPartsRequestModal(false)}
+              >
+                <Text style={styles.rescheduleCancelBtnText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.rescheduleConfirmBtn}
+                onPress={requestPart}
+              >
+                <Text style={styles.rescheduleConfirmBtnText}>Request</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Parts Response Modal - Office manager enters distributor & ETA */}
+      <Modal
+        visible={showPartsResponseModal}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => setShowPartsResponseModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.partsModal}>
+            <Text style={styles.partsModalTitle}>Respond to Part Request</Text>
+            <Text style={styles.partsModalSubtitle}>
+              Part: {selectedJob?.part_number} - Invoice #{selectedJob?.omega_invoice}
+            </Text>
+            
+            {/* Distributor Selection */}
+            <View style={styles.formField}>
+              <Text style={styles.formLabel}>Distributor *</Text>
+              <View style={styles.distributorOptions}>
+                {DISTRIBUTORS.map((dist) => (
+                  <TouchableOpacity
+                    key={dist}
+                    style={[
+                      styles.distributorOption,
+                      partsDistributor === dist && styles.distributorOptionSelected
+                    ]}
+                    onPress={() => setPartsDistributor(dist)}
+                  >
+                    <Text style={[
+                      styles.distributorOptionText,
+                      partsDistributor === dist && styles.distributorOptionTextSelected
+                    ]}>
+                      {dist}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            {/* ETA Time */}
+            <View style={styles.formField}>
+              <Text style={styles.formLabel}>ETA Time *</Text>
+              <TouchableOpacity
+                style={styles.rescheduleTimeBtn}
+                onPress={() => setShowPartsEtaPicker(true)}
+              >
+                <Ionicons name="time-outline" size={18} color="#2196F3" />
+                <Text style={styles.rescheduleTimeBtnText}>{formatTime(partsEta)}</Text>
+                <Ionicons name="chevron-down" size={18} color="#666" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.partsModalActions}>
+              <TouchableOpacity 
+                style={styles.rescheduleCancelBtn}
+                onPress={() => setShowPartsResponseModal(false)}
+              >
+                <Text style={styles.rescheduleCancelBtnText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.rescheduleConfirmBtn}
+                onPress={respondToPart}
+              >
+                <Text style={styles.rescheduleConfirmBtnText}>Send</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Parts ETA Time Picker */}
+      <Modal
+        visible={showPartsEtaPicker}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => setShowPartsEtaPicker(false)}
+      >
+        <View style={styles.timePickerOverlay}>
+          <View style={styles.timePickerModal}>
+            <Text style={styles.timePickerTitle}>Select ETA Time</Text>
+            <ScrollView style={styles.timePickerScroll}>
+              {TIME_SLOTS.map((time) => (
+                <TouchableOpacity
+                  key={time}
+                  style={[
+                    styles.timePickerItem,
+                    partsEta === time && styles.timePickerItemSelected
+                  ]}
+                  onPress={() => {
+                    setPartsEta(time);
+                    setShowPartsEtaPicker(false);
+                  }}
+                >
+                  <Text style={[
+                    styles.timePickerItemText,
+                    partsEta === time && styles.timePickerItemTextSelected
+                  ]}>
+                    {formatTime(time)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            <TouchableOpacity
+              style={styles.timePickerCancelBtn}
+              onPress={() => setShowPartsEtaPicker(false)}
+            >
+              <Text style={styles.timePickerCancelBtnText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
