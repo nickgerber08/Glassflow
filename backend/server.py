@@ -223,6 +223,11 @@ class KatyshopJob(BaseModel):
     created_by: str
     created_by_name: Optional[str] = None
     notes: Optional[str] = None
+    # Parts order fields
+    parts_order_status: str = "none"  # none, requested, ordered
+    omega_invoice: Optional[str] = None
+    parts_distributor: Optional[str] = None  # Mygrant, PGW, IGC, Vitro, Pilkington
+    parts_eta: Optional[str] = None  # HH:MM format
     created_at: datetime
     updated_at: datetime
 
@@ -254,6 +259,19 @@ class KatyshopJobUpdate(BaseModel):
     end_time: Optional[str] = None
     status: Optional[str] = None
     notes: Optional[str] = None
+    # Parts order fields
+    parts_order_status: Optional[str] = None
+    omega_invoice: Optional[str] = None
+    parts_distributor: Optional[str] = None
+    parts_eta: Optional[str] = None
+
+# Parts Request Model
+class PartsRequestCreate(BaseModel):
+    omega_invoice: str  # Required
+
+class PartsResponseCreate(BaseModel):
+    parts_distributor: str  # Required
+    parts_eta: str  # Required - HH:MM format
 
 # Auth Helper Functions
 async def get_current_user(request: Request) -> Optional[User]:
