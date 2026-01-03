@@ -1369,8 +1369,8 @@ async def request_part(job_id: str, parts_request: PartsRequestCreate, request: 
                 {"job_id": job_id, "type": "parts_request"}
             )
     
-    # Return updated job
-    updated_job = await db.katyshop_jobs.find_one({"job_id": job_id})
+    # Return updated job without _id
+    updated_job = await db.katyshop_jobs.find_one({"job_id": job_id}, {"_id": 0})
     return updated_job
 
 @api_router.post("/katyshop/jobs/{job_id}/respond-part")
