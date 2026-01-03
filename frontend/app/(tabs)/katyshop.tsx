@@ -1852,6 +1852,21 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#fff',
   },
+  rescheduleBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#E3F2FD',
+    borderRadius: 10,
+    paddingVertical: 14,
+    gap: 8,
+    marginBottom: 12,
+  },
+  rescheduleBtnText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#2196F3',
+  },
   deleteJobBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1866,6 +1881,49 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
     color: '#F44336',
+  },
+  // Reschedule modal styles
+  rescheduleTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  rescheduleSubtitle: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  rescheduleActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 20,
+  },
+  rescheduleCancelBtn: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 10,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  rescheduleCancelBtnText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#666',
+  },
+  rescheduleConfirmBtn: {
+    flex: 1,
+    backgroundColor: '#2196F3',
+    borderRadius: 10,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  rescheduleConfirmBtnText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#fff',
   },
   // Date picker button in form
   datePickerBtn: {
