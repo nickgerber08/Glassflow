@@ -102,6 +102,26 @@ export default function KatyshopScreen() {
   const [showStartTimePicker, setShowStartTimePicker] = useState(false);
   const [showEndTimePicker, setShowEndTimePicker] = useState(false);
 
+  // Swipe gesture for day navigation
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => false,
+      onMoveShouldSetPanResponder: (_, gestureState) => {
+        // Only respond to horizontal swipes
+        return Math.abs(gestureState.dx) > Math.abs(gestureState.dy) && Math.abs(gestureState.dx) > 20;
+      },
+      onPanResponderRelease: (_, gestureState) => {
+        if (gestureState.dx > 50) {
+          // Swipe right - go to previous day
+          changeDate(-1);
+        } else if (gestureState.dx < -50) {
+          // Swipe left - go to next day
+          changeDate(1);
+        }
+      },
+    })
+  ).current;
+
   const fetchJobs = useCallback(async () => {
     try {
       const dateStr = formatDateForApi(selectedDate);
