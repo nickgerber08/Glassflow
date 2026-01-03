@@ -77,8 +77,11 @@ export default function KatyshopScreen() {
   const [showAddJobModal, setShowAddJobModal] = useState(false);
   const [showAdvisorModal, setShowAdvisorModal] = useState(false);
   const [showJobDetailModal, setShowJobDetailModal] = useState(false);
+  const [showCalendarModal, setShowCalendarModal] = useState(false);
+  const [showFormDatePicker, setShowFormDatePicker] = useState(false);
   const [selectedJob, setSelectedJob] = useState<KatyshopJob | null>(null);
   const [newAdvisorName, setNewAdvisorName] = useState('');
+  const [calendarViewMonth, setCalendarViewMonth] = useState(new Date());
   
   // Job form state
   const [formYear, setFormYear] = useState('');
@@ -89,6 +92,7 @@ export default function KatyshopScreen() {
   const [formCustomerType, setFormCustomerType] = useState('waiter');
   const [formAdvisorId, setFormAdvisorId] = useState('');
   const [formAdvisorName, setFormAdvisorName] = useState('');
+  const [formDate, setFormDate] = useState(new Date());
   const [formStartTime, setFormStartTime] = useState('09:00');
   const [formEndTime, setFormEndTime] = useState('10:00');
   const [formNotes, setFormNotes] = useState('');
