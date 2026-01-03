@@ -441,22 +441,35 @@ export default function KatyshopScreen() {
       // Parse the job's current date
       const [year, month, day] = selectedJob.date.split('-').map(Number);
       setRescheduleDate(new Date(year, month - 1, day));
+      // Set the current times
+      setRescheduleStartTime(selectedJob.start_time);
+      setRescheduleEndTime(selectedJob.end_time);
       setShowRescheduleModal(true);
     }
   };
 
-  const rescheduleJob = async (newDate: Date) => {
+  const rescheduleJob = async () => {
     if (!selectedJob) return;
     
+    // Validate times
+    if (rescheduleStartTime >= rescheduleEndTime) {
+      Alert.alert('Invalid Time', 'End time must be after start time');
+      return;
+    }
+    
     try {
-      const dateStr = formatDateForApi(newDate);
+      const dateStr = formatDateForApi(rescheduleDate);
       const response = await fetch(`${BACKEND_URL}/api/katyshop/jobs/${selectedJob.job_id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${sessionToken}`,
         },
-        body: JSON.stringify({ date: dateStr }),
+        body: JSON.stringify({ 
+          date: dateStr,
+          start_time: rescheduleStartTime,
+          end_time: rescheduleEndTime,
+        }),
       });
 
       if (response.ok) {
@@ -464,9 +477,9 @@ export default function KatyshopScreen() {
         setShowJobDetailModal(false);
         setSelectedJob(null);
         // Navigate to the new date to show the rescheduled job
-        setSelectedDate(newDate);
+        setSelectedDate(rescheduleDate);
         await fetchJobs();
-        Alert.alert('Success', `Job rescheduled to ${newDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}`);
+        Alert.alert('Success', `Job rescheduled to ${rescheduleDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} at ${formatTime(rescheduleStartTime)}`);
       } else {
         const error = await response.json();
         Alert.alert('Error', error.detail || 'Failed to reschedule job');
