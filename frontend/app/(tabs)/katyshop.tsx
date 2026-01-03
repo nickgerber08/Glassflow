@@ -423,9 +423,6 @@ export default function KatyshopScreen() {
               const slotCount = Math.max(1, endIndex - startIndex);
               const height = slotCount * 50 - 4;
 
-              // Get creator's first name
-              const creatorFirstName = job.created_by_name ? job.created_by_name.split(' ')[0] : '';
-
               return (
                 <TouchableOpacity
                   key={job.job_id}
@@ -442,25 +439,19 @@ export default function KatyshopScreen() {
                     setShowJobDetailModal(true);
                   }}
                 >
-                  {/* Row 1: Vehicle, Part Number, Customer Type, Advisor */}
+                  {/* Row 1: Year Make Model */}
                   <View style={styles.jobBlockRow}>
                     <Text style={styles.jobBlockVehicle} numberOfLines={1}>
                       {job.vehicle_year} {job.vehicle_make || ''} {job.vehicle_model}
                     </Text>
+                  </View>
+                  {/* Row 2: Part # | ADV: Name | Calibration */}
+                  <View style={styles.jobBlockRow}>
                     <Text style={styles.jobBlockPart} numberOfLines={1}>
                       {job.part_number}
                     </Text>
-                    <Text style={styles.jobBlockCustomerType}>
-                      {job.customer_type === 'waiter' ? '⏳' : '🚗'}
-                    </Text>
                     <Text style={styles.jobBlockAdvisor} numberOfLines={1}>
                       ADV: {job.service_advisor_name}
-                    </Text>
-                  </View>
-                  {/* Row 2: Creator Name & Calibration */}
-                  <View style={styles.jobBlockRow}>
-                    <Text style={styles.jobBlockCreator} numberOfLines={1}>
-                      {creatorFirstName}
                     </Text>
                     {job.needs_calibration && (
                       <Text style={styles.jobBlockCalibration}>Calibration</Text>
