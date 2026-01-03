@@ -63,7 +63,15 @@ interface KatyshopJob {
   created_by: string;
   created_by_name?: string;
   notes?: string;
+  // Parts order fields
+  parts_order_status?: string; // none, requested, ordered
+  omega_invoice?: string;
+  parts_distributor?: string;
+  parts_eta?: string;
 }
+
+// Distributor options
+const DISTRIBUTORS = ['Mygrant', 'PGW', 'IGC', 'Vitro', 'Pilkington'];
 
 export default function KatyshopScreen() {
   const { sessionToken, user } = useAuth();
