@@ -1317,6 +1317,37 @@ export default function KatyshopScreen() {
               ))}
             </View>
 
+            {/* Time Pickers */}
+            <View style={styles.rescheduleTimeSection}>
+              <Text style={styles.rescheduleTimeSectionTitle}>Select Time</Text>
+              
+              {/* Start Time */}
+              <View style={styles.rescheduleTimeRow}>
+                <Text style={styles.rescheduleTimeLabel}>Start Time:</Text>
+                <TouchableOpacity
+                  style={styles.rescheduleTimeBtn}
+                  onPress={() => setShowRescheduleStartPicker(true)}
+                >
+                  <Ionicons name="time-outline" size={18} color="#2196F3" />
+                  <Text style={styles.rescheduleTimeBtnText}>{formatTime(rescheduleStartTime)}</Text>
+                  <Ionicons name="chevron-down" size={18} color="#666" />
+                </TouchableOpacity>
+              </View>
+
+              {/* End Time */}
+              <View style={styles.rescheduleTimeRow}>
+                <Text style={styles.rescheduleTimeLabel}>End Time:</Text>
+                <TouchableOpacity
+                  style={styles.rescheduleTimeBtn}
+                  onPress={() => setShowRescheduleEndPicker(true)}
+                >
+                  <Ionicons name="time-outline" size={18} color="#2196F3" />
+                  <Text style={styles.rescheduleTimeBtnText}>{formatTime(rescheduleEndTime)}</Text>
+                  <Ionicons name="chevron-down" size={18} color="#666" />
+                </TouchableOpacity>
+              </View>
+            </View>
+
             {/* Action buttons */}
             <View style={styles.rescheduleActions}>
               <TouchableOpacity 
@@ -1327,11 +1358,102 @@ export default function KatyshopScreen() {
               </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.rescheduleConfirmBtn}
-                onPress={() => rescheduleJob(rescheduleDate)}
+                onPress={() => rescheduleJob()}
               >
                 <Text style={styles.rescheduleConfirmBtnText}>Reschedule</Text>
               </TouchableOpacity>
             </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Reschedule Start Time Picker Modal */}
+      <Modal
+        visible={showRescheduleStartPicker}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => setShowRescheduleStartPicker(false)}
+      >
+        <View style={styles.timePickerOverlay}>
+          <View style={styles.timePickerModal}>
+            <Text style={styles.timePickerTitle}>Select Start Time</Text>
+            <ScrollView style={styles.timePickerScroll}>
+              {TIME_SLOTS.map((time) => (
+                <TouchableOpacity
+                  key={time}
+                  style={[
+                    styles.timePickerItem,
+                    rescheduleStartTime === time && styles.timePickerItemSelected
+                  ]}
+                  onPress={() => {
+                    setRescheduleStartTime(time);
+                    // Auto-adjust end time if needed
+                    if (time >= rescheduleEndTime) {
+                      const idx = TIME_SLOTS.indexOf(time);
+                      if (idx < TIME_SLOTS.length - 1) {
+                        setRescheduleEndTime(TIME_SLOTS[idx + 1]);
+                      }
+                    }
+                    setShowRescheduleStartPicker(false);
+                  }}
+                >
+                  <Text style={[
+                    styles.timePickerItemText,
+                    rescheduleStartTime === time && styles.timePickerItemTextSelected
+                  ]}>
+                    {formatTime(time)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            <TouchableOpacity
+              style={styles.timePickerCancelBtn}
+              onPress={() => setShowRescheduleStartPicker(false)}
+            >
+              <Text style={styles.timePickerCancelBtnText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Reschedule End Time Picker Modal */}
+      <Modal
+        visible={showRescheduleEndPicker}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => setShowRescheduleEndPicker(false)}
+      >
+        <View style={styles.timePickerOverlay}>
+          <View style={styles.timePickerModal}>
+            <Text style={styles.timePickerTitle}>Select End Time</Text>
+            <ScrollView style={styles.timePickerScroll}>
+              {TIME_SLOTS.filter(t => t > rescheduleStartTime).map((time) => (
+                <TouchableOpacity
+                  key={time}
+                  style={[
+                    styles.timePickerItem,
+                    rescheduleEndTime === time && styles.timePickerItemSelected
+                  ]}
+                  onPress={() => {
+                    setRescheduleEndTime(time);
+                    setShowRescheduleEndPicker(false);
+                  }}
+                >
+                  <Text style={[
+                    styles.timePickerItemText,
+                    rescheduleEndTime === time && styles.timePickerItemTextSelected
+                  ]}>
+                    {formatTime(time)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            <TouchableOpacity
+              style={styles.timePickerCancelBtn}
+              onPress={() => setShowRescheduleEndPicker(false)}
+            >
+              <Text style={styles.timePickerCancelBtnText}>Cancel</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
