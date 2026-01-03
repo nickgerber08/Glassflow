@@ -2062,6 +2062,99 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#fff',
   },
+  rescheduleTimeSection: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+  },
+  rescheduleTimeSectionTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 12,
+  },
+  rescheduleTimeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  rescheduleTimeLabel: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '500',
+  },
+  rescheduleTimeBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E3F2FD',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    gap: 8,
+  },
+  rescheduleTimeBtnText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#1976D2',
+  },
+  // Time picker modal styles
+  timePickerOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  timePickerModal: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    width: '80%',
+    maxWidth: 300,
+    maxHeight: '60%',
+    padding: 16,
+  },
+  timePickerTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  timePickerScroll: {
+    maxHeight: 250,
+  },
+  timePickerItem: {
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 4,
+  },
+  timePickerItemSelected: {
+    backgroundColor: '#E3F2FD',
+  },
+  timePickerItemText: {
+    fontSize: 16,
+    color: '#333',
+    textAlign: 'center',
+  },
+  timePickerItemTextSelected: {
+    color: '#1976D2',
+    fontWeight: '700',
+  },
+  timePickerCancelBtn: {
+    marginTop: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+  },
+  timePickerCancelBtnText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#666',
+  },
   // Date picker button in form
   datePickerBtn: {
     flexDirection: 'row',
