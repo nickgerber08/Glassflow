@@ -101,26 +101,39 @@ export default function KatyshopScreen() {
   const [formNotes, setFormNotes] = useState('');
   const [showStartTimePicker, setShowStartTimePicker] = useState(false);
   const [showEndTimePicker, setShowEndTimePicker] = useState(false);
+  const [showRescheduleModal, setShowRescheduleModal] = useState(false);
+  const [rescheduleDate, setRescheduleDate] = useState(new Date());
 
-  // Swipe gesture for day navigation
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => false,
-      onMoveShouldSetPanResponder: (_, gestureState) => {
-        // Only respond to horizontal swipes
-        return Math.abs(gestureState.dx) > Math.abs(gestureState.dy) && Math.abs(gestureState.dx) > 20;
-      },
-      onPanResponderRelease: (_, gestureState) => {
-        if (gestureState.dx > 50) {
-          // Swipe right - go to previous day
-          changeDate(-1);
-        } else if (gestureState.dx < -50) {
-          // Swipe left - go to next day
-          changeDate(1);
-        }
-      },
-    })
-  ).current;
+  // Track touch for swipe gesture
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
+
+  const handleTouchStart = (e: any) => {
+    touchStartX.current = e.nativeEvent.pageX;
+  };
+
+  const handleTouchEnd = (e: any) => {
+    touchEndX.current = e.nativeEvent.pageX;
+    const diff = touchStartX.current - touchEndX.current;
+    
+    if (Math.abs(diff) > 80) {
+      if (diff > 0) {
+        // Swipe left - next day
+        setSelectedDate(prev => {
+          const newDate = new Date(prev);
+          newDate.setDate(newDate.getDate() + 1);
+          return newDate;
+        });
+      } else {
+        // Swipe right - previous day
+        setSelectedDate(prev => {
+          const newDate = new Date(prev);
+          newDate.setDate(newDate.getDate() - 1);
+          return newDate;
+        });
+      }
+    }
+  };
 
   const fetchJobs = useCallback(async () => {
     try {
