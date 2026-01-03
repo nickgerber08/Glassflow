@@ -1171,8 +1171,8 @@ async def create_katyshop_job(job_data: KatyshopJobCreate, request: Request):
         status="scheduled",
         assigned_to="sina",
         assigned_to_name="Sina",
-        created_by=user["user_id"],
-        created_by_name=user.get("name", "Unknown"),
+        created_by=user.user_id,
+        created_by_name=user.name or "Unknown",
         notes=job_data.notes,
         created_at=now,
         updated_at=now
