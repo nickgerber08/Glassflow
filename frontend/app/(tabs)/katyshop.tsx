@@ -1061,6 +1061,15 @@ export default function KatyshopScreen() {
                     )}
                   </View>
 
+                  {/* Reschedule Button */}
+                  <TouchableOpacity
+                    style={styles.rescheduleBtn}
+                    onPress={openRescheduleModal}
+                  >
+                    <Ionicons name="calendar-outline" size={20} color="#2196F3" />
+                    <Text style={styles.rescheduleBtnText}>Reschedule Job</Text>
+                  </TouchableOpacity>
+
                   {/* Delete Button */}
                   <TouchableOpacity
                     style={styles.deleteJobBtn}
