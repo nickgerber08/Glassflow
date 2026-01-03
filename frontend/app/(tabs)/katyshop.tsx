@@ -410,13 +410,22 @@ export default function KatyshopScreen() {
           style: 'destructive',
           onPress: async () => {
             try {
-              await fetch(`${BACKEND_URL}/api/katyshop/jobs/${jobId}`, {
+              const response = await fetch(`${BACKEND_URL}/api/katyshop/jobs/${jobId}`, {
                 method: 'DELETE',
                 headers: { Authorization: `Bearer ${sessionToken}` },
               });
-              setShowJobDetailModal(false);
-              await fetchJobs();
+              
+              if (response.ok) {
+                setShowJobDetailModal(false);
+                setSelectedJob(null);
+                await fetchJobs();
+                Alert.alert('Success', 'Job deleted successfully');
+              } else {
+                const error = await response.json();
+                Alert.alert('Error', error.detail || 'Failed to delete job');
+              }
             } catch (error) {
+              console.error('Delete error:', error);
               Alert.alert('Error', 'Failed to delete job');
             }
           },
