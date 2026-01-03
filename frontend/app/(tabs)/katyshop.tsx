@@ -506,6 +506,79 @@ export default function KatyshopScreen() {
     }
   };
 
+  // Parts Request - Tech requests a part
+  const requestPart = async () => {
+    if (!selectedJob) return;
+    
+    if (!partsInvoice.trim()) {
+      Alert.alert('Required', 'Please enter the Omega Invoice #');
+      return;
+    }
+    
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/katyshop/jobs/${selectedJob.job_id}/request-part`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${sessionToken}`,
+        },
+        body: JSON.stringify({ omega_invoice: partsInvoice }),
+      });
+
+      if (response.ok) {
+        setShowPartsRequestModal(false);
+        setPartsInvoice('');
+        await fetchJobs();
+        Alert.alert('Success', 'Part request sent to office manager');
+      } else {
+        const error = await response.json();
+        Alert.alert('Error', error.detail || 'Failed to request part');
+      }
+    } catch (error) {
+      console.error('Parts request error:', error);
+      Alert.alert('Error', 'Failed to request part');
+    }
+  };
+
+  // Parts Response - Office manager responds with distributor and ETA
+  const respondToPart = async () => {
+    if (!selectedJob) return;
+    
+    if (!partsDistributor) {
+      Alert.alert('Required', 'Please select a distributor');
+      return;
+    }
+    
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/katyshop/jobs/${selectedJob.job_id}/respond-part`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${sessionToken}`,
+        },
+        body: JSON.stringify({ 
+          parts_distributor: partsDistributor,
+          parts_eta: partsEta,
+        }),
+      });
+
+      if (response.ok) {
+        setShowPartsResponseModal(false);
+        setPartsDistributor('');
+        setPartsEta('09:00');
+        setShowJobDetailModal(false);
+        await fetchJobs();
+        Alert.alert('Success', `Part ordered: ${partsDistributor} @ ${formatTime(partsEta)}`);
+      } else {
+        const error = await response.json();
+        Alert.alert('Error', error.detail || 'Failed to respond to part request');
+      }
+    } catch (error) {
+      console.error('Parts response error:', error);
+      Alert.alert('Error', 'Failed to respond to part request');
+    }
+  };
+
   const selectAdvisor = (advisor: ServiceAdvisor) => {
     setFormAdvisorId(advisor.advisor_id);
     setFormAdvisorName(advisor.name);
