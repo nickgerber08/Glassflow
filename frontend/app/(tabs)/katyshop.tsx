@@ -1916,6 +1916,11 @@ const styles = StyleSheet.create({
     color: '#E53935',
     fontWeight: '700',
   },
+  jobBlockOrderInfo: {
+    fontSize: 12,
+    color: '#4CAF50',
+    fontWeight: '700',
+  },
   jobBlockAdvisor: {
     fontSize: 12,
     color: '#555',
