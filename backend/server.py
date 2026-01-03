@@ -1321,6 +1321,115 @@ async def delete_katyshop_job(job_id: str, request: Request):
     
     return {"success": True}
 
+@api_router.post("/katyshop/jobs/{job_id}/request-part")
+async def request_part(job_id: str, parts_request: PartsRequestCreate, request: Request):
+    """Tech requests a part - notifies office managers"""
+    user = await require_auth(request)
+    
+    # Get the job
+    job = await db.katyshop_jobs.find_one({"job_id": job_id})
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    # Update job with parts request info
+    update_data = {
+        "parts_order_status": "requested",
+        "omega_invoice": parts_request.omega_invoice,
+        "updated_at": datetime.now(timezone.utc)
+    }
+    
+    await db.katyshop_jobs.update_one(
+        {"job_id": job_id},
+        {"$set": update_data}
+    )
+    
+    # Notify all admin users about the parts request
+    admin_users = await db.users.find({"role": "admin"}).to_list(100)
+    
+    for admin in admin_users:
+        if admin.get("push_token"):
+            # Create notification
+            notification = {
+                "notification_id": f"notif_{uuid.uuid4().hex[:12]}",
+                "user_id": admin["user_id"],
+                "title": "🔧 Parts Request",
+                "body": f"{job['part_number']} - Invoice #{parts_request.omega_invoice}",
+                "job_id": job_id,
+                "job_type": "katyshop",
+                "read": False,
+                "created_at": datetime.now(timezone.utc)
+            }
+            await db.notifications.insert_one(notification)
+            
+            # Send push notification
+            await send_push_notification(
+                admin["push_token"],
+                notification["title"],
+                notification["body"],
+                {"job_id": job_id, "type": "parts_request"}
+            )
+    
+    # Return updated job
+    updated_job = await db.katyshop_jobs.find_one({"job_id": job_id})
+    return updated_job
+
+@api_router.post("/katyshop/jobs/{job_id}/respond-part")
+async def respond_to_part_request(job_id: str, parts_response: PartsResponseCreate, request: Request):
+    """Office manager responds to parts request - notifies tech"""
+    user = await require_auth(request)
+    
+    # Get the job
+    job = await db.katyshop_jobs.find_one({"job_id": job_id})
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    if job.get("parts_order_status") != "requested":
+        raise HTTPException(status_code=400, detail="No pending parts request for this job")
+    
+    # Update job with parts response
+    update_data = {
+        "parts_order_status": "ordered",
+        "parts_distributor": parts_response.parts_distributor,
+        "parts_eta": parts_response.parts_eta,
+        "updated_at": datetime.now(timezone.utc)
+    }
+    
+    await db.katyshop_jobs.update_one(
+        {"job_id": job_id},
+        {"$set": update_data}
+    )
+    
+    # Format ETA time for display
+    eta_hour = int(parts_response.parts_eta.split(':')[0])
+    eta_min = int(parts_response.parts_eta.split(':')[1])
+    eta_display = f"{eta_hour % 12 or 12}:{eta_min:02d} {'AM' if eta_hour < 12 else 'PM'}"
+    
+    # Notify the assigned tech (Sina) about the response
+    sina_user = await db.users.find_one({"name": {"$regex": "sina", "$options": "i"}})
+    if sina_user and sina_user.get("push_token"):
+        notification = {
+            "notification_id": f"notif_{uuid.uuid4().hex[:12]}",
+            "user_id": sina_user["user_id"],
+            "title": "📦 Part Ordered",
+            "body": f"{job['part_number']} - {parts_response.parts_distributor} @ {eta_display}",
+            "job_id": job_id,
+            "job_type": "katyshop",
+            "read": False,
+            "created_at": datetime.now(timezone.utc)
+        }
+        await db.notifications.insert_one(notification)
+        
+        await send_push_notification(
+            sina_user["push_token"],
+            notification["title"],
+            notification["body"],
+            {"job_id": job_id, "type": "parts_ordered"}
+        )
+    
+    # Return updated job
+    updated_job = await db.katyshop_jobs.find_one({"job_id": job_id})
+    return updated_job
+
 # Socket.IO events disabled for now
 # @sio.event
 # async def connect(sid, environ):
