@@ -1268,12 +1268,12 @@ const styles = StyleSheet.create({
   jobBlockRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
   },
   jobBlockVehicle: {
     flex: 1,
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: 13,
+    fontWeight: '700',
     color: '#333',
   },
   jobBlockPart: {
@@ -1281,24 +1281,15 @@ const styles = StyleSheet.create({
     color: '#E53935',
     fontWeight: '700',
   },
-  jobBlockCustomerType: {
-    fontSize: 11,
-  },
   jobBlockAdvisor: {
     fontSize: 11,
     color: '#666',
     fontWeight: '500',
   },
-  jobBlockCreator: {
-    fontSize: 11,
-    color: '#1976D2',
-    fontWeight: '600',
-  },
   jobBlockCalibration: {
     fontSize: 11,
     color: '#FF9800',
-    fontWeight: '600',
-    marginLeft: 8,
+    fontWeight: '700',
   },
   // Modal styles
   modalOverlay: {
