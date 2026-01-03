@@ -502,7 +502,13 @@ export default function KatyshopScreen() {
           <Ionicons name="chevron-back" size={28} color="#2196F3" />
         </TouchableOpacity>
         
-        <TouchableOpacity onPress={() => setSelectedDate(new Date())} style={styles.dateDisplay}>
+        <TouchableOpacity 
+          onPress={() => {
+            setCalendarViewMonth(selectedDate);
+            setShowCalendarModal(true);
+          }} 
+          style={styles.dateDisplay}
+        >
           <Text style={styles.dateText}>{formatDisplayDate(selectedDate)}</Text>
           {isToday(selectedDate) && (
             <View style={styles.todayBadge}>
