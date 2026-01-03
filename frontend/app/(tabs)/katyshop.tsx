@@ -434,6 +434,47 @@ export default function KatyshopScreen() {
     );
   };
 
+  const openRescheduleModal = () => {
+    if (selectedJob) {
+      // Parse the job's current date
+      const [year, month, day] = selectedJob.date.split('-').map(Number);
+      setRescheduleDate(new Date(year, month - 1, day));
+      setShowRescheduleModal(true);
+    }
+  };
+
+  const rescheduleJob = async (newDate: Date) => {
+    if (!selectedJob) return;
+    
+    try {
+      const dateStr = formatDateForApi(newDate);
+      const response = await fetch(`${BACKEND_URL}/api/katyshop/jobs/${selectedJob.job_id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${sessionToken}`,
+        },
+        body: JSON.stringify({ date: dateStr }),
+      });
+
+      if (response.ok) {
+        setShowRescheduleModal(false);
+        setShowJobDetailModal(false);
+        setSelectedJob(null);
+        // Navigate to the new date to show the rescheduled job
+        setSelectedDate(newDate);
+        await fetchJobs();
+        Alert.alert('Success', `Job rescheduled to ${newDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}`);
+      } else {
+        const error = await response.json();
+        Alert.alert('Error', error.detail || 'Failed to reschedule job');
+      }
+    } catch (error) {
+      console.error('Reschedule error:', error);
+      Alert.alert('Error', 'Failed to reschedule job');
+    }
+  };
+
   const selectAdvisor = (advisor: ServiceAdvisor) => {
     setFormAdvisorId(advisor.advisor_id);
     setFormAdvisorName(advisor.name);
