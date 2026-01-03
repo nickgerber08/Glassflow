@@ -671,6 +671,19 @@ export default function KatyshopScreen() {
                 </ScrollView>
               )}
 
+              {/* Date Selection */}
+              <Text style={styles.formSectionTitle}>Date</Text>
+              <TouchableOpacity 
+                style={styles.datePickerBtn}
+                onPress={() => setShowFormDatePicker(true)}
+              >
+                <Ionicons name="calendar" size={20} color="#2196F3" />
+                <Text style={styles.datePickerBtnText}>
+                  {formDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+                </Text>
+                <Ionicons name="chevron-down" size={18} color="#666" />
+              </TouchableOpacity>
+
               {/* Time Block */}
               <Text style={styles.formSectionTitle}>Time Block</Text>
               <View style={styles.formRow}>
