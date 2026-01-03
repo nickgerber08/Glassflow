@@ -957,6 +957,156 @@ export default function KatyshopScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Calendar Modal for Date Selection */}
+      <Modal
+        visible={showCalendarModal}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => setShowCalendarModal(false)}
+      >
+        <View style={styles.calendarOverlay}>
+          <View style={styles.calendarModal}>
+            <View style={styles.calendarHeader}>
+              <TouchableOpacity onPress={() => changeCalendarMonth(-1)}>
+                <Ionicons name="chevron-back" size={28} color="#2196F3" />
+              </TouchableOpacity>
+              <Text style={styles.calendarMonthTitle}>
+                {calendarViewMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+              </Text>
+              <TouchableOpacity onPress={() => changeCalendarMonth(1)}>
+                <Ionicons name="chevron-forward" size={28} color="#2196F3" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Weekday headers */}
+            <View style={styles.calendarWeekdays}>
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                <Text key={day} style={styles.calendarWeekdayText}>{day}</Text>
+              ))}
+            </View>
+
+            {/* Calendar days */}
+            <View style={styles.calendarDaysGrid}>
+              {getMonthDays(calendarViewMonth).map((day, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    styles.calendarDay,
+                    day && isSameDay(day, selectedDate) && styles.calendarDaySelected,
+                    day && isSameDay(day, new Date()) && styles.calendarDayToday,
+                  ]}
+                  onPress={() => day && selectCalendarDate(day)}
+                  disabled={!day}
+                >
+                  {day && (
+                    <Text
+                      style={[
+                        styles.calendarDayText,
+                        isSameDay(day, selectedDate) && styles.calendarDayTextSelected,
+                        isSameDay(day, new Date()) && !isSameDay(day, selectedDate) && styles.calendarDayTextToday,
+                      ]}
+                    >
+                      {day.getDate()}
+                    </Text>
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* Quick actions */}
+            <View style={styles.calendarQuickActions}>
+              <TouchableOpacity 
+                style={styles.calendarQuickBtn}
+                onPress={() => selectCalendarDate(new Date())}
+              >
+                <Text style={styles.calendarQuickBtnText}>Today</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.calendarCloseBtn}
+                onPress={() => setShowCalendarModal(false)}
+              >
+                <Text style={styles.calendarCloseBtnText}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Form Date Picker Modal */}
+      <Modal
+        visible={showFormDatePicker}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => setShowFormDatePicker(false)}
+      >
+        <View style={styles.calendarOverlay}>
+          <View style={styles.calendarModal}>
+            <View style={styles.calendarHeader}>
+              <TouchableOpacity onPress={() => {
+                const newMonth = new Date(formDate);
+                newMonth.setMonth(newMonth.getMonth() - 1);
+                setFormDate(newMonth);
+              }}>
+                <Ionicons name="chevron-back" size={28} color="#2196F3" />
+              </TouchableOpacity>
+              <Text style={styles.calendarMonthTitle}>
+                {formDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+              </Text>
+              <TouchableOpacity onPress={() => {
+                const newMonth = new Date(formDate);
+                newMonth.setMonth(newMonth.getMonth() + 1);
+                setFormDate(newMonth);
+              }}>
+                <Ionicons name="chevron-forward" size={28} color="#2196F3" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Weekday headers */}
+            <View style={styles.calendarWeekdays}>
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                <Text key={day} style={styles.calendarWeekdayText}>{day}</Text>
+              ))}
+            </View>
+
+            {/* Calendar days */}
+            <View style={styles.calendarDaysGrid}>
+              {getMonthDays(formDate).map((day, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    styles.calendarDay,
+                    day && isSameDay(day, formDate) && styles.calendarDaySelected,
+                    day && isSameDay(day, new Date()) && styles.calendarDayToday,
+                  ]}
+                  onPress={() => day && selectFormDate(day)}
+                  disabled={!day}
+                >
+                  {day && (
+                    <Text
+                      style={[
+                        styles.calendarDayText,
+                        isSameDay(day, formDate) && styles.calendarDayTextSelected,
+                        isSameDay(day, new Date()) && !isSameDay(day, formDate) && styles.calendarDayTextToday,
+                      ]}
+                    >
+                      {day.getDate()}
+                    </Text>
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* Done button */}
+            <TouchableOpacity 
+              style={styles.calendarDoneBtn}
+              onPress={() => setShowFormDatePicker(false)}
+            >
+              <Text style={styles.calendarDoneBtnText}>Done</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
