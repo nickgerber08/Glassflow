@@ -193,9 +193,52 @@ export default function KatyshopScreen() {
     setFormCustomerType('waiter');
     setFormAdvisorId('');
     setFormAdvisorName('');
+    setFormDate(selectedDate);
     setFormStartTime('09:00');
     setFormEndTime('10:00');
     setFormNotes('');
+  };
+
+  // Calendar helper functions
+  const getMonthDays = (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startDayOfWeek = firstDay.getDay();
+    
+    const days = [];
+    // Add empty slots for days before the 1st
+    for (let i = 0; i < startDayOfWeek; i++) {
+      days.push(null);
+    }
+    // Add all days of the month
+    for (let i = 1; i <= daysInMonth; i++) {
+      days.push(new Date(year, month, i));
+    }
+    return days;
+  };
+
+  const isSameDay = (date1: Date | null, date2: Date) => {
+    if (!date1) return false;
+    return date1.toDateString() === date2.toDateString();
+  };
+
+  const selectCalendarDate = (date: Date) => {
+    setSelectedDate(date);
+    setShowCalendarModal(false);
+  };
+
+  const selectFormDate = (date: Date) => {
+    setFormDate(date);
+    setShowFormDatePicker(false);
+  };
+
+  const changeCalendarMonth = (direction: number) => {
+    const newMonth = new Date(calendarViewMonth);
+    newMonth.setMonth(newMonth.getMonth() + direction);
+    setCalendarViewMonth(newMonth);
   };
 
   const addAdvisor = async () => {
