@@ -439,21 +439,28 @@ export default function KatyshopScreen() {
                     setShowJobDetailModal(true);
                   }}
                 >
-                  <View style={styles.jobBlockHeader}>
+                  {/* Row 1: Time, Vehicle, Part Number */}
+                  <View style={styles.jobBlockRow}>
                     <Text style={styles.jobBlockTime}>
-                      {formatTime(job.start_time)} - {formatTime(job.end_time)}
+                      {formatTime(job.start_time)}-{formatTime(job.end_time)}
+                    </Text>
+                    <Text style={styles.jobBlockVehicle} numberOfLines={1}>
+                      {job.vehicle_year} {job.vehicle_make || ''} {job.vehicle_model}
+                    </Text>
+                    <Text style={styles.jobBlockPart} numberOfLines={1}>
+                      {job.part_number} {job.needs_calibration && '📐'}
+                    </Text>
+                  </View>
+                  {/* Row 2: Customer Type, Advisor, Status */}
+                  <View style={styles.jobBlockRow}>
+                    <Text style={styles.jobBlockCustomerType}>
+                      {job.customer_type === 'waiter' ? '⏳ Waiter' : '🚗 Drop Off'}
+                    </Text>
+                    <Text style={styles.jobBlockAdvisor} numberOfLines={1}>
+                      Advisor: {job.service_advisor_name}
                     </Text>
                     <View style={[styles.statusDot, { backgroundColor: STATUS_COLORS[job.status] }]} />
                   </View>
-                  <Text style={styles.jobBlockVehicle} numberOfLines={1}>
-                    {job.vehicle_year} {job.vehicle_make || ''} {job.vehicle_model}
-                  </Text>
-                  <Text style={styles.jobBlockPart} numberOfLines={1}>
-                    {job.part_number} {job.needs_calibration && '📐'}
-                  </Text>
-                  <Text style={styles.jobBlockAdvisor} numberOfLines={1}>
-                    {job.customer_type === 'waiter' ? '⏳' : '🚗'} {job.service_advisor_name}
-                  </Text>
                 </TouchableOpacity>
               );
             })
