@@ -405,12 +405,32 @@ export default function KatyshopScreen() {
     });
   };
 
-  const renderTimeBlock = (time: string, index: number) => {
-    const jobsInSlot = getJobsForTimeSlot(time);
-    const hasJob = jobsInSlot.length > 0;
+  // Calculate job position and height based on time
+  const getJobPosition = (startTime: string, endTime: string) => {
+    const startHour = parseInt(startTime.split(':')[0]);
+    const startMin = parseInt(startTime.split(':')[1]);
+    const endHour = parseInt(endTime.split(':')[0]);
+    const endMin = parseInt(endTime.split(':')[1]);
     
-    // Only show the job on its start time
-    const startingJobs = jobs.filter(job => job.start_time === time);
+    const firstSlotHour = 7; // 7 AM
+    const topOffset = ((startHour - firstSlotHour) + (startMin / 60)) * HOUR_HEIGHT;
+    const duration = (endHour - startHour) + ((endMin - startMin) / 60);
+    const height = Math.max(duration * HOUR_HEIGHT - 4, 40);
+    
+    return { topOffset, height };
+  };
+
+  // Find jobs that start at or span this hour
+  const getJobsStartingAtHour = (hourTime: string) => {
+    const hour = parseInt(hourTime.split(':')[0]);
+    return jobs.filter(job => {
+      const jobStartHour = parseInt(job.start_time.split(':')[0]);
+      return jobStartHour === hour;
+    });
+  };
+
+  const renderTimeBlock = (time: string, index: number) => {
+    const startingJobs = getJobsStartingAtHour(time);
 
     return (
       <View key={time} style={styles.timeRow}>
@@ -420,11 +440,7 @@ export default function KatyshopScreen() {
         <View style={styles.timeSlotContainer}>
           {startingJobs.length > 0 ? (
             startingJobs.map((job) => {
-              // Calculate height based on duration
-              const startIndex = TIME_SLOTS.indexOf(job.start_time);
-              const endIndex = TIME_SLOTS.indexOf(job.end_time);
-              const slotCount = Math.max(1, endIndex - startIndex);
-              const height = slotCount * 50 - 4;
+              const { height } = getJobPosition(job.start_time, job.end_time);
 
               return (
                 <TouchableOpacity
@@ -433,7 +449,7 @@ export default function KatyshopScreen() {
                     styles.jobBlock,
                     { 
                       height,
-                      backgroundColor: STATUS_COLORS[job.status] + '20',
+                      backgroundColor: STATUS_COLORS[job.status] + '25',
                       borderLeftColor: STATUS_COLORS[job.status],
                     }
                   ]}
@@ -443,19 +459,13 @@ export default function KatyshopScreen() {
                   }}
                 >
                   {/* Row 1: Year Make Model */}
+                  <Text style={styles.jobBlockVehicle} numberOfLines={1}>
+                    {job.vehicle_year} {job.vehicle_make || ''} {job.vehicle_model}
+                  </Text>
+                  {/* Row 2: Part # (RED) | ADV: Name | Calibration */}
                   <View style={styles.jobBlockRow}>
-                    <Text style={styles.jobBlockVehicle} numberOfLines={1}>
-                      {job.vehicle_year} {job.vehicle_make || ''} {job.vehicle_model}
-                    </Text>
-                  </View>
-                  {/* Row 2: Part # | ADV: Name | Calibration */}
-                  <View style={styles.jobBlockRow}>
-                    <Text style={styles.jobBlockPart} numberOfLines={1}>
-                      {job.part_number}
-                    </Text>
-                    <Text style={styles.jobBlockAdvisor} numberOfLines={1}>
-                      ADV: {job.service_advisor_name}
-                    </Text>
+                    <Text style={styles.jobBlockPart}>{job.part_number}</Text>
+                    <Text style={styles.jobBlockAdvisor}>ADV: {job.service_advisor_name}</Text>
                     {job.needs_calibration && (
                       <Text style={styles.jobBlockCalibration}>Calibration</Text>
                     )}
