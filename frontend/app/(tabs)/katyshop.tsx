@@ -113,6 +113,14 @@ export default function KatyshopScreen() {
   const [rescheduleEndTime, setRescheduleEndTime] = useState('10:00');
   const [showRescheduleStartPicker, setShowRescheduleStartPicker] = useState(false);
   const [showRescheduleEndPicker, setShowRescheduleEndPicker] = useState(false);
+  
+  // Parts request state
+  const [showPartsRequestModal, setShowPartsRequestModal] = useState(false);
+  const [showPartsResponseModal, setShowPartsResponseModal] = useState(false);
+  const [partsInvoice, setPartsInvoice] = useState('');
+  const [partsDistributor, setPartsDistributor] = useState('');
+  const [partsEta, setPartsEta] = useState('09:00');
+  const [showPartsEtaPicker, setShowPartsEtaPicker] = useState(false);
 
   // Track touch for swipe gesture
   const touchStartX = useRef(0);
