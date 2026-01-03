@@ -1173,10 +1173,17 @@ export default function KatyshopScreen() {
                     </Text>
                   </View>
 
-                  {/* Created By */}
+                  {/* Created By with Parts Order Info */}
                   <View style={styles.detailSection}>
                     <Text style={styles.detailSectionTitle}>Created By</Text>
-                    <Text style={styles.detailValue}>{selectedJob.created_by_name || 'Unknown'}</Text>
+                    <View style={styles.createdByRow}>
+                      <Text style={styles.detailValue}>{selectedJob.created_by_name || 'Unknown'}</Text>
+                      {selectedJob.parts_order_status === 'ordered' && selectedJob.parts_distributor && (
+                        <Text style={styles.createdByOrderInfo}>
+                          {selectedJob.parts_distributor} : {formatTime(selectedJob.parts_eta || '')}
+                        </Text>
+                      )}
+                    </View>
                   </View>
 
                   {/* Notes */}
