@@ -1515,7 +1515,7 @@ async def create_office_note(note_data: OfficeNoteCreate, request: Request):
     user = await require_auth(request)
     
     # Check if user is admin
-    if user.get("role") != "admin":
+    if user.role != "admin":
         raise HTTPException(status_code=403, detail="Only admins can create notes")
     
     # Get max order if not provided
@@ -1531,7 +1531,7 @@ async def create_office_note(note_data: OfficeNoteCreate, request: Request):
         "color": note_data.color,
         "category": note_data.category,
         "order": order,
-        "created_by": user["user_id"],
+        "created_by": user.user_id,
         "created_at": datetime.now(timezone.utc),
         "updated_at": datetime.now(timezone.utc)
     }
@@ -1549,7 +1549,7 @@ async def update_office_note(note_id: str, note_data: OfficeNoteUpdate, request:
     user = await require_auth(request)
     
     # Check if user is admin
-    if user.get("role") != "admin":
+    if user.role != "admin":
         raise HTTPException(status_code=403, detail="Only admins can edit notes")
     
     # Build update dict
