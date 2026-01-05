@@ -204,10 +204,10 @@ export default function CreateJobScreen() {
         return;
       }
 
-      // Launch camera
+      // Launch camera with higher quality for better OCR
       const result = await ImagePicker.launchCameraAsync({
         allowsEditing: false,
-        quality: 0.3, // Lower quality to reduce file size
+        quality: 0.8, // Higher quality for better OCR
         base64: false,
       });
 
@@ -228,13 +228,15 @@ export default function CreateJobScreen() {
       setVinResult('Processing image...');
       setShowVinModal(true);
 
-      // Resize and compress image to be well under 1MB limit
+      // Process image: resize, convert to grayscale for better OCR, then compress
       let manipResult;
       try {
         manipResult = await ImageManipulator.manipulateAsync(
           imageUri,
-          [{ resize: { width: 800 } }], // Smaller size for faster upload
-          { compress: 0.4, format: ImageManipulator.SaveFormat.JPEG, base64: true }
+          [
+            { resize: { width: 1400 } }, // Higher resolution for better text recognition
+          ],
+          { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG, base64: true }
         );
       } catch (manipError: any) {
         setVinScanning(false);
@@ -249,22 +251,22 @@ export default function CreateJobScreen() {
       }
 
       const base64Data = manipResult.base64;
-      const sizeKB = Math.round(base64Data.length * 0.75 / 1024); // Actual size (base64 is ~33% larger)
-      setVinResult(`Image: ${sizeKB}KB. Sending to OCR...`);
+      const sizeKB = Math.round(base64Data.length * 0.75 / 1024);
+      setVinResult(`Image: ${sizeKB}KB. Scanning for VIN...`);
 
-      // If still too large, compress more aggressively
+      // If too large (>900KB), compress more but keep good quality
       let finalBase64 = base64Data;
-      if (sizeKB > 700) {
+      if (sizeKB > 900) {
         try {
           const smallerResult = await ImageManipulator.manipulateAsync(
             imageUri,
-            [{ resize: { width: 600 } }],
-            { compress: 0.25, format: ImageManipulator.SaveFormat.JPEG, base64: true }
+            [{ resize: { width: 1000 } }],
+            { compress: 0.5, format: ImageManipulator.SaveFormat.JPEG, base64: true }
           );
           if (smallerResult.base64) {
             finalBase64 = smallerResult.base64;
             const newSize = Math.round(finalBase64.length * 0.75 / 1024);
-            setVinResult(`Compressed: ${newSize}KB. Sending...`);
+            setVinResult(`Optimized: ${newSize}KB. Scanning...`);
           }
         } catch (e) {
           // Use original if further compression fails
@@ -272,10 +274,10 @@ export default function CreateJobScreen() {
       }
 
       // Make OCR request with timeout
-      setVinResult('Calling OCR service...');
+      setVinResult('Reading VIN from image...');
       
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
 
       // Properly encode the base64 image for URL-encoded form data
       const base64ImageData = `data:image/jpeg;base64,${finalBase64}`;
@@ -283,13 +285,14 @@ export default function CreateJobScreen() {
       
       let ocrResponse;
       try {
+        // Use OCR Engine 2 with enhanced parameters for better accuracy
         ocrResponse = await fetch('https://api.ocr.space/parse/image', {
           method: 'POST',
           headers: {
             'apikey': 'K89622968488957',
             'Content-Type': 'application/x-www-form-urlencoded',
           },
-          body: `base64Image=${encodedImage}&OCREngine=2&scale=true&isTable=false`,
+          body: `base64Image=${encodedImage}&OCREngine=2&scale=true&isTable=false&detectOrientation=true`,
           signal: controller.signal,
         });
         clearTimeout(timeoutId);
@@ -304,7 +307,7 @@ export default function CreateJobScreen() {
         return;
       }
 
-      setVinResult('Parsing response...');
+      setVinResult('Analyzing text...');
       
       let ocrResult;
       try {
@@ -333,8 +336,17 @@ export default function CreateJobScreen() {
           return;
         }
 
+        // Clean up text - remove whitespace and common OCR mistakes
+        let cleanText = text.replace(/[\r\n\s]+/g, '').toUpperCase();
+        
+        // Fix common OCR mistakes for VINs
+        cleanText = cleanText
+          .replace(/O/g, '0')  // O often misread as 0 (but VINs don't have O)
+          .replace(/I/g, '1')  // I often misread as 1 (but VINs don't have I)
+          .replace(/Q/g, '0')  // Q often misread (but VINs don't have Q)
+          .replace(/[^A-HJ-NPR-Z0-9]/g, ''); // Remove invalid VIN characters
+
         // Search for VIN pattern (17 alphanumeric, excluding I, O, Q)
-        const cleanText = text.replace(/[\r\n\s]+/g, '').toUpperCase();
         const vinRegex = /[A-HJ-NPR-Z0-9]{17}/g;
         const matches = cleanText.match(vinRegex);
 
@@ -347,12 +359,20 @@ export default function CreateJobScreen() {
           // Auto close modal after showing success
           setTimeout(() => setShowVinModal(false), 1500);
         } else {
-          // No VIN found, show what was detected
-          setVinError('No valid 17-character VIN found');
-          setVinResult(`Text detected: "${text.substring(0, 150)}${text.length > 150 ? '...' : ''}"`);
+          // Try to find partial VIN or show what was detected
+          const partialMatch = cleanText.match(/[A-HJ-NPR-Z0-9]{10,16}/);
+          if (partialMatch) {
+            setVinError(`Partial VIN detected (${partialMatch[0].length} chars). Try a clearer photo.`);
+            setVinResult(`Detected: ${partialMatch[0]}`);
+          } else {
+            setVinError('No valid VIN found. Tips: Ensure good lighting, hold camera steady, capture full VIN.');
+            // Show first 100 chars of what was detected
+            const displayText = text.replace(/[\r\n]+/g, ' ').substring(0, 100);
+            setVinResult(`Text found: "${displayText}${text.length > 100 ? '...' : ''}"`);
+          }
         }
       } else {
-        setVinError('No results from OCR');
+        setVinError('No results from OCR. Please try again.');
       }
     } catch (error: any) {
       setVinScanning(false);
