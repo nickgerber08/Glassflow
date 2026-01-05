@@ -277,6 +277,10 @@ export default function CreateJobScreen() {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
+      // Properly encode the base64 image for URL-encoded form data
+      const base64ImageData = `data:image/jpeg;base64,${finalBase64}`;
+      const encodedImage = encodeURIComponent(base64ImageData);
+      
       let ocrResponse;
       try {
         ocrResponse = await fetch('https://api.ocr.space/parse/image', {
@@ -285,7 +289,7 @@ export default function CreateJobScreen() {
             'apikey': 'K89622968488957',
             'Content-Type': 'application/x-www-form-urlencoded',
           },
-          body: `base64Image=data:image/jpeg;base64,${finalBase64}&OCREngine=2&scale=true&isTable=false`,
+          body: `base64Image=${encodedImage}&OCREngine=2&scale=true&isTable=false`,
           signal: controller.signal,
         });
         clearTimeout(timeoutId);
