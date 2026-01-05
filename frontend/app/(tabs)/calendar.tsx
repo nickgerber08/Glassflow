@@ -53,9 +53,159 @@ function groupJobsByLocation(jobs: any[]) {
 
 export default function CalendarScreen() {
   const { jobs, setSelectedJob } = useJobStore();
+  const { user, token } = useAuth();
   const router = useRouter();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  
+  // Jenny's Notes state
+  const [showNotes, setShowNotes] = useState(false);
+  const [notes, setNotes] = useState<OfficeNote[]>([]);
+  const [notesLoading, setNotesLoading] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [showAddNote, setShowAddNote] = useState(false);
+  const [showEditNote, setShowEditNote] = useState(false);
+  const [editingNote, setEditingNote] = useState<OfficeNote | null>(null);
+  const [newNoteTitle, setNewNoteTitle] = useState('');
+  const [newNoteContent, setNewNoteContent] = useState('');
+  const [newNoteColor, setNewNoteColor] = useState('yellow');
+  const [newNoteCategory, setNewNoteCategory] = useState('general');
+
+  const isAdmin = user?.role === 'admin';
+
+  const fetchNotes = useCallback(async () => {
+    if (!token) return;
+    setNotesLoading(true);
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/office-notes`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setNotes(data);
+      }
+    } catch (error) {
+      console.error('Error fetching notes:', error);
+    } finally {
+      setNotesLoading(false);
+    }
+  }, [token]);
+
+  const seedNotes = async () => {
+    if (!token || !isAdmin) return;
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/office-notes/seed`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (response.ok) {
+        fetchNotes();
+        Alert.alert('Success', 'Notes have been loaded!');
+      }
+    } catch (error) {
+      console.error('Error seeding notes:', error);
+    }
+  };
+
+  const createNote = async () => {
+    if (!token || !newNoteTitle.trim()) return;
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/office-notes`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: newNoteTitle,
+          content: newNoteContent,
+          color: newNoteColor,
+          category: newNoteCategory,
+        }),
+      });
+      if (response.ok) {
+        setShowAddNote(false);
+        setNewNoteTitle('');
+        setNewNoteContent('');
+        setNewNoteColor('yellow');
+        setNewNoteCategory('general');
+        fetchNotes();
+      }
+    } catch (error) {
+      console.error('Error creating note:', error);
+    }
+  };
+
+  const updateNote = async () => {
+    if (!token || !editingNote) return;
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/office-notes/${editingNote.note_id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: newNoteTitle,
+          content: newNoteContent,
+          color: newNoteColor,
+          category: newNoteCategory,
+        }),
+      });
+      if (response.ok) {
+        setShowEditNote(false);
+        setEditingNote(null);
+        fetchNotes();
+      }
+    } catch (error) {
+      console.error('Error updating note:', error);
+    }
+  };
+
+  const deleteNote = async (noteId: string) => {
+    if (!token) return;
+    Alert.alert('Delete Note', 'Are you sure you want to delete this note?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            const response = await fetch(`${BACKEND_URL}/api/office-notes/${noteId}`, {
+              method: 'DELETE',
+              headers: { 'Authorization': `Bearer ${token}` },
+            });
+            if (response.ok) {
+              fetchNotes();
+            }
+          } catch (error) {
+            console.error('Error deleting note:', error);
+          }
+        },
+      },
+    ]);
+  };
+
+  const openEditNote = (note: OfficeNote) => {
+    setEditingNote(note);
+    setNewNoteTitle(note.title);
+    setNewNoteContent(note.content);
+    setNewNoteColor(note.color);
+    setNewNoteCategory(note.category);
+    setShowEditNote(true);
+  };
+
+  useEffect(() => {
+    if (showNotes && notes.length === 0) {
+      fetchNotes();
+    }
+  }, [showNotes, fetchNotes]);
+
+  const filteredNotes = selectedCategory === 'all' 
+    ? notes 
+    : notes.filter(n => n.category === selectedCategory);
+
+  const categories = ['all', 'general', 'parts', 'suppliers', 'vehicles', 'warnings'];
 
   const daysInMonth = eachDayOfInterval({
     start: startOfMonth(currentMonth),
