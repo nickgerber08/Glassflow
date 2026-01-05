@@ -513,6 +513,11 @@ export default function CreateJobScreen() {
       return;
     }
 
+    if (!omegaInvoice || !omegaInvoice.trim()) {
+      Alert.alert('Error', 'Omega Invoice # is required');
+      return;
+    }
+
     if (!location) {
       Alert.alert('Error', 'Location not available. Please try again.');
       return;
