@@ -1954,4 +1954,49 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#666',
   },
+  vinResultContainer: {
+    padding: 10,
+  },
+  vinErrorBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFEBEE',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+    gap: 10,
+  },
+  vinErrorText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#D32F2F',
+  },
+  vinResultBox: {
+    backgroundColor: '#E8F5E9',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+  },
+  vinResultLabel: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 4,
+  },
+  vinResultText: {
+    fontSize: 14,
+    color: '#333',
+  },
+  vinRetryBtn: {
+    marginTop: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    backgroundColor: '#2196F3',
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  vinRetryBtnText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#fff',
+  },
 });
