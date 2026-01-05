@@ -205,7 +205,7 @@ export default function CreateJobScreen() {
 
       const result = await ImagePicker.launchCameraAsync({
         allowsEditing: false,
-        quality: 0.5,
+        quality: 0.2, // Very low quality to stay under 1MB limit
         base64: true,
       });
 
