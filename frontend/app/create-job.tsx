@@ -1101,6 +1101,36 @@ export default function CreateJobScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* VIN Scanning Modal */}
+      <Modal
+        visible={showVinModal}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => setShowVinModal(false)}
+      >
+        <View style={styles.vinModalOverlay}>
+          <View style={styles.vinModalContent}>
+            <View style={styles.vinModalHeader}>
+              <Text style={styles.vinModalTitle}>Scanning VIN...</Text>
+              <TouchableOpacity onPress={() => setShowVinModal(false)}>
+                <Ionicons name="close-circle" size={28} color="#666" />
+              </TouchableOpacity>
+            </View>
+            
+            {vinImage && (
+              <Image source={{ uri: vinImage }} style={styles.vinPreviewImage} />
+            )}
+            
+            {vinScanning && (
+              <View style={styles.vinScanningIndicator}>
+                <ActivityIndicator size="large" color="#2196F3" />
+                <Text style={styles.vinScanningText}>Reading VIN from image...</Text>
+              </View>
+            )}
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
