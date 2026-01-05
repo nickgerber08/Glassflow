@@ -412,12 +412,6 @@ export default function CalendarScreen() {
                 <Ionicons name="add" size={20} color="#fff" />
                 <Text style={styles.addNoteBtnText}>Add Note</Text>
               </TouchableOpacity>
-              {notes.length === 0 && (
-                <TouchableOpacity style={styles.seedBtn} onPress={seedNotes}>
-                  <Ionicons name="download" size={20} color="#2196F3" />
-                  <Text style={styles.seedBtnText}>Load Jenny's Notes</Text>
-                </TouchableOpacity>
-              )}
             </View>
           )}
 
