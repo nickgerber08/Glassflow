@@ -198,32 +198,42 @@ export default function CreateJobScreen() {
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [16, 9],
-        quality: 0.8,
+        quality: 0.7,
         base64: true,
       });
 
-      if (!result.canceled && result.assets[0]) {
+      if (!result.canceled && result.assets[0] && result.assets[0].base64) {
         setVinImage(result.assets[0].uri);
         setVinScanning(true);
         setShowVinModal(true);
         
-        // Use OCR.space free API to extract text
+        // Use OCR.space free API to extract text with timeout
         try {
-          const formData = new FormData();
-          formData.append('apikey', 'K89622968488957'); // Free tier API key
-          formData.append('base64Image', `data:image/jpeg;base64,${result.assets[0].base64}`);
-          formData.append('isOverlayRequired', 'false');
-          formData.append('OCREngine', '2'); // More accurate for VINs
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
           
           const ocrResponse = await fetch('https://api.ocr.space/parse/image', {
             method: 'POST',
-            body: formData,
+            headers: {
+              'apikey': 'K89622968488957',
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `base64Image=data:image/jpeg;base64,${result.assets[0].base64}&isOverlayRequired=false&OCREngine=2`,
+            signal: controller.signal,
           });
           
+          clearTimeout(timeoutId);
+          
           const ocrResult = await ocrResponse.json();
+          console.log('OCR Result:', JSON.stringify(ocrResult).substring(0, 200));
+          
+          setVinScanning(false);
+          setShowVinModal(false);
           
           if (ocrResult.ParsedResults && ocrResult.ParsedResults[0]) {
             const text = ocrResult.ParsedResults[0].ParsedText || '';
+            console.log('Parsed text:', text);
+            
             // Extract VIN - 17 characters, alphanumeric, no I, O, Q
             const vinRegex = /[A-HJ-NPR-Z0-9]{17}/gi;
             const matches = text.match(vinRegex);
@@ -231,24 +241,40 @@ export default function CreateJobScreen() {
             if (matches && matches.length > 0) {
               setVinOrLp(matches[0].toUpperCase());
               Alert.alert('VIN Found!', `Detected: ${matches[0].toUpperCase()}`);
-              setShowVinModal(false);
             } else {
-              Alert.alert('No VIN Found', 'Could not detect a valid VIN. You can manually enter it or try again.');
+              // Try a looser match - any 17 alphanumeric chars
+              const looseRegex = /[A-Z0-9]{17}/gi;
+              const looseMatches = text.replace(/\s/g, '').match(looseRegex);
+              
+              if (looseMatches && looseMatches.length > 0) {
+                setVinOrLp(looseMatches[0].toUpperCase());
+                Alert.alert('VIN Found!', `Detected: ${looseMatches[0].toUpperCase()}\n\nPlease verify this is correct.`);
+              } else {
+                Alert.alert('No VIN Found', 'Could not detect a valid 17-character VIN.\n\nPlease enter it manually or try again with better lighting.');
+              }
             }
+          } else if (ocrResult.ErrorMessage) {
+            Alert.alert('OCR Error', ocrResult.ErrorMessage[0] || 'Failed to process image');
           } else {
             Alert.alert('OCR Failed', 'Could not read the image. Please try again or enter manually.');
           }
-        } catch (ocrError) {
+        } catch (ocrError: any) {
           console.error('OCR error:', ocrError);
-          Alert.alert('Scan Error', 'Failed to process image. Please enter VIN manually.');
+          setVinScanning(false);
+          setShowVinModal(false);
+          
+          if (ocrError.name === 'AbortError') {
+            Alert.alert('Timeout', 'Scan took too long. Please try again or enter VIN manually.');
+          } else {
+            Alert.alert('Scan Error', 'Failed to process image. Please enter VIN manually.');
+          }
         }
-        
-        setVinScanning(false);
       }
     } catch (error) {
       console.error('Camera error:', error);
       Alert.alert('Error', 'Failed to open camera');
       setVinScanning(false);
+      setShowVinModal(false);
     }
   };
 
