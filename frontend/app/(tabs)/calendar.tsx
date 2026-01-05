@@ -864,6 +864,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: '#666',
+  },
   emptyNotesContainer: {
     flex: 1,
     justifyContent: 'center',
