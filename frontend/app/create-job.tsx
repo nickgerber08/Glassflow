@@ -225,36 +225,53 @@ export default function CreateJobScreen() {
           clearTimeout(timeoutId);
           
           const ocrResult = await ocrResponse.json();
-          console.log('OCR Result:', JSON.stringify(ocrResult).substring(0, 200));
           
           setVinScanning(false);
           setShowVinModal(false);
           
           if (ocrResult.ParsedResults && ocrResult.ParsedResults[0]) {
             const text = ocrResult.ParsedResults[0].ParsedText || '';
-            console.log('Parsed text:', text);
+            
+            // Show what was detected for debugging
+            if (!text || text.trim().length === 0) {
+              Alert.alert('No Text Found', 'The image scan did not detect any text. Try again with better lighting and a clearer image.');
+              return;
+            }
+            
+            // Clean up text - remove newlines, extra spaces
+            const cleanText = text.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim();
             
             // Extract VIN - 17 characters, alphanumeric, no I, O, Q
             const vinRegex = /[A-HJ-NPR-Z0-9]{17}/gi;
-            const matches = text.match(vinRegex);
+            const matches = cleanText.match(vinRegex);
             
             if (matches && matches.length > 0) {
-              setVinOrLp(matches[0].toUpperCase());
-              Alert.alert('VIN Found!', `Detected: ${matches[0].toUpperCase()}`);
+              const detectedVin = matches[0].toUpperCase();
+              setVinOrLp(detectedVin);
+              Alert.alert('VIN Found!', `Detected: ${detectedVin}`);
             } else {
               // Try a looser match - any 17 alphanumeric chars
               const looseRegex = /[A-Z0-9]{17}/gi;
-              const looseMatches = text.replace(/\s/g, '').match(looseRegex);
+              const noSpaceText = cleanText.replace(/\s/g, '').toUpperCase();
+              const looseMatches = noSpaceText.match(looseRegex);
               
               if (looseMatches && looseMatches.length > 0) {
-                setVinOrLp(looseMatches[0].toUpperCase());
-                Alert.alert('VIN Found!', `Detected: ${looseMatches[0].toUpperCase()}\n\nPlease verify this is correct.`);
+                const detectedVin = looseMatches[0];
+                setVinOrLp(detectedVin);
+                Alert.alert('VIN Found!', `Detected: ${detectedVin}\n\nPlease verify this is correct.`);
               } else {
-                Alert.alert('No VIN Found', 'Could not detect a valid 17-character VIN.\n\nPlease enter it manually or try again with better lighting.');
+                // Show what was detected so user knows it's working
+                const preview = cleanText.length > 100 ? cleanText.substring(0, 100) + '...' : cleanText;
+                Alert.alert(
+                  'No Valid VIN Found', 
+                  `Detected text:\n"${preview}"\n\nCould not find a 17-character VIN. Please try again or enter manually.`
+                );
               }
             }
           } else if (ocrResult.ErrorMessage) {
-            Alert.alert('OCR Error', ocrResult.ErrorMessage[0] || 'Failed to process image');
+            Alert.alert('OCR Error', Array.isArray(ocrResult.ErrorMessage) ? ocrResult.ErrorMessage[0] : ocrResult.ErrorMessage);
+          } else if (ocrResult.IsErroredOnProcessing) {
+            Alert.alert('Processing Error', 'The OCR service could not process the image. Please try a clearer photo.');
           } else {
             Alert.alert('OCR Failed', 'Could not read the image. Please try again or enter manually.');
           }
@@ -266,7 +283,7 @@ export default function CreateJobScreen() {
           if (ocrError.name === 'AbortError') {
             Alert.alert('Timeout', 'Scan took too long. Please try again or enter VIN manually.');
           } else {
-            Alert.alert('Scan Error', 'Failed to process image. Please enter VIN manually.');
+            Alert.alert('Scan Error', `Failed to process image: ${ocrError.message || 'Unknown error'}`);
           }
         }
       }
