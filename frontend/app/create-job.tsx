@@ -188,6 +188,85 @@ export default function CreateJobScreen() {
     }
   };
 
+  // VIN validation function - uses check digit at position 9
+  const validateVin = (vin: string): boolean => {
+    if (vin.length !== 17) return false;
+    
+    // VIN character values for checksum calculation
+    const transliteration: { [key: string]: number } = {
+      'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5, 'F': 6, 'G': 7, 'H': 8,
+      'J': 1, 'K': 2, 'L': 3, 'M': 4, 'N': 5, 'P': 7, 'R': 9,
+      'S': 2, 'T': 3, 'U': 4, 'V': 5, 'W': 6, 'X': 7, 'Y': 8, 'Z': 9,
+      '0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9
+    };
+    
+    // Position weights for checksum
+    const weights = [8, 7, 6, 5, 4, 3, 2, 10, 0, 9, 8, 7, 6, 5, 4, 3, 2];
+    
+    let sum = 0;
+    for (let i = 0; i < 17; i++) {
+      const char = vin[i];
+      const value = transliteration[char];
+      if (value === undefined) return false; // Invalid character
+      sum += value * weights[i];
+    }
+    
+    const checkDigit = sum % 11;
+    const checkChar = checkDigit === 10 ? 'X' : checkDigit.toString();
+    
+    return vin[8] === checkChar;
+  };
+
+  // Extract potential VINs from OCR text
+  const extractVinCandidates = (text: string): string[] => {
+    // Clean the text
+    let cleanText = text.toUpperCase();
+    
+    // Replace common OCR mistakes
+    cleanText = cleanText
+      .replace(/[oO]/g, '0')  // O -> 0
+      .replace(/[iI]/g, '1')  // I -> 1
+      .replace(/[qQ]/g, '0'); // Q -> 0
+    
+    // Find all potential 17-character sequences
+    const candidates: string[] = [];
+    
+    // Method 1: Look for "VIN" label followed by the number
+    const vinLabelMatch = cleanText.match(/VIN[:\s#]*([A-HJ-NPR-Z0-9]{17})/);
+    if (vinLabelMatch) {
+      candidates.push(vinLabelMatch[1]);
+    }
+    
+    // Method 2: Extract all 17-character alphanumeric sequences
+    const allText = cleanText.replace(/[^A-HJ-NPR-Z0-9]/g, '');
+    for (let i = 0; i <= allText.length - 17; i++) {
+      const potential = allText.substring(i, i + 17);
+      // Basic VIN format check - first char should be valid country code
+      const firstChar = potential[0];
+      // Valid first characters: 1-5 (North America), J (Japan), K (Korea), S (UK), W (Germany), etc.
+      if (/^[1-5JKLMNPRSTUVWXYZ]/.test(firstChar)) {
+        candidates.push(potential);
+      }
+    }
+    
+    // Method 3: Look in individual lines for cleaner extraction
+    const lines = text.split(/[\r\n]+/);
+    for (const line of lines) {
+      const cleanLine = line.toUpperCase()
+        .replace(/[oO]/g, '0')
+        .replace(/[iI]/g, '1')
+        .replace(/[qQ]/g, '0')
+        .replace(/[^A-HJ-NPR-Z0-9]/g, '');
+      
+      if (cleanLine.length === 17 && /^[1-5JKLMNPRSTUVWXYZ]/.test(cleanLine[0])) {
+        candidates.push(cleanLine);
+      }
+    }
+    
+    // Remove duplicates
+    return [...new Set(candidates)];
+  };
+
   // VIN Scanner function
   const scanVin = async () => {
     // Reset states
@@ -207,7 +286,7 @@ export default function CreateJobScreen() {
       // Launch camera with higher quality for better OCR
       const result = await ImagePicker.launchCameraAsync({
         allowsEditing: false,
-        quality: 0.8, // Higher quality for better OCR
+        quality: 0.8,
         base64: false,
       });
 
@@ -228,14 +307,12 @@ export default function CreateJobScreen() {
       setVinResult('Processing image...');
       setShowVinModal(true);
 
-      // Process image: resize, convert to grayscale for better OCR, then compress
+      // Process image: resize for better OCR
       let manipResult;
       try {
         manipResult = await ImageManipulator.manipulateAsync(
           imageUri,
-          [
-            { resize: { width: 1400 } }, // Higher resolution for better text recognition
-          ],
+          [{ resize: { width: 1400 } }],
           { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG, base64: true }
         );
       } catch (manipError: any) {
@@ -254,7 +331,7 @@ export default function CreateJobScreen() {
       const sizeKB = Math.round(base64Data.length * 0.75 / 1024);
       setVinResult(`Image: ${sizeKB}KB. Scanning for VIN...`);
 
-      // If too large (>900KB), compress more but keep good quality
+      // If too large, compress more
       let finalBase64 = base64Data;
       if (sizeKB > 900) {
         try {
@@ -265,27 +342,20 @@ export default function CreateJobScreen() {
           );
           if (smallerResult.base64) {
             finalBase64 = smallerResult.base64;
-            const newSize = Math.round(finalBase64.length * 0.75 / 1024);
-            setVinResult(`Optimized: ${newSize}KB. Scanning...`);
           }
-        } catch (e) {
-          // Use original if further compression fails
-        }
+        } catch (e) {}
       }
 
-      // Make OCR request with timeout
-      setVinResult('Reading VIN from image...');
+      setVinResult('Reading text from image...');
       
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-      // Properly encode the base64 image for URL-encoded form data
       const base64ImageData = `data:image/jpeg;base64,${finalBase64}`;
       const encodedImage = encodeURIComponent(base64ImageData);
       
       let ocrResponse;
       try {
-        // Use OCR Engine 2 with enhanced parameters for better accuracy
         ocrResponse = await fetch('https://api.ocr.space/parse/image', {
           method: 'POST',
           headers: {
@@ -307,7 +377,7 @@ export default function CreateJobScreen() {
         return;
       }
 
-      setVinResult('Analyzing text...');
+      setVinResult('Validating VIN...');
       
       let ocrResult;
       try {
@@ -320,14 +390,12 @@ export default function CreateJobScreen() {
       
       setVinScanning(false);
       
-      // Check for API errors
       if (ocrResult.IsErroredOnProcessing) {
         const errorMsg = ocrResult.ErrorMessage?.[0] || ocrResult.ErrorDetails || 'OCR processing failed';
         setVinError(errorMsg);
         return;
       }
       
-      // Process successful result
       if (ocrResult.ParsedResults && ocrResult.ParsedResults[0]) {
         const text = ocrResult.ParsedResults[0].ParsedText || '';
         
@@ -336,41 +404,34 @@ export default function CreateJobScreen() {
           return;
         }
 
-        // Clean up text - remove whitespace and common OCR mistakes
-        let cleanText = text.replace(/[\r\n\s]+/g, '').toUpperCase();
+        // Extract VIN candidates
+        const candidates = extractVinCandidates(text);
         
-        // Fix common OCR mistakes for VINs
-        cleanText = cleanText
-          .replace(/O/g, '0')  // O often misread as 0 (but VINs don't have O)
-          .replace(/I/g, '1')  // I often misread as 1 (but VINs don't have I)
-          .replace(/Q/g, '0')  // Q often misread (but VINs don't have Q)
-          .replace(/[^A-HJ-NPR-Z0-9]/g, ''); // Remove invalid VIN characters
-
-        // Search for VIN pattern (17 alphanumeric, excluding I, O, Q)
-        const vinRegex = /[A-HJ-NPR-Z0-9]{17}/g;
-        const matches = cleanText.match(vinRegex);
-
-        if (matches && matches.length > 0) {
-          // SUCCESS - Found VIN!
-          const foundVin = matches[0];
-          setVinOrLp(foundVin);
-          setVinResult(`✓ VIN Found: ${foundVin}`);
-          setVinError('');
-          // Auto close modal after showing success
-          setTimeout(() => setShowVinModal(false), 1500);
-        } else {
-          // Try to find partial VIN or show what was detected
-          const partialMatch = cleanText.match(/[A-HJ-NPR-Z0-9]{10,16}/);
-          if (partialMatch) {
-            setVinError(`Partial VIN detected (${partialMatch[0].length} chars). Try a clearer photo.`);
-            setVinResult(`Detected: ${partialMatch[0]}`);
-          } else {
-            setVinError('No valid VIN found. Tips: Ensure good lighting, hold camera steady, capture full VIN.');
-            // Show first 100 chars of what was detected
-            const displayText = text.replace(/[\r\n]+/g, ' ').substring(0, 100);
-            setVinResult(`Text found: "${displayText}${text.length > 100 ? '...' : ''}"`);
+        // First, try to find a VIN that passes checksum validation
+        for (const candidate of candidates) {
+          if (validateVin(candidate)) {
+            setVinOrLp(candidate);
+            setVinResult(`✓ Valid VIN: ${candidate}`);
+            setVinError('');
+            setTimeout(() => setShowVinModal(false), 1500);
+            return;
           }
         }
+        
+        // If no checksum-valid VIN found, use the first candidate that looks like a VIN
+        if (candidates.length > 0) {
+          const bestCandidate = candidates[0];
+          setVinOrLp(bestCandidate);
+          setVinResult(`VIN Found: ${bestCandidate}`);
+          setVinError('Note: Could not verify checksum. Please double-check.');
+          setTimeout(() => setShowVinModal(false), 2000);
+          return;
+        }
+        
+        // No valid candidates found
+        setVinError('No valid VIN found. Tips: Focus camera on VIN only, ensure good lighting.');
+        const displayText = text.replace(/[\r\n]+/g, ' ').substring(0, 80);
+        setVinResult(`Text found: "${displayText}..."`);
       } else {
         setVinError('No results from OCR. Please try again.');
       }
