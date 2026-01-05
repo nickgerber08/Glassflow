@@ -1793,4 +1793,69 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#4CAF50',
   },
+  // VIN Scanner styles
+  vinInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  vinInput: {
+    flex: 1,
+  },
+  scanVinBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#2196F3',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    gap: 6,
+  },
+  scanVinBtnText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  vinModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  vinModalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    width: '90%',
+    maxWidth: 350,
+  },
+  vinModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  vinModalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#333',
+  },
+  vinPreviewImage: {
+    width: '100%',
+    height: 150,
+    borderRadius: 10,
+    backgroundColor: '#f0f0f0',
+    marginBottom: 16,
+  },
+  vinScanningIndicator: {
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  vinScanningText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: '#666',
+  },
 });
