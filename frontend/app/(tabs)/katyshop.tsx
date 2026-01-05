@@ -1173,14 +1173,14 @@ export default function KatyshopScreen() {
                     </Text>
                   </View>
 
-                  {/* Created By with Parts Order Info */}
+                  {/* Created By with Invoice # */}
                   <View style={styles.detailSection}>
                     <Text style={styles.detailSectionTitle}>Created By</Text>
                     <View style={styles.createdByRow}>
                       <Text style={styles.detailValue}>{selectedJob.created_by_name || 'Unknown'}</Text>
-                      {selectedJob.parts_order_status === 'ordered' && selectedJob.parts_distributor && (
+                      {selectedJob.omega_invoice && (
                         <Text style={styles.createdByOrderInfo}>
-                          {selectedJob.parts_distributor} : {formatTime(selectedJob.parts_eta || '')}
+                          Invoice #{selectedJob.omega_invoice}
                         </Text>
                       )}
                     </View>
