@@ -119,8 +119,12 @@ export default function CalendarScreen() {
   };
 
   const createNote = async () => {
-    if (!token || !newNoteTitle.trim()) return;
+    if (!token || !newNoteTitle.trim()) {
+      Alert.alert('Error', 'Please enter a title for the note');
+      return;
+    }
     try {
+      console.log('Creating note:', newNoteTitle);
       const response = await fetch(`${BACKEND_URL}/api/office-notes`, {
         method: 'POST',
         headers: {
@@ -134,6 +138,7 @@ export default function CalendarScreen() {
           category: newNoteCategory,
         }),
       });
+      console.log('Create note response:', response.status);
       if (response.ok) {
         setShowAddNote(false);
         setNewNoteTitle('');
@@ -141,9 +146,15 @@ export default function CalendarScreen() {
         setNewNoteColor('yellow');
         setNewNoteCategory('general');
         fetchNotes();
+        Alert.alert('Success', 'Note created!');
+      } else {
+        const errorText = await response.text();
+        console.error('Create note error:', errorText);
+        Alert.alert('Error', 'Failed to create note. ' + (errorText.includes('admin') ? 'Admin access required.' : 'Please try again.'));
       }
     } catch (error) {
       console.error('Error creating note:', error);
+      Alert.alert('Error', 'Network error creating note.');
     }
   };
 
