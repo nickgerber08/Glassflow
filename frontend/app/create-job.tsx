@@ -202,8 +202,21 @@ export default function CreateJobScreen() {
         base64: true,
       });
 
-      if (!result.canceled && result.assets[0] && result.assets[0].base64) {
-        const base64Data = result.assets[0].base64;
+      // Debug: Show what ImagePicker returned
+      Alert.alert(
+        'Debug: ImagePicker Result', 
+        `canceled: ${result.canceled}\nassets: ${result.assets ? result.assets.length : 'null'}\nhasBase64: ${result.assets?.[0]?.base64 ? 'yes' : 'no'}`
+      );
+
+      if (!result.canceled && result.assets && result.assets[0]) {
+        const asset = result.assets[0];
+        
+        if (!asset.base64) {
+          Alert.alert('No Base64', 'Image was captured but base64 data is missing. URI: ' + asset.uri);
+          return;
+        }
+        
+        const base64Data = asset.base64;
         
         // Debug: Show image size
         Alert.alert('Debug: Image Captured', `Image size: ${Math.round(base64Data.length / 1024)} KB`);
