@@ -203,6 +203,32 @@ class ServiceAdvisor(BaseModel):
 class ServiceAdvisorCreate(BaseModel):
     name: str
 
+# Jenny's Notes models - reference notes for office manager
+class OfficeNote(BaseModel):
+    note_id: str
+    title: str
+    content: str
+    color: str = "yellow"  # yellow, red, green, cyan, magenta
+    category: str = "general"  # general, parts, suppliers, vehicles, warnings
+    order: int = 0  # For ordering notes
+    created_by: str
+    created_at: datetime
+    updated_at: datetime
+
+class OfficeNoteCreate(BaseModel):
+    title: str
+    content: str
+    color: str = "yellow"
+    category: str = "general"
+    order: Optional[int] = None
+
+class OfficeNoteUpdate(BaseModel):
+    title: Optional[str] = None
+    content: Optional[str] = None
+    color: Optional[str] = None
+    category: Optional[str] = None
+    order: Optional[int] = None
+
 # Katyshop Job models
 class KatyshopJob(BaseModel):
     job_id: str
