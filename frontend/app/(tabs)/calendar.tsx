@@ -244,6 +244,13 @@ export default function CalendarScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Calendar</Text>
+        <TouchableOpacity 
+          style={styles.notesButton} 
+          onPress={() => setShowNotes(true)}
+        >
+          <Ionicons name="document-text" size={20} color="#fff" />
+          <Text style={styles.notesButtonText}>Jenny's Notes</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.calendarHeader}>
