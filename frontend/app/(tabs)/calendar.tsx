@@ -379,6 +379,178 @@ export default function CalendarScreen() {
           ))
         )}
       </ScrollView>
+
+      {/* Jenny's Notes Modal */}
+      <Modal visible={showNotes} animationType="slide" presentationStyle="pageSheet">
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>📝 Jenny's Notes</Text>
+            <TouchableOpacity onPress={() => setShowNotes(false)} style={styles.closeButton}>
+              <Ionicons name="close" size={28} color="#333" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Category Filter */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScroll}>
+            {categories.map((cat) => (
+              <TouchableOpacity
+                key={cat}
+                style={[styles.categoryChip, selectedCategory === cat && styles.categoryChipActive]}
+                onPress={() => setSelectedCategory(cat)}
+              >
+                <Text style={[styles.categoryChipText, selectedCategory === cat && styles.categoryChipTextActive]}>
+                  {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          {/* Admin Actions */}
+          {isAdmin && (
+            <View style={styles.adminActions}>
+              <TouchableOpacity style={styles.addNoteBtn} onPress={() => setShowAddNote(true)}>
+                <Ionicons name="add" size={20} color="#fff" />
+                <Text style={styles.addNoteBtnText}>Add Note</Text>
+              </TouchableOpacity>
+              {notes.length === 0 && (
+                <TouchableOpacity style={styles.seedBtn} onPress={seedNotes}>
+                  <Ionicons name="download" size={20} color="#2196F3" />
+                  <Text style={styles.seedBtnText}>Load Jenny's Notes</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
+
+          {/* Notes List */}
+          {notesLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#2196F3" />
+            </View>
+          ) : filteredNotes.length === 0 ? (
+            <View style={styles.emptyNotesContainer}>
+              <Ionicons name="document-text-outline" size={64} color="#ccc" />
+              <Text style={styles.emptyNotesText}>No notes yet</Text>
+              {isAdmin && notes.length === 0 && (
+                <Text style={styles.emptyNotesSubtext}>Tap "Load Jenny's Notes" to import</Text>
+              )}
+            </View>
+          ) : (
+            <ScrollView style={styles.notesList}>
+              {filteredNotes.map((note) => {
+                const colors = NOTE_COLORS[note.color] || NOTE_COLORS.yellow;
+                return (
+                  <TouchableOpacity
+                    key={note.note_id}
+                    style={[styles.noteCard, { backgroundColor: colors.bg, borderLeftColor: colors.border }]}
+                    onPress={() => isAdmin && openEditNote(note)}
+                    activeOpacity={isAdmin ? 0.7 : 1}
+                  >
+                    <View style={styles.noteHeader}>
+                      <Text style={[styles.noteTitle, { color: colors.text }]}>{note.title}</Text>
+                      <View style={styles.noteBadge}>
+                        <Text style={styles.noteBadgeText}>{note.category}</Text>
+                      </View>
+                    </View>
+                    <Text style={[styles.noteContent, { color: colors.text }]}>{note.content}</Text>
+                    {isAdmin && (
+                      <View style={styles.noteActions}>
+                        <TouchableOpacity onPress={() => openEditNote(note)} style={styles.noteActionBtn}>
+                          <Ionicons name="pencil" size={16} color="#666" />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => deleteNote(note.note_id)} style={styles.noteActionBtn}>
+                          <Ionicons name="trash" size={16} color="#E53935" />
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          )}
+        </SafeAreaView>
+      </Modal>
+
+      {/* Add/Edit Note Modal */}
+      <Modal visible={showAddNote || showEditNote} animationType="slide" transparent>
+        <View style={styles.editModalOverlay}>
+          <View style={styles.editModalContent}>
+            <Text style={styles.editModalTitle}>{showEditNote ? 'Edit Note' : 'Add New Note'}</Text>
+            
+            <Text style={styles.inputLabel}>Title</Text>
+            <TextInput
+              style={styles.textInput}
+              value={newNoteTitle}
+              onChangeText={setNewNoteTitle}
+              placeholder="Note title"
+              placeholderTextColor="#999"
+            />
+
+            <Text style={styles.inputLabel}>Content</Text>
+            <TextInput
+              style={[styles.textInput, styles.textArea]}
+              value={newNoteContent}
+              onChangeText={setNewNoteContent}
+              placeholder="Note content"
+              placeholderTextColor="#999"
+              multiline
+              numberOfLines={4}
+            />
+
+            <Text style={styles.inputLabel}>Color</Text>
+            <View style={styles.colorPicker}>
+              {Object.keys(NOTE_COLORS).map((color) => (
+                <TouchableOpacity
+                  key={color}
+                  style={[
+                    styles.colorOption,
+                    { backgroundColor: NOTE_COLORS[color].bg, borderColor: NOTE_COLORS[color].border },
+                    newNoteColor === color && styles.colorOptionSelected,
+                  ]}
+                  onPress={() => setNewNoteColor(color)}
+                >
+                  {newNoteColor === color && <Ionicons name="checkmark" size={16} color={NOTE_COLORS[color].text} />}
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <Text style={styles.inputLabel}>Category</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {['general', 'parts', 'suppliers', 'vehicles', 'warnings'].map((cat) => (
+                <TouchableOpacity
+                  key={cat}
+                  style={[styles.categoryOption, newNoteCategory === cat && styles.categoryOptionSelected]}
+                  onPress={() => setNewNoteCategory(cat)}
+                >
+                  <Text style={[styles.categoryOptionText, newNoteCategory === cat && styles.categoryOptionTextSelected]}>
+                    {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+
+            <View style={styles.editModalButtons}>
+              <TouchableOpacity
+                style={styles.cancelBtn}
+                onPress={() => {
+                  setShowAddNote(false);
+                  setShowEditNote(false);
+                  setEditingNote(null);
+                  setNewNoteTitle('');
+                  setNewNoteContent('');
+                }}
+              >
+                <Text style={styles.cancelBtnText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.saveBtn}
+                onPress={showEditNote ? updateNote : createNote}
+              >
+                <Text style={styles.saveBtnText}>{showEditNote ? 'Update' : 'Save'}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
