@@ -198,14 +198,14 @@ export default function CreateJobScreen() {
 
       // Launch camera - simplified options
       const result = await ImagePicker.launchCameraAsync({
-        allowsEditing: false, // Disable editing to avoid issues
+        allowsEditing: false,
         quality: 0.5,
         base64: true,
       });
 
       // Check if user cancelled
       if (result.canceled) {
-        return; // User cancelled, do nothing
+        return;
       }
 
       // Check if we got assets
@@ -223,16 +223,19 @@ export default function CreateJobScreen() {
       }
 
       const base64Data = asset.base64;
-      const imageSizeKB = Math.round(base64Data.length / 1024);
       
       // Show scanning modal
       setVinImage(asset.uri);
       setVinScanning(true);
       setShowVinModal(true);
 
-      // Call OCR API
+      // Call OCR API with Promise.race for timeout
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Request timed out after 30 seconds')), 30000);
+      });
+
       try {
-        const ocrResponse = await fetch('https://api.ocr.space/parse/image', {
+        const fetchPromise = fetch('https://api.ocr.space/parse/image', {
           method: 'POST',
           headers: {
             'apikey': 'K89622968488957',
@@ -241,10 +244,22 @@ export default function CreateJobScreen() {
           body: `base64Image=data:image/jpeg;base64,${base64Data}&OCREngine=2&scale=true`,
         });
 
+        const ocrResponse = await Promise.race([fetchPromise, timeoutPromise]) as Response;
+        
+        if (!ocrResponse.ok) {
+          throw new Error(`Server returned ${ocrResponse.status}`);
+        }
+
         const ocrResult = await ocrResponse.json();
         
         setVinScanning(false);
         setShowVinModal(false);
+
+        // Debug: Show what came back
+        if (!ocrResult.ParsedResults) {
+          Alert.alert('OCR Response', JSON.stringify(ocrResult).substring(0, 300));
+          return;
+        }
 
         if (ocrResult.ParsedResults && ocrResult.ParsedResults[0]) {
           const text = ocrResult.ParsedResults[0].ParsedText || '';
@@ -263,18 +278,20 @@ export default function CreateJobScreen() {
             setVinOrLp(matches[0]);
             Alert.alert('VIN Found!', `Detected: ${matches[0]}`);
           } else {
-            Alert.alert('No VIN Found', `Scanned text: "${text.substring(0, 100)}..."\n\nNo valid 17-character VIN detected. Please enter manually.`);
+            // Show what was found
+            const displayText = text.length > 150 ? text.substring(0, 150) + '...' : text;
+            Alert.alert('No VIN Found', `Text found:\n"${displayText}"\n\nNo 17-character VIN detected.`);
           }
         } else {
           const errorMsg = ocrResult.ErrorMessage ? 
             (Array.isArray(ocrResult.ErrorMessage) ? ocrResult.ErrorMessage[0] : ocrResult.ErrorMessage) : 
-            'OCR failed';
+            'Unknown error';
           Alert.alert('Scan Failed', errorMsg);
         }
       } catch (ocrError: any) {
         setVinScanning(false);
         setShowVinModal(false);
-        Alert.alert('OCR Error', ocrError.message || 'Failed to process image');
+        Alert.alert('Scan Error', ocrError.message || 'Failed to process image. Please try again or enter VIN manually.');
       }
     } catch (error: any) {
       setVinScanning(false);
