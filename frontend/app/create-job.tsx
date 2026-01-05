@@ -206,25 +206,54 @@ export default function CreateJobScreen() {
 
       const result = await ImagePicker.launchCameraAsync({
         allowsEditing: false,
-        quality: 0.2, // Very low quality to stay under 1MB limit
-        base64: true,
+        quality: 0.5,
+        base64: false, // Don't get base64 here, we'll resize first
       });
 
       if (result.canceled) {
         return;
       }
 
-      if (!result.assets || !result.assets[0] || !result.assets[0].base64) {
+      if (!result.assets || !result.assets[0]) {
         setVinError('No image data received');
         setShowVinModal(true);
         return;
       }
 
-      const base64Data = result.assets[0].base64;
-      setVinImage(result.assets[0].uri);
+      const imageUri = result.assets[0].uri;
+      setVinImage(imageUri);
       setVinScanning(true);
-      setVinResult('Sending to OCR...');
+      setVinResult('Compressing image...');
       setShowVinModal(true);
+
+      // Resize and compress image to under 1MB
+      const manipResult = await ImageManipulator.manipulateAsync(
+        imageUri,
+        [{ resize: { width: 1200 } }], // Resize to max 1200px width
+        { compress: 0.5, format: ImageManipulator.SaveFormat.JPEG, base64: true }
+      );
+
+      if (!manipResult.base64) {
+        setVinScanning(false);
+        setVinError('Failed to process image');
+        return;
+      }
+
+      const base64Data = manipResult.base64;
+      const sizeKB = Math.round(base64Data.length / 1024);
+      setVinResult(`Image size: ${sizeKB} KB. Sending to OCR...`);
+
+      // If still too large, compress more
+      let finalBase64 = base64Data;
+      if (sizeKB > 900) {
+        const smallerResult = await ImageManipulator.manipulateAsync(
+          imageUri,
+          [{ resize: { width: 800 } }],
+          { compress: 0.3, format: ImageManipulator.SaveFormat.JPEG, base64: true }
+        );
+        finalBase64 = smallerResult.base64 || base64Data;
+        setVinResult(`Compressed to ${Math.round((finalBase64.length) / 1024)} KB. Sending...`);
+      }
 
       // Make OCR request
       const ocrResponse = await fetch('https://api.ocr.space/parse/image', {
@@ -233,7 +262,7 @@ export default function CreateJobScreen() {
           'apikey': 'K89622968488957',
           'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: `base64Image=data:image/jpeg;base64,${base64Data}&OCREngine=2&scale=true`,
+        body: `base64Image=data:image/jpeg;base64,${finalBase64}&OCREngine=2&scale=true`,
       });
 
       setVinResult('Processing response...');
@@ -262,6 +291,7 @@ export default function CreateJobScreen() {
           // SUCCESS - Found VIN
           setVinOrLp(matches[0]);
           setVinResult(`VIN Found: ${matches[0]}`);
+          setVinError('');
           // Auto close after success
           setTimeout(() => setShowVinModal(false), 1500);
         } else {
@@ -269,7 +299,7 @@ export default function CreateJobScreen() {
           setVinResult(`Text detected: "${text.substring(0, 200)}..."`);
         }
       } else {
-        setVinError(ocrResult.ErrorMessage?.[0] || 'OCR failed');
+        setVinError(ocrResult.ErrorMessage?.[0] || ocrResult.ErrorDetails || 'OCR failed');
         setVinResult(`Raw: ${rawResult}`);
       }
     } catch (error: any) {
