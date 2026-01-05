@@ -205,9 +205,12 @@ export default function CreateJobScreen() {
       if (!result.canceled && result.assets[0] && result.assets[0].base64) {
         const base64Data = result.assets[0].base64;
         
+        // Debug: Show image size
+        Alert.alert('Debug: Image Captured', `Image size: ${Math.round(base64Data.length / 1024)} KB`);
+        
         // Check if image is too large (> 1MB base64 = ~750KB image)
-        if (base64Data.length > 1000000) {
-          Alert.alert('Image Too Large', 'Please try again with the camera further from the VIN, or enter the VIN manually.');
+        if (base64Data.length > 1500000) {
+          Alert.alert('Image Too Large', `Size: ${Math.round(base64Data.length / 1024)} KB. Please try again with the camera further from the VIN.`);
           return;
         }
         
@@ -217,17 +220,12 @@ export default function CreateJobScreen() {
         
         // Use OCR.space free API to extract text with timeout
         try {
+          Alert.alert('Debug', 'Starting OCR request...');
+          
           const controller = new AbortController();
           const timeoutId = setTimeout(() => {
             controller.abort();
-          }, 20000); // 20 second timeout
-          
-          const requestBody = new URLSearchParams();
-          requestBody.append('base64Image', `data:image/jpeg;base64,${base64Data}`);
-          requestBody.append('isOverlayRequired', 'false');
-          requestBody.append('OCREngine', '2');
-          requestBody.append('scale', 'true');
-          requestBody.append('isTable', 'false');
+          }, 25000); // 25 second timeout
           
           const ocrResponse = await fetch('https://api.ocr.space/parse/image', {
             method: 'POST',
@@ -235,11 +233,13 @@ export default function CreateJobScreen() {
               'apikey': 'K89622968488957',
               'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: requestBody.toString(),
+            body: `base64Image=data:image/jpeg;base64,${base64Data}&OCREngine=2&scale=true`,
             signal: controller.signal,
           });
           
           clearTimeout(timeoutId);
+          
+          Alert.alert('Debug', `OCR Response status: ${ocrResponse.status}`);
           
           if (!ocrResponse.ok) {
             throw new Error(`HTTP ${ocrResponse.status}`);
@@ -250,6 +250,9 @@ export default function CreateJobScreen() {
           setVinScanning(false);
           setShowVinModal(false);
           
+          // Debug: Show raw response
+          Alert.alert('Debug: OCR Result', JSON.stringify(ocrResult).substring(0, 300));
+          
           if (ocrResult.ParsedResults && ocrResult.ParsedResults[0]) {
             const text = ocrResult.ParsedResults[0].ParsedText || '';
             
@@ -258,6 +261,9 @@ export default function CreateJobScreen() {
               Alert.alert('No Text Found', 'The image scan did not detect any text. Try again with better lighting and a clearer image.');
               return;
             }
+            
+            // Debug: Show detected text
+            Alert.alert('Debug: Detected Text', text.substring(0, 200));
             
             // Clean up text - remove newlines, extra spaces
             const cleanText = text.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim();
