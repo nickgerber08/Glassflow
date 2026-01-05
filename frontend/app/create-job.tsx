@@ -196,18 +196,19 @@ export default function CreateJobScreen() {
     setVinImage(null);
     
     try {
+      // Request camera permission
       const permResult = await ImagePicker.requestCameraPermissionsAsync();
       
       if (permResult.status !== 'granted') {
-        setVinError('Camera permission denied');
-        setShowVinModal(true);
+        Alert.alert('Permission Required', 'Camera permission is needed to scan VIN');
         return;
       }
 
+      // Launch camera
       const result = await ImagePicker.launchCameraAsync({
         allowsEditing: false,
-        quality: 0.5,
-        base64: false, // Don't get base64 here, we'll resize first
+        quality: 0.3, // Lower quality to reduce file size
+        base64: false,
       });
 
       if (result.canceled) {
@@ -215,96 +216,144 @@ export default function CreateJobScreen() {
       }
 
       if (!result.assets || !result.assets[0]) {
-        setVinError('No image data received');
-        setShowVinModal(true);
+        Alert.alert('Error', 'No image was captured');
         return;
       }
 
       const imageUri = result.assets[0].uri;
+      
+      // Show modal immediately with captured image
       setVinImage(imageUri);
       setVinScanning(true);
-      setVinResult('Compressing image...');
+      setVinResult('Processing image...');
       setShowVinModal(true);
 
-      // Resize and compress image to under 1MB
-      const manipResult = await ImageManipulator.manipulateAsync(
-        imageUri,
-        [{ resize: { width: 1200 } }], // Resize to max 1200px width
-        { compress: 0.5, format: ImageManipulator.SaveFormat.JPEG, base64: true }
-      );
+      // Resize and compress image to be well under 1MB limit
+      let manipResult;
+      try {
+        manipResult = await ImageManipulator.manipulateAsync(
+          imageUri,
+          [{ resize: { width: 800 } }], // Smaller size for faster upload
+          { compress: 0.4, format: ImageManipulator.SaveFormat.JPEG, base64: true }
+        );
+      } catch (manipError: any) {
+        setVinScanning(false);
+        setVinError(`Image processing failed: ${manipError.message}`);
+        return;
+      }
 
       if (!manipResult.base64) {
         setVinScanning(false);
-        setVinError('Failed to process image');
+        setVinError('Failed to get image data');
         return;
       }
 
       const base64Data = manipResult.base64;
-      const sizeKB = Math.round(base64Data.length / 1024);
-      setVinResult(`Image size: ${sizeKB} KB. Sending to OCR...`);
+      const sizeKB = Math.round(base64Data.length * 0.75 / 1024); // Actual size (base64 is ~33% larger)
+      setVinResult(`Image: ${sizeKB}KB. Sending to OCR...`);
 
-      // If still too large, compress more
+      // If still too large, compress more aggressively
       let finalBase64 = base64Data;
-      if (sizeKB > 900) {
-        const smallerResult = await ImageManipulator.manipulateAsync(
-          imageUri,
-          [{ resize: { width: 800 } }],
-          { compress: 0.3, format: ImageManipulator.SaveFormat.JPEG, base64: true }
-        );
-        finalBase64 = smallerResult.base64 || base64Data;
-        setVinResult(`Compressed to ${Math.round((finalBase64.length) / 1024)} KB. Sending...`);
+      if (sizeKB > 700) {
+        try {
+          const smallerResult = await ImageManipulator.manipulateAsync(
+            imageUri,
+            [{ resize: { width: 600 } }],
+            { compress: 0.25, format: ImageManipulator.SaveFormat.JPEG, base64: true }
+          );
+          if (smallerResult.base64) {
+            finalBase64 = smallerResult.base64;
+            const newSize = Math.round(finalBase64.length * 0.75 / 1024);
+            setVinResult(`Compressed: ${newSize}KB. Sending...`);
+          }
+        } catch (e) {
+          // Use original if further compression fails
+        }
       }
 
-      // Make OCR request
-      const ocrResponse = await fetch('https://api.ocr.space/parse/image', {
-        method: 'POST',
-        headers: {
-          'apikey': 'K89622968488957',
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `base64Image=data:image/jpeg;base64,${finalBase64}&OCREngine=2&scale=true`,
-      });
-
-      setVinResult('Processing response...');
+      // Make OCR request with timeout
+      setVinResult('Calling OCR service...');
       
-      const ocrResult = await ocrResponse.json();
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+      let ocrResponse;
+      try {
+        ocrResponse = await fetch('https://api.ocr.space/parse/image', {
+          method: 'POST',
+          headers: {
+            'apikey': 'K89622968488957',
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: `base64Image=data:image/jpeg;base64,${finalBase64}&OCREngine=2&scale=true&isTable=false`,
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+      } catch (fetchError: any) {
+        clearTimeout(timeoutId);
+        setVinScanning(false);
+        if (fetchError.name === 'AbortError') {
+          setVinError('Request timed out. Please try again.');
+        } else {
+          setVinError(`Network error: ${fetchError.message}`);
+        }
+        return;
+      }
+
+      setVinResult('Parsing response...');
+      
+      let ocrResult;
+      try {
+        ocrResult = await ocrResponse.json();
+      } catch (parseError) {
+        setVinScanning(false);
+        setVinError('Failed to parse OCR response');
+        return;
+      }
+      
       setVinScanning(false);
       
-      // Show raw result for debugging
-      const rawResult = JSON.stringify(ocrResult).substring(0, 500);
+      // Check for API errors
+      if (ocrResult.IsErroredOnProcessing) {
+        const errorMsg = ocrResult.ErrorMessage?.[0] || ocrResult.ErrorDetails || 'OCR processing failed';
+        setVinError(errorMsg);
+        return;
+      }
       
+      // Process successful result
       if (ocrResult.ParsedResults && ocrResult.ParsedResults[0]) {
         const text = ocrResult.ParsedResults[0].ParsedText || '';
         
         if (!text.trim()) {
-          setVinError('No text detected in image');
-          setVinResult(`Raw: ${rawResult}`);
+          setVinError('No text detected. Try better lighting or angle.');
           return;
         }
 
-        // Search for VIN
+        // Search for VIN pattern (17 alphanumeric, excluding I, O, Q)
         const cleanText = text.replace(/[\r\n\s]+/g, '').toUpperCase();
         const vinRegex = /[A-HJ-NPR-Z0-9]{17}/g;
         const matches = cleanText.match(vinRegex);
 
         if (matches && matches.length > 0) {
-          // SUCCESS - Found VIN
-          setVinOrLp(matches[0]);
-          setVinResult(`VIN Found: ${matches[0]}`);
+          // SUCCESS - Found VIN!
+          const foundVin = matches[0];
+          setVinOrLp(foundVin);
+          setVinResult(`✓ VIN Found: ${foundVin}`);
           setVinError('');
-          // Auto close after success
+          // Auto close modal after showing success
           setTimeout(() => setShowVinModal(false), 1500);
         } else {
-          setVinError('No valid VIN found');
-          setVinResult(`Text detected: "${text.substring(0, 200)}..."`);
+          // No VIN found, show what was detected
+          setVinError('No valid 17-character VIN found');
+          setVinResult(`Text detected: "${text.substring(0, 150)}${text.length > 150 ? '...' : ''}"`);
         }
       } else {
-        setVinError(ocrResult.ErrorMessage?.[0] || ocrResult.ErrorDetails || 'OCR failed');
-        setVinResult(`Raw: ${rawResult}`);
+        setVinError('No results from OCR');
       }
     } catch (error: any) {
       setVinScanning(false);
-      setVinError(`Error: ${error.message || 'Unknown error'}`);
+      setVinError(`Unexpected error: ${error.message || 'Unknown'}`);
+      console.error('VIN scan error:', error);
     }
   };
 
