@@ -102,11 +102,11 @@ export default function CalendarScreen() {
   }, [sessionToken]);
 
   const seedNotes = async () => {
-    if (!token || !isAdmin) return;
+    if (!sessionToken || !isAdmin) return;
     try {
       const response = await fetch(`${BACKEND_URL}/api/office-notes/seed`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: { 'Authorization': `Bearer ${sessionToken}` },
       });
       if (response.ok) {
         fetchNotes();
@@ -118,7 +118,7 @@ export default function CalendarScreen() {
   };
 
   const createNote = async () => {
-    if (!token || !newNoteTitle.trim()) {
+    if (!sessionToken || !newNoteTitle.trim()) {
       Alert.alert('Error', 'Please enter a title for the note');
       return;
     }
@@ -127,7 +127,7 @@ export default function CalendarScreen() {
       const response = await fetch(`${BACKEND_URL}/api/office-notes`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${sessionToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -158,12 +158,12 @@ export default function CalendarScreen() {
   };
 
   const updateNote = async () => {
-    if (!token || !editingNote) return;
+    if (!sessionToken || !editingNote) return;
     try {
       const response = await fetch(`${BACKEND_URL}/api/office-notes/${editingNote.note_id}`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${sessionToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -184,7 +184,7 @@ export default function CalendarScreen() {
   };
 
   const deleteNote = async (noteId: string) => {
-    if (!token) return;
+    if (!sessionToken) return;
     Alert.alert('Delete Note', 'Are you sure you want to delete this note?', [
       { text: 'Cancel', style: 'cancel' },
       {
@@ -194,7 +194,7 @@ export default function CalendarScreen() {
           try {
             const response = await fetch(`${BACKEND_URL}/api/office-notes/${noteId}`, {
               method: 'DELETE',
-              headers: { 'Authorization': `Bearer ${token}` },
+              headers: { 'Authorization': `Bearer ${sessionToken}` },
             });
             if (response.ok) {
               fetchNotes();
