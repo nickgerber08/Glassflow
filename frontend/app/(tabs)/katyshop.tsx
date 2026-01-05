@@ -1896,6 +1896,84 @@ export default function KatyshopScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* VIN Scanner Modal */}
+      <Modal
+        visible={showVinModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowVinModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.vinModal}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>VIN Scanner</Text>
+              <TouchableOpacity onPress={() => setShowVinModal(false)}>
+                <Ionicons name="close-circle" size={28} color="#666" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Captured Image Preview */}
+            {vinImage && (
+              <View style={styles.vinImageContainer}>
+                <Image source={{ uri: vinImage }} style={styles.vinImagePreview} />
+              </View>
+            )}
+
+            {/* Scanning Indicator */}
+            {vinScanning && (
+              <View style={styles.vinScanningContainer}>
+                <ActivityIndicator size="large" color="#2196F3" />
+                <Text style={styles.vinScanningText}>Reading VIN...</Text>
+              </View>
+            )}
+
+            {/* VIN Input */}
+            <View style={styles.formField}>
+              <Text style={styles.formLabel}>VIN Number</Text>
+              <TextInput
+                style={styles.vinInput}
+                placeholder="Enter or scan VIN"
+                placeholderTextColor="#999"
+                value={scannedVin}
+                onChangeText={(text) => setScannedVin(text.toUpperCase())}
+                autoCapitalize="characters"
+                maxLength={17}
+              />
+              <Text style={styles.vinHint}>17 characters (letters A-H, J-N, P-R, S-Z and numbers)</Text>
+            </View>
+
+            {/* Scan Button */}
+            <TouchableOpacity
+              style={styles.vinScanButton}
+              onPress={takeVinPhoto}
+              disabled={vinScanning}
+            >
+              <Ionicons name="camera" size={24} color="#fff" />
+              <Text style={styles.vinScanButtonText}>
+                {vinScanning ? 'Scanning...' : 'Take Photo of VIN'}
+              </Text>
+            </TouchableOpacity>
+
+            {/* Save Button */}
+            <View style={styles.vinModalActions}>
+              <TouchableOpacity 
+                style={styles.rescheduleCancelBtn}
+                onPress={() => setShowVinModal(false)}
+              >
+                <Text style={styles.rescheduleCancelBtnText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.rescheduleConfirmBtn, !scannedVin.trim() && styles.disabledBtn]}
+                onPress={saveVin}
+                disabled={!scannedVin.trim()}
+              >
+                <Text style={styles.rescheduleConfirmBtnText}>Save VIN</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
