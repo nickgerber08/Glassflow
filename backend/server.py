@@ -1463,8 +1463,48 @@ async def respond_to_part_request(job_id: str, parts_response: PartsResponseCrea
 
 @api_router.get("/office-notes")
 async def get_office_notes(request: Request):
-    """Get all office notes - anyone can view"""
-    await require_auth(request)
+    """Get all office notes - anyone can view. Auto-seeds Jenny's notes if empty."""
+    user = await require_auth(request)
+    
+    # Check if notes exist, if not, auto-seed Jenny's notes
+    existing_count = await db.office_notes.count_documents({})
+    if existing_count == 0:
+        # Auto-seed Jenny's notes
+        initial_notes = [
+            {"title": "ARMADA", "content": "NEED MOLDING - AFFORDABLE 27.00", "color": "green", "category": "parts"},
+            {"title": "NO MERCEDES S550", "content": "Do not service", "color": "red", "category": "warnings"},
+            {"title": "AMERICAN", "content": "L 5504G", "color": "yellow", "category": "parts"},
+            {"title": "Sika Activator", "content": "SK60H180-250", "color": "yellow", "category": "parts"},
+            {"title": "Part Swap", "content": "USE 3185 INSTEAD OF 3183", "color": "yellow", "category": "parts"},
+            {"title": "19+ SILVERADO", "content": "DW2498", "color": "yellow", "category": "vehicles"},
+            {"title": "Silverado Parts", "content": "5048 - 5049\n4792-5487", "color": "cyan", "category": "parts"},
+            {"title": "YPN", "content": "MOLDING-MOLDING", "color": "yellow", "category": "parts"},
+            {"title": "17-18 RAV", "content": "4803 & 4361 - DON'T KNOW WHICH", "color": "yellow", "category": "vehicles"},
+            {"title": "5048 Pricing", "content": "130.00 - MYGRANT", "color": "yellow", "category": "suppliers"},
+            {"title": "5555 Pricing", "content": "118.00 - MYGRANT\n87462-PGW-Hou", "color": "cyan", "category": "suppliers"},
+            {"title": "5048-5049", "content": "MYGRANT NEED LOWER RETAINER", "color": "yellow", "category": "parts"},
+            {"title": "MYGRANT-PILK", "content": "WILL NOT DELIVER U428 W/O GLASS ORDERED", "color": "yellow", "category": "warnings"},
+            {"title": "154884-PGW", "content": "ACTIVATER", "color": "yellow", "category": "parts"},
+            {"title": "23 COROLLA", "content": "OEM", "color": "yellow", "category": "vehicles"},
+            {"title": "4751 Warning", "content": "ONLY - DON'T ORDER 4961", "color": "red", "category": "warnings"},
+            {"title": "VITRO Schedule", "content": "10:15 - BEAUMONT RUN\n12:30 - TRANSFER FROM HOUSTON-PASADENA", "color": "yellow", "category": "suppliers"},
+            {"title": "Windshield Symbols", "content": "TRIANGLE = LANE DEPARTURE\nCIRCLE OR EYE = RAIN SENSOR", "color": "yellow", "category": "general"},
+            {"title": "NEW TUNDRA - PART #'s", "content": "W/RS: 5820-5821-5826-5827\nW/O RS: 5819-5822-5823-5828-5829\nHUD & RS: 5824-5825-5830-5831", "color": "magenta", "category": "vehicles"},
+            {"title": "CHR Rain Sensor", "content": "5665 - NO RAIN SENSOR\n5666 - HAS RAIN SENSOR", "color": "cyan", "category": "vehicles"},
+            {"title": "5504-PRIMER", "content": "DON'T ORDER FROM PILK", "color": "green", "category": "warnings"},
+            {"title": "UM1511", "content": "Part reference", "color": "green", "category": "parts"},
+            {"title": "PUGM6", "content": "10 MM UNDERSIDE MOLDING", "color": "green", "category": "parts"},
+        ]
+        
+        now = datetime.now(timezone.utc)
+        for i, note in enumerate(initial_notes):
+            note["note_id"] = f"note_{uuid.uuid4().hex[:12]}"
+            note["order"] = i
+            note["created_by"] = "system"
+            note["created_at"] = now
+            note["updated_at"] = now
+        
+        await db.office_notes.insert_many(initial_notes)
     
     notes = await db.office_notes.find({}, {"_id": 0}).sort("order", 1).to_list(200)
     return notes
