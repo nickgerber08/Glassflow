@@ -188,136 +188,100 @@ export default function CreateJobScreen() {
   // VIN Scanner function
   const scanVin = async () => {
     try {
-      const { status } = await ImagePicker.requestCameraPermissionsAsync();
-      if (status !== 'granted') {
+      // Request permission
+      const permResult = await ImagePicker.requestCameraPermissionsAsync();
+      
+      if (permResult.status !== 'granted') {
         Alert.alert('Permission Required', 'Camera permission is needed to scan VIN');
         return;
       }
 
+      // Launch camera - simplified options
       const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [4, 1], // Narrow aspect for VIN sticker
-        quality: 0.3, // Lower quality = smaller file
+        allowsEditing: false, // Disable editing to avoid issues
+        quality: 0.5,
         base64: true,
       });
 
-      // Debug: Show what ImagePicker returned
-      Alert.alert(
-        'Debug: ImagePicker Result', 
-        `canceled: ${result.canceled}\nassets: ${result.assets ? result.assets.length : 'null'}\nhasBase64: ${result.assets?.[0]?.base64 ? 'yes' : 'no'}`
-      );
+      // Check if user cancelled
+      if (result.canceled) {
+        return; // User cancelled, do nothing
+      }
 
-      if (!result.canceled && result.assets && result.assets[0]) {
-        const asset = result.assets[0];
+      // Check if we got assets
+      if (!result.assets || result.assets.length === 0) {
+        Alert.alert('Error', 'No image was captured');
+        return;
+      }
+
+      const asset = result.assets[0];
+
+      // Check for base64 data
+      if (!asset.base64) {
+        Alert.alert('Error', 'Image captured but no data received. Please try again.');
+        return;
+      }
+
+      const base64Data = asset.base64;
+      const imageSizeKB = Math.round(base64Data.length / 1024);
+      
+      // Show scanning modal
+      setVinImage(asset.uri);
+      setVinScanning(true);
+      setShowVinModal(true);
+
+      // Call OCR API
+      try {
+        const ocrResponse = await fetch('https://api.ocr.space/parse/image', {
+          method: 'POST',
+          headers: {
+            'apikey': 'K89622968488957',
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: `base64Image=data:image/jpeg;base64,${base64Data}&OCREngine=2&scale=true`,
+        });
+
+        const ocrResult = await ocrResponse.json();
         
-        if (!asset.base64) {
-          Alert.alert('No Base64', 'Image was captured but base64 data is missing. URI: ' + asset.uri);
-          return;
-        }
-        
-        const base64Data = asset.base64;
-        
-        // Debug: Show image size
-        Alert.alert('Debug: Image Captured', `Image size: ${Math.round(base64Data.length / 1024)} KB`);
-        
-        // Check if image is too large (> 1MB base64 = ~750KB image)
-        if (base64Data.length > 1500000) {
-          Alert.alert('Image Too Large', `Size: ${Math.round(base64Data.length / 1024)} KB. Please try again with the camera further from the VIN.`);
-          return;
-        }
-        
-        setVinImage(result.assets[0].uri);
-        setVinScanning(true);
-        setShowVinModal(true);
-        
-        // Use OCR.space free API to extract text with timeout
-        try {
-          Alert.alert('Debug', 'Starting OCR request...');
+        setVinScanning(false);
+        setShowVinModal(false);
+
+        if (ocrResult.ParsedResults && ocrResult.ParsedResults[0]) {
+          const text = ocrResult.ParsedResults[0].ParsedText || '';
           
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => {
-            controller.abort();
-          }, 25000); // 25 second timeout
-          
-          const ocrResponse = await fetch('https://api.ocr.space/parse/image', {
-            method: 'POST',
-            headers: {
-              'apikey': 'K89622968488957',
-              'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `base64Image=data:image/jpeg;base64,${base64Data}&OCREngine=2&scale=true`,
-            signal: controller.signal,
-          });
-          
-          clearTimeout(timeoutId);
-          
-          Alert.alert('Debug', `OCR Response status: ${ocrResponse.status}`);
-          
-          if (!ocrResponse.ok) {
-            throw new Error(`HTTP ${ocrResponse.status}`);
+          if (!text.trim()) {
+            Alert.alert('No Text Found', 'Could not read any text from the image. Please try again with better lighting.');
+            return;
           }
-          
-          const ocrResult = await ocrResponse.json();
-          
-          setVinScanning(false);
-          setShowVinModal(false);
-          
-          // Debug: Show raw response
-          Alert.alert('Debug: OCR Result', JSON.stringify(ocrResult).substring(0, 300));
-          
-          if (ocrResult.ParsedResults && ocrResult.ParsedResults[0]) {
-            const text = ocrResult.ParsedResults[0].ParsedText || '';
-            
-            // Show what was detected for debugging
-            if (!text || text.trim().length === 0) {
-              Alert.alert('No Text Found', 'The image scan did not detect any text. Try again with better lighting and a clearer image.');
-              return;
-            }
-            
-            // Debug: Show detected text
-            Alert.alert('Debug: Detected Text', text.substring(0, 200));
-            
-            // Clean up text - remove newlines, extra spaces
-            const cleanText = text.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim();
-            
-            // Extract VIN - 17 characters, alphanumeric, no I, O, Q
-            const vinRegex = /[A-HJ-NPR-Z0-9]{17}/gi;
-            const matches = cleanText.match(vinRegex);
-            
-            if (matches && matches.length > 0) {
-              const detectedVin = matches[0].toUpperCase();
-              setVinOrLp(detectedVin);
-              Alert.alert('VIN Found!', `Detected: ${detectedVin}`);
-            } else {
-              // Try a looser match - any 17 alphanumeric chars
-              const looseRegex = /[A-Z0-9]{17}/gi;
-              const noSpaceText = cleanText.replace(/\s/g, '').toUpperCase();
-              const looseMatches = noSpaceText.match(looseRegex);
-              
-              if (looseMatches && looseMatches.length > 0) {
-                const detectedVin = looseMatches[0];
-                setVinOrLp(detectedVin);
-                Alert.alert('VIN Found!', `Detected: ${detectedVin}\n\nPlease verify this is correct.`);
-              } else {
-                // Show what was detected so user knows it's working
-                const preview = cleanText.length > 100 ? cleanText.substring(0, 100) + '...' : cleanText;
-                Alert.alert(
-                  'No Valid VIN Found', 
-                  `Detected text:\n"${preview}"\n\nCould not find a 17-character VIN. Please try again or enter manually.`
-                );
-              }
-            }
-          } else if (ocrResult.ErrorMessage) {
-            Alert.alert('OCR Error', Array.isArray(ocrResult.ErrorMessage) ? ocrResult.ErrorMessage[0] : ocrResult.ErrorMessage);
-          } else if (ocrResult.IsErroredOnProcessing) {
-            Alert.alert('Processing Error', 'The OCR service could not process the image. Please try a clearer photo.');
+
+          // Clean and search for VIN
+          const cleanText = text.replace(/[\r\n\s]+/g, '').toUpperCase();
+          const vinRegex = /[A-HJ-NPR-Z0-9]{17}/g;
+          const matches = cleanText.match(vinRegex);
+
+          if (matches && matches.length > 0) {
+            setVinOrLp(matches[0]);
+            Alert.alert('VIN Found!', `Detected: ${matches[0]}`);
           } else {
-            Alert.alert('OCR Failed', 'Could not read the image. Please try again or enter manually.');
+            Alert.alert('No VIN Found', `Scanned text: "${text.substring(0, 100)}..."\n\nNo valid 17-character VIN detected. Please enter manually.`);
           }
-        } catch (ocrError: any) {
-          console.error('OCR error:', ocrError);
-          setVinScanning(false);
+        } else {
+          const errorMsg = ocrResult.ErrorMessage ? 
+            (Array.isArray(ocrResult.ErrorMessage) ? ocrResult.ErrorMessage[0] : ocrResult.ErrorMessage) : 
+            'OCR failed';
+          Alert.alert('Scan Failed', errorMsg);
+        }
+      } catch (ocrError: any) {
+        setVinScanning(false);
+        setShowVinModal(false);
+        Alert.alert('OCR Error', ocrError.message || 'Failed to process image');
+      }
+    } catch (error: any) {
+      setVinScanning(false);
+      setShowVinModal(false);
+      Alert.alert('Camera Error', error.message || 'Failed to access camera');
+    }
+  };
           setShowVinModal(false);
           
           if (ocrError.name === 'AbortError') {
