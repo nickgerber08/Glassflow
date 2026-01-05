@@ -91,6 +91,8 @@ export default function CreateJobScreen() {
   const [showVinModal, setShowVinModal] = useState(false);
   const [vinScanning, setVinScanning] = useState(false);
   const [vinImage, setVinImage] = useState<string | null>(null);
+  const [vinResult, setVinResult] = useState<string>('');
+  const [vinError, setVinError] = useState<string>('');
 
   useEffect(() => {
     fetchUsers();
