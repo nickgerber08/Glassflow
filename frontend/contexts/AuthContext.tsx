@@ -156,11 +156,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      // Get Expo push token
-      const pushTokenData = await Notifications.getExpoPushTokenAsync({
-        projectId: Constants.expoConfig?.extra?.eas?.projectId,
-      });
-      const pushToken = pushTokenData.data;
+      // Get Expo push token - handle missing projectId gracefully
+      let pushToken: string;
+      try {
+        const projectId = Constants.expoConfig?.extra?.eas?.projectId;
+        const pushTokenData = await Notifications.getExpoPushTokenAsync(
+          projectId ? { projectId } : undefined
+        );
+        pushToken = pushTokenData.data;
+      } catch (pushError) {
+        // Push notifications may not work in Expo Go with SDK 53+
+        console.log('Push token not available in this environment');
+        return;
+      }
 
       // Register token with backend
       await fetch(`${BACKEND_URL}/api/push-token`, {
@@ -174,7 +182,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       console.log('Push token registered:', pushToken);
     } catch (error) {
-      console.error('Error registering push token:', error);
+      // Non-critical error - don't show to user
+      console.log('Push token registration skipped');
     }
   };
 
