@@ -185,6 +185,73 @@ export default function CreateJobScreen() {
     }
   };
 
+  // VIN Scanner function
+  const scanVin = async () => {
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Camera permission is needed to scan VIN');
+        return;
+      }
+
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [16, 9],
+        quality: 0.8,
+        base64: true,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        setVinImage(result.assets[0].uri);
+        setVinScanning(true);
+        setShowVinModal(true);
+        
+        // Use OCR.space free API to extract text
+        try {
+          const formData = new FormData();
+          formData.append('apikey', 'K89622968488957'); // Free tier API key
+          formData.append('base64Image', `data:image/jpeg;base64,${result.assets[0].base64}`);
+          formData.append('isOverlayRequired', 'false');
+          formData.append('OCREngine', '2'); // More accurate for VINs
+          
+          const ocrResponse = await fetch('https://api.ocr.space/parse/image', {
+            method: 'POST',
+            body: formData,
+          });
+          
+          const ocrResult = await ocrResponse.json();
+          
+          if (ocrResult.ParsedResults && ocrResult.ParsedResults[0]) {
+            const text = ocrResult.ParsedResults[0].ParsedText || '';
+            // Extract VIN - 17 characters, alphanumeric, no I, O, Q
+            const vinRegex = /[A-HJ-NPR-Z0-9]{17}/gi;
+            const matches = text.match(vinRegex);
+            
+            if (matches && matches.length > 0) {
+              setVinOrLp(matches[0].toUpperCase());
+              Alert.alert('VIN Found!', `Detected: ${matches[0].toUpperCase()}`);
+              setShowVinModal(false);
+            } else {
+              Alert.alert('No VIN Found', 'Could not detect a valid VIN. You can manually enter it or try again.');
+            }
+          } else {
+            Alert.alert('OCR Failed', 'Could not read the image. Please try again or enter manually.');
+          }
+        } catch (ocrError) {
+          console.error('OCR error:', ocrError);
+          Alert.alert('Scan Error', 'Failed to process image. Please enter VIN manually.');
+        }
+        
+        setVinScanning(false);
+      }
+    } catch (error) {
+      console.error('Camera error:', error);
+      Alert.alert('Error', 'Failed to open camera');
+      setVinScanning(false);
+    }
+  };
+
   const getCurrentLocation = async () => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
