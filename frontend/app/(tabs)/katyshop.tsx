@@ -588,6 +588,116 @@ export default function KatyshopScreen() {
     }
   };
 
+  // VIN Scanner functions
+  const openVinScanner = () => {
+    setScannedVin(selectedJob?.vehicle_vin || '');
+    setVinImage(null);
+    setShowVinModal(true);
+  };
+
+  const takeVinPhoto = async () => {
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Camera permission is needed to scan VIN');
+        return;
+      }
+
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [16, 9],
+        quality: 0.8,
+        base64: true,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        setVinImage(result.assets[0].uri);
+        setVinScanning(true);
+        
+        // Use OCR.space free API to extract text
+        try {
+          const formData = new FormData();
+          formData.append('apikey', 'K89622968488957'); // Free tier API key
+          formData.append('base64Image', `data:image/jpeg;base64,${result.assets[0].base64}`);
+          formData.append('isOverlayRequired', 'false');
+          formData.append('OCREngine', '2'); // More accurate for VINs
+          
+          const ocrResponse = await fetch('https://api.ocr.space/parse/image', {
+            method: 'POST',
+            body: formData,
+          });
+          
+          const ocrResult = await ocrResponse.json();
+          
+          if (ocrResult.ParsedResults && ocrResult.ParsedResults[0]) {
+            const text = ocrResult.ParsedResults[0].ParsedText || '';
+            // Extract VIN - 17 characters, alphanumeric, no I, O, Q
+            const vinRegex = /[A-HJ-NPR-Z0-9]{17}/gi;
+            const matches = text.match(vinRegex);
+            
+            if (matches && matches.length > 0) {
+              setScannedVin(matches[0].toUpperCase());
+              Alert.alert('VIN Found!', `Detected: ${matches[0].toUpperCase()}`);
+            } else {
+              Alert.alert('No VIN Found', 'Could not detect a valid VIN. Try again with better lighting or manually enter the VIN.');
+            }
+          } else {
+            Alert.alert('OCR Failed', 'Could not read the image. Please try again.');
+          }
+        } catch (ocrError) {
+          console.error('OCR error:', ocrError);
+          Alert.alert('Scan Error', 'Failed to process image. Please enter VIN manually.');
+        }
+        
+        setVinScanning(false);
+      }
+    } catch (error) {
+      console.error('Camera error:', error);
+      Alert.alert('Error', 'Failed to open camera');
+      setVinScanning(false);
+    }
+  };
+
+  const saveVin = async () => {
+    if (!selectedJob || !scannedVin.trim()) {
+      Alert.alert('Error', 'Please enter a VIN');
+      return;
+    }
+    
+    // Validate VIN format (17 characters, no I, O, Q)
+    const vinRegex = /^[A-HJ-NPR-Z0-9]{17}$/i;
+    if (!vinRegex.test(scannedVin.trim())) {
+      Alert.alert('Invalid VIN', 'VIN must be exactly 17 characters (letters and numbers, no I, O, or Q)');
+      return;
+    }
+    
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/katyshop/jobs/${selectedJob.job_id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${sessionToken}`,
+        },
+        body: JSON.stringify({ vehicle_vin: scannedVin.trim().toUpperCase() }),
+      });
+
+      if (response.ok) {
+        setShowVinModal(false);
+        await fetchJobs();
+        // Update the selected job too
+        setSelectedJob(prev => prev ? { ...prev, vehicle_vin: scannedVin.trim().toUpperCase() } : null);
+        Alert.alert('Success', 'VIN saved successfully');
+      } else {
+        const error = await response.json();
+        Alert.alert('Error', error.detail || 'Failed to save VIN');
+      }
+    } catch (error) {
+      console.error('Save VIN error:', error);
+      Alert.alert('Error', 'Failed to save VIN');
+    }
+  };
+
   const selectAdvisor = (advisor: ServiceAdvisor) => {
     setFormAdvisorId(advisor.advisor_id);
     setFormAdvisorName(advisor.name);
