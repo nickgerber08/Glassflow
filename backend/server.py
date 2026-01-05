@@ -1499,7 +1499,8 @@ async def create_office_note(note_data: OfficeNoteCreate, request: Request):
     await db.office_notes.insert_one(note)
     
     # Return without _id
-    del note["_id"] if "_id" in note else None
+    if "_id" in note:
+        del note["_id"]
     return note
 
 @api_router.put("/office-notes/{note_id}")
