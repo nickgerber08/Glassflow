@@ -2938,4 +2938,102 @@ const styles = StyleSheet.create({
   distributorOptionTextSelected: {
     color: '#2196F3',
   },
+  // VIN Scanner styles
+  vinRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  vinText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    fontFamily: 'monospace',
+    letterSpacing: 1,
+  },
+  vinEditBtn: {
+    padding: 8,
+  },
+  scanVinBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#E3F2FD',
+    borderRadius: 10,
+    paddingVertical: 12,
+    gap: 8,
+  },
+  scanVinBtnText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#2196F3',
+  },
+  vinModal: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: 16,
+    paddingHorizontal: 20,
+    paddingBottom: 30,
+    maxHeight: '90%',
+  },
+  vinImageContainer: {
+    alignItems: 'center',
+    marginVertical: 16,
+  },
+  vinImagePreview: {
+    width: '100%',
+    height: 150,
+    borderRadius: 12,
+    backgroundColor: '#f0f0f0',
+  },
+  vinScanningContainer: {
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  vinScanningText: {
+    marginTop: 10,
+    fontSize: 14,
+    color: '#666',
+  },
+  vinInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 10,
+    padding: 14,
+    fontSize: 18,
+    fontFamily: 'monospace',
+    letterSpacing: 2,
+    textAlign: 'center',
+    backgroundColor: '#f9f9f9',
+  },
+  vinHint: {
+    fontSize: 11,
+    color: '#999',
+    textAlign: 'center',
+    marginTop: 6,
+  },
+  vinScanButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#2196F3',
+    borderRadius: 12,
+    paddingVertical: 14,
+    marginTop: 16,
+    gap: 10,
+  },
+  vinScanButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  vinModalActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 20,
+  },
+  disabledBtn: {
+    opacity: 0.5,
+  },
 });
