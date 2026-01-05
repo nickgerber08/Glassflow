@@ -1949,4 +1949,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
   },
+  vinScanningHint: {
+    marginTop: 6,
+    fontSize: 12,
+    color: '#999',
+  },
+  vinCancelBtn: {
+    marginTop: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  vinCancelBtnText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#666',
+  },
 });
