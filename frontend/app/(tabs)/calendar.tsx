@@ -52,7 +52,7 @@ function groupJobsByLocation(jobs: any[]) {
 
 export default function CalendarScreen() {
   const { jobs, setSelectedJob } = useJobStore();
-  const { user, token } = useAuth();
+  const { user, sessionToken } = useAuth();
   const router = useRouter();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -73,7 +73,7 @@ export default function CalendarScreen() {
   const isAdmin = user?.role === 'admin';
 
   const fetchNotes = useCallback(async () => {
-    if (!token) {
+    if (!sessionToken) {
       console.log('No token available for fetching notes');
       return;
     }
@@ -81,7 +81,7 @@ export default function CalendarScreen() {
     try {
       console.log('Fetching notes from:', `${BACKEND_URL}/api/office-notes`);
       const response = await fetch(`${BACKEND_URL}/api/office-notes`, {
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: { 'Authorization': `Bearer ${sessionToken}` },
       });
       console.log('Notes response status:', response.status);
       if (response.ok) {
@@ -99,7 +99,7 @@ export default function CalendarScreen() {
     } finally {
       setNotesLoading(false);
     }
-  }, [token]);
+  }, [sessionToken]);
 
   const seedNotes = async () => {
     if (!token || !isAdmin) return;
