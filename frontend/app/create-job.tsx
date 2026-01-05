@@ -197,12 +197,20 @@ export default function CreateJobScreen() {
       const result = await ImagePicker.launchCameraAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
-        aspect: [16, 9],
-        quality: 0.7,
+        aspect: [4, 1], // Narrow aspect for VIN sticker
+        quality: 0.3, // Lower quality = smaller file
         base64: true,
       });
 
       if (!result.canceled && result.assets[0] && result.assets[0].base64) {
+        const base64Data = result.assets[0].base64;
+        
+        // Check if image is too large (> 1MB base64 = ~750KB image)
+        if (base64Data.length > 1000000) {
+          Alert.alert('Image Too Large', 'Please try again with the camera further from the VIN, or enter the VIN manually.');
+          return;
+        }
+        
         setVinImage(result.assets[0].uri);
         setVinScanning(true);
         setShowVinModal(true);
@@ -210,7 +218,16 @@ export default function CreateJobScreen() {
         // Use OCR.space free API to extract text with timeout
         try {
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+          const timeoutId = setTimeout(() => {
+            controller.abort();
+          }, 20000); // 20 second timeout
+          
+          const requestBody = new URLSearchParams();
+          requestBody.append('base64Image', `data:image/jpeg;base64,${base64Data}`);
+          requestBody.append('isOverlayRequired', 'false');
+          requestBody.append('OCREngine', '2');
+          requestBody.append('scale', 'true');
+          requestBody.append('isTable', 'false');
           
           const ocrResponse = await fetch('https://api.ocr.space/parse/image', {
             method: 'POST',
@@ -218,11 +235,15 @@ export default function CreateJobScreen() {
               'apikey': 'K89622968488957',
               'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: `base64Image=data:image/jpeg;base64,${result.assets[0].base64}&isOverlayRequired=false&OCREngine=2`,
+            body: requestBody.toString(),
             signal: controller.signal,
           });
           
           clearTimeout(timeoutId);
+          
+          if (!ocrResponse.ok) {
+            throw new Error(`HTTP ${ocrResponse.status}`);
+          }
           
           const ocrResult = await ocrResponse.json();
           
