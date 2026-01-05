@@ -49,6 +49,7 @@ interface KatyshopJob {
   vehicle_year: string;
   vehicle_model: string;
   vehicle_make?: string;
+  vehicle_vin?: string;
   part_number: string;
   needs_calibration: boolean;
   customer_type: string;
