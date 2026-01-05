@@ -195,11 +195,12 @@ export default function CalendarScreen() {
     setShowEditNote(true);
   };
 
+  // Fetch notes when modal opens
   useEffect(() => {
-    if (showNotes && notes.length === 0) {
+    if (showNotes) {
       fetchNotes();
     }
-  }, [showNotes, fetchNotes]);
+  }, [showNotes]);
 
   const filteredNotes = selectedCategory === 'all' 
     ? notes 
