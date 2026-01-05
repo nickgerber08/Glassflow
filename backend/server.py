@@ -209,6 +209,7 @@ class KatyshopJob(BaseModel):
     vehicle_year: str
     vehicle_model: str
     vehicle_make: Optional[str] = None  # Optional
+    vehicle_vin: Optional[str] = None  # VIN number
     part_number: str  # Required
     needs_calibration: bool = False
     customer_type: str  # 'waiter' or 'drop_off'
@@ -235,6 +236,7 @@ class KatyshopJobCreate(BaseModel):
     vehicle_year: str
     vehicle_model: str
     vehicle_make: Optional[str] = None
+    vehicle_vin: Optional[str] = None
     part_number: str
     needs_calibration: bool = False
     customer_type: str  # 'waiter' or 'drop_off'
@@ -249,6 +251,7 @@ class KatyshopJobUpdate(BaseModel):
     vehicle_year: Optional[str] = None
     vehicle_model: Optional[str] = None
     vehicle_make: Optional[str] = None
+    vehicle_vin: Optional[str] = None
     part_number: Optional[str] = None
     needs_calibration: Optional[bool] = None
     customer_type: Optional[str] = None
