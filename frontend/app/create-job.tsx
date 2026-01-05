@@ -10,12 +10,14 @@ import {
   ActivityIndicator,
   Platform,
   Modal,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../contexts/AuthContext';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Location from 'expo-location';
+import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
