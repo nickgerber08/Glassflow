@@ -1582,7 +1582,7 @@ async def delete_office_note(note_id: str, request: Request):
     user = await require_auth(request)
     
     # Check if user is admin
-    if user.get("role") != "admin":
+    if user.role != "admin":
         raise HTTPException(status_code=403, detail="Only admins can delete notes")
     
     result = await db.office_notes.delete_one({"note_id": note_id})
@@ -1597,7 +1597,7 @@ async def seed_office_notes(request: Request):
     """Seed initial Jenny's notes - admin only, one-time setup"""
     user = await require_auth(request)
     
-    if user.get("role") != "admin":
+    if user.role != "admin":
         raise HTTPException(status_code=403, detail="Only admins can seed notes")
     
     # Check if notes already exist
