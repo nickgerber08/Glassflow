@@ -1459,6 +1459,150 @@ async def respond_to_part_request(job_id: str, parts_response: PartsResponseCrea
     updated_job = await db.katyshop_jobs.find_one({"job_id": job_id}, {"_id": 0})
     return updated_job
 
+# ==================== JENNY'S NOTES (Office Reference Notes) ====================
+
+@api_router.get("/office-notes")
+async def get_office_notes(request: Request):
+    """Get all office notes - anyone can view"""
+    await require_auth(request)
+    
+    notes = await db.office_notes.find({}, {"_id": 0}).sort("order", 1).to_list(200)
+    return notes
+
+@api_router.post("/office-notes")
+async def create_office_note(note_data: OfficeNoteCreate, request: Request):
+    """Create a new office note - admin only"""
+    user = await require_auth(request)
+    
+    # Check if user is admin
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can create notes")
+    
+    # Get max order if not provided
+    order = note_data.order
+    if order is None:
+        max_order_note = await db.office_notes.find_one(sort=[("order", -1)])
+        order = (max_order_note.get("order", 0) + 1) if max_order_note else 0
+    
+    note = {
+        "note_id": f"note_{uuid.uuid4().hex[:12]}",
+        "title": note_data.title,
+        "content": note_data.content,
+        "color": note_data.color,
+        "category": note_data.category,
+        "order": order,
+        "created_by": user["user_id"],
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc)
+    }
+    
+    await db.office_notes.insert_one(note)
+    
+    # Return without _id
+    del note["_id"] if "_id" in note else None
+    return note
+
+@api_router.put("/office-notes/{note_id}")
+async def update_office_note(note_id: str, note_data: OfficeNoteUpdate, request: Request):
+    """Update an office note - admin only"""
+    user = await require_auth(request)
+    
+    # Check if user is admin
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can edit notes")
+    
+    # Build update dict
+    update_dict = {"updated_at": datetime.now(timezone.utc)}
+    if note_data.title is not None:
+        update_dict["title"] = note_data.title
+    if note_data.content is not None:
+        update_dict["content"] = note_data.content
+    if note_data.color is not None:
+        update_dict["color"] = note_data.color
+    if note_data.category is not None:
+        update_dict["category"] = note_data.category
+    if note_data.order is not None:
+        update_dict["order"] = note_data.order
+    
+    result = await db.office_notes.update_one(
+        {"note_id": note_id},
+        {"$set": update_dict}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Note not found")
+    
+    updated_note = await db.office_notes.find_one({"note_id": note_id}, {"_id": 0})
+    return updated_note
+
+@api_router.delete("/office-notes/{note_id}")
+async def delete_office_note(note_id: str, request: Request):
+    """Delete an office note - admin only"""
+    user = await require_auth(request)
+    
+    # Check if user is admin
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can delete notes")
+    
+    result = await db.office_notes.delete_one({"note_id": note_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Note not found")
+    
+    return {"success": True}
+
+@api_router.post("/office-notes/seed")
+async def seed_office_notes(request: Request):
+    """Seed initial Jenny's notes - admin only, one-time setup"""
+    user = await require_auth(request)
+    
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can seed notes")
+    
+    # Check if notes already exist
+    existing = await db.office_notes.count_documents({})
+    if existing > 0:
+        return {"message": "Notes already seeded", "count": existing}
+    
+    # Jenny's notes from the spreadsheet
+    initial_notes = [
+        {"title": "ARMADA", "content": "NEED MOLDING - AFFORDABLE 27.00", "color": "green", "category": "parts"},
+        {"title": "NO MERCEDES S550", "content": "Do not service", "color": "red", "category": "warnings"},
+        {"title": "AMERICAN", "content": "L 5504G", "color": "yellow", "category": "parts"},
+        {"title": "Sika Activator", "content": "SK60H180-250", "color": "yellow", "category": "parts"},
+        {"title": "Part Swap", "content": "USE 3185 INSTEAD OF 3183", "color": "yellow", "category": "parts"},
+        {"title": "19+ SILVERADO", "content": "DW2498", "color": "yellow", "category": "vehicles"},
+        {"title": "Silverado Parts", "content": "5048 - 5049\n4792-5487", "color": "cyan", "category": "parts"},
+        {"title": "YPN", "content": "MOLDING-MOLDING", "color": "yellow", "category": "parts"},
+        {"title": "17-18 RAV", "content": "4803 & 4361 - DON'T KNOW WHICH", "color": "yellow", "category": "vehicles"},
+        {"title": "5048 Pricing", "content": "130.00 - MYGRANT", "color": "yellow", "category": "suppliers"},
+        {"title": "5555 Pricing", "content": "118.00 - MYGRANT\n87462-PGW-Hou", "color": "cyan", "category": "suppliers"},
+        {"title": "5048-5049", "content": "MYGRANT NEED LOWER RETAINER", "color": "yellow", "category": "parts"},
+        {"title": "MYGRANT-PILK", "content": "WILL NOT DELIVER U428 W/O GLASS ORDERED", "color": "yellow", "category": "warnings"},
+        {"title": "154884-PGW", "content": "ACTIVATER", "color": "yellow", "category": "parts"},
+        {"title": "23 COROLLA", "content": "OEM", "color": "yellow", "category": "vehicles"},
+        {"title": "4751 Warning", "content": "ONLY - DON'T ORDER 4961", "color": "red", "category": "warnings"},
+        {"title": "VITRO Schedule", "content": "10:15 - BEAUMONT RUN\n12:30 - TRANSFER FROM HOUSTON-PASADENA", "color": "yellow", "category": "suppliers"},
+        {"title": "Windshield Symbols", "content": "TRIANGLE = LANE DEPARTURE\nCIRCLE OR EYE = RAIN SENSOR", "color": "yellow", "category": "general"},
+        {"title": "NEW TUNDRA - PART #'s", "content": "W/RS: 5820-5821-5826-5827\nW/O RS: 5819-5822-5823-5828-5829\nHUD & RS: 5824-5825-5830-5831", "color": "magenta", "category": "vehicles"},
+        {"title": "CHR Rain Sensor", "content": "5665 - NO RAIN SENSOR\n5666 - HAS RAIN SENSOR", "color": "cyan", "category": "vehicles"},
+        {"title": "5504-PRIMER", "content": "DON'T ORDER FROM PILK", "color": "green", "category": "warnings"},
+        {"title": "UM1511", "content": "Part reference", "color": "green", "category": "parts"},
+        {"title": "PUGM6", "content": "10 MM UNDERSIDE MOLDING", "color": "green", "category": "parts"},
+    ]
+    
+    now = datetime.now(timezone.utc)
+    for i, note in enumerate(initial_notes):
+        note["note_id"] = f"note_{uuid.uuid4().hex[:12]}"
+        note["order"] = i
+        note["created_by"] = user["user_id"]
+        note["created_at"] = now
+        note["updated_at"] = now
+    
+    await db.office_notes.insert_many(initial_notes)
+    
+    return {"message": "Notes seeded successfully", "count": len(initial_notes)}
+
 # Socket.IO events disabled for now
 # @sio.event
 # async def connect(sid, environ):
