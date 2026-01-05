@@ -282,22 +282,6 @@ export default function CreateJobScreen() {
       Alert.alert('Camera Error', error.message || 'Failed to access camera');
     }
   };
-          setShowVinModal(false);
-          
-          if (ocrError.name === 'AbortError') {
-            Alert.alert('Timeout', 'Scan took too long. Please try again or enter VIN manually.');
-          } else {
-            Alert.alert('Scan Error', `Failed to process image: ${ocrError.message || 'Unknown error'}`);
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Camera error:', error);
-      Alert.alert('Error', 'Failed to open camera');
-      setVinScanning(false);
-      setShowVinModal(false);
-    }
-  };
 
   const getCurrentLocation = async () => {
     try {
