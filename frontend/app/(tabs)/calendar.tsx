@@ -419,14 +419,12 @@ export default function CalendarScreen() {
           {notesLoading ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#2196F3" />
+              <Text style={styles.loadingText}>Loading notes...</Text>
             </View>
           ) : filteredNotes.length === 0 ? (
             <View style={styles.emptyNotesContainer}>
               <Ionicons name="document-text-outline" size={64} color="#ccc" />
-              <Text style={styles.emptyNotesText}>No notes yet</Text>
-              {isAdmin && notes.length === 0 && (
-                <Text style={styles.emptyNotesSubtext}>Tap "Load Jenny's Notes" to import</Text>
-              )}
+              <Text style={styles.emptyNotesText}>No notes in this category</Text>
             </View>
           ) : (
             <ScrollView style={styles.notesList}>
