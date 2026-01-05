@@ -74,18 +74,29 @@ export default function CalendarScreen() {
   const isAdmin = user?.role === 'admin';
 
   const fetchNotes = useCallback(async () => {
-    if (!token) return;
+    if (!token) {
+      console.log('No token available for fetching notes');
+      return;
+    }
     setNotesLoading(true);
     try {
+      console.log('Fetching notes from:', `${BACKEND_URL}/api/office-notes`);
       const response = await fetch(`${BACKEND_URL}/api/office-notes`, {
         headers: { 'Authorization': `Bearer ${token}` },
       });
+      console.log('Notes response status:', response.status);
       if (response.ok) {
         const data = await response.json();
+        console.log('Notes received:', data.length);
         setNotes(data);
+      } else {
+        const errorText = await response.text();
+        console.error('Notes fetch error:', errorText);
+        Alert.alert('Error', 'Failed to load notes. Please try again.');
       }
     } catch (error) {
       console.error('Error fetching notes:', error);
+      Alert.alert('Error', 'Network error loading notes.');
     } finally {
       setNotesLoading(false);
     }
