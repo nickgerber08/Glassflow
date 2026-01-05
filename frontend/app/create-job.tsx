@@ -189,116 +189,91 @@ export default function CreateJobScreen() {
 
   // VIN Scanner function
   const scanVin = async () => {
+    // Reset states
+    setVinResult('');
+    setVinError('');
+    setVinImage(null);
+    
     try {
-      // Request permission
       const permResult = await ImagePicker.requestCameraPermissionsAsync();
       
       if (permResult.status !== 'granted') {
-        Alert.alert('Permission Required', 'Camera permission is needed to scan VIN');
+        setVinError('Camera permission denied');
+        setShowVinModal(true);
         return;
       }
 
-      // Launch camera - simplified options
       const result = await ImagePicker.launchCameraAsync({
         allowsEditing: false,
         quality: 0.5,
         base64: true,
       });
 
-      // Check if user cancelled
       if (result.canceled) {
         return;
       }
 
-      // Check if we got assets
-      if (!result.assets || result.assets.length === 0) {
-        Alert.alert('Error', 'No image was captured');
+      if (!result.assets || !result.assets[0] || !result.assets[0].base64) {
+        setVinError('No image data received');
+        setShowVinModal(true);
         return;
       }
 
-      const asset = result.assets[0];
-
-      // Check for base64 data
-      if (!asset.base64) {
-        Alert.alert('Error', 'Image captured but no data received. Please try again.');
-        return;
-      }
-
-      const base64Data = asset.base64;
-      
-      // Show scanning modal
-      setVinImage(asset.uri);
+      const base64Data = result.assets[0].base64;
+      setVinImage(result.assets[0].uri);
       setVinScanning(true);
+      setVinResult('Sending to OCR...');
       setShowVinModal(true);
 
-      // Call OCR API with Promise.race for timeout
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Request timed out after 30 seconds')), 30000);
+      // Make OCR request
+      const ocrResponse = await fetch('https://api.ocr.space/parse/image', {
+        method: 'POST',
+        headers: {
+          'apikey': 'K89622968488957',
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `base64Image=data:image/jpeg;base64,${base64Data}&OCREngine=2&scale=true`,
       });
 
-      try {
-        const fetchPromise = fetch('https://api.ocr.space/parse/image', {
-          method: 'POST',
-          headers: {
-            'apikey': 'K89622968488957',
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: `base64Image=data:image/jpeg;base64,${base64Data}&OCREngine=2&scale=true`,
-        });
-
-        const ocrResponse = await Promise.race([fetchPromise, timeoutPromise]) as Response;
+      setVinResult('Processing response...');
+      
+      const ocrResult = await ocrResponse.json();
+      setVinScanning(false);
+      
+      // Show raw result for debugging
+      const rawResult = JSON.stringify(ocrResult).substring(0, 500);
+      
+      if (ocrResult.ParsedResults && ocrResult.ParsedResults[0]) {
+        const text = ocrResult.ParsedResults[0].ParsedText || '';
         
-        if (!ocrResponse.ok) {
-          throw new Error(`Server returned ${ocrResponse.status}`);
-        }
-
-        const ocrResult = await ocrResponse.json();
-        
-        setVinScanning(false);
-        setShowVinModal(false);
-
-        // Debug: Show what came back
-        if (!ocrResult.ParsedResults) {
-          Alert.alert('OCR Response', JSON.stringify(ocrResult).substring(0, 300));
+        if (!text.trim()) {
+          setVinError('No text detected in image');
+          setVinResult(`Raw: ${rawResult}`);
           return;
         }
 
-        if (ocrResult.ParsedResults && ocrResult.ParsedResults[0]) {
-          const text = ocrResult.ParsedResults[0].ParsedText || '';
-          
-          if (!text.trim()) {
-            Alert.alert('No Text Found', 'Could not read any text from the image. Please try again with better lighting.');
-            return;
-          }
+        // Search for VIN
+        const cleanText = text.replace(/[\r\n\s]+/g, '').toUpperCase();
+        const vinRegex = /[A-HJ-NPR-Z0-9]{17}/g;
+        const matches = cleanText.match(vinRegex);
 
-          // Clean and search for VIN
-          const cleanText = text.replace(/[\r\n\s]+/g, '').toUpperCase();
-          const vinRegex = /[A-HJ-NPR-Z0-9]{17}/g;
-          const matches = cleanText.match(vinRegex);
-
-          if (matches && matches.length > 0) {
-            setVinOrLp(matches[0]);
-            Alert.alert('VIN Found!', `Detected: ${matches[0]}`);
-          } else {
-            // Show what was found
-            const displayText = text.length > 150 ? text.substring(0, 150) + '...' : text;
-            Alert.alert('No VIN Found', `Text found:\n"${displayText}"\n\nNo 17-character VIN detected.`);
-          }
+        if (matches && matches.length > 0) {
+          // SUCCESS - Found VIN
+          setVinOrLp(matches[0]);
+          setVinResult(`VIN Found: ${matches[0]}`);
+          // Auto close after success
+          setTimeout(() => setShowVinModal(false), 1500);
         } else {
-          const errorMsg = ocrResult.ErrorMessage ? 
-            (Array.isArray(ocrResult.ErrorMessage) ? ocrResult.ErrorMessage[0] : ocrResult.ErrorMessage) : 
-            'Unknown error';
-          Alert.alert('Scan Failed', errorMsg);
+          setVinError('No valid VIN found');
+          setVinResult(`Text detected: "${text.substring(0, 200)}..."`);
         }
-      } catch (ocrError: any) {
-        setVinScanning(false);
-        setShowVinModal(false);
-        Alert.alert('Scan Error', ocrError.message || 'Failed to process image. Please try again or enter VIN manually.');
+      } else {
+        setVinError(ocrResult.ErrorMessage?.[0] || 'OCR failed');
+        setVinResult(`Raw: ${rawResult}`);
       }
     } catch (error: any) {
       setVinScanning(false);
-      setShowVinModal(false);
-      Alert.alert('Camera Error', error.message || 'Failed to access camera');
+      setVinError(`Error: ${error.message || 'Unknown error'}`);
     }
   };
 
