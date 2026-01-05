@@ -626,14 +626,30 @@ export default function CreateJobScreen() {
 
           <View style={styles.inputGroup}>
             <Text style={styles.label}>VIN or License Plate</Text>
-            <TextInput
-              style={styles.input}
-              value={vinOrLp}
-              onChangeText={setVinOrLp}
-              placeholder="Enter VIN or LP number (optional)"
-              placeholderTextColor="#999"
-              autoCapitalize="characters"
-            />
+            <View style={styles.vinInputRow}>
+              <TextInput
+                style={[styles.input, styles.vinInput]}
+                value={vinOrLp}
+                onChangeText={setVinOrLp}
+                placeholder="Enter VIN or LP number"
+                placeholderTextColor="#999"
+                autoCapitalize="characters"
+              />
+              <TouchableOpacity 
+                style={styles.scanVinBtn} 
+                onPress={scanVin}
+                disabled={vinScanning}
+              >
+                {vinScanning ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <>
+                    <Ionicons name="camera" size={20} color="#fff" />
+                    <Text style={styles.scanVinBtnText}>Scan</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </View>
           </View>
 
           <View style={styles.inputGroup}>
