@@ -1161,7 +1161,7 @@ export default function CreateJobScreen() {
               <View style={styles.vinScanningIndicator}>
                 <ActivityIndicator size="large" color="#2196F3" />
                 <Text style={styles.vinScanningText}>Reading VIN from image...</Text>
-                <Text style={styles.vinScanningHint}>This may take up to 20 seconds</Text>
+                {vinResult ? <Text style={styles.vinResultText}>{vinResult}</Text> : null}
                 <TouchableOpacity 
                   style={styles.vinCancelBtn}
                   onPress={() => {
@@ -1173,12 +1173,38 @@ export default function CreateJobScreen() {
                 </TouchableOpacity>
               </View>
             ) : (
-              <TouchableOpacity 
-                style={styles.vinCancelBtn}
-                onPress={() => setShowVinModal(false)}
-              >
-                <Text style={styles.vinCancelBtnText}>Close</Text>
-              </TouchableOpacity>
+              <View style={styles.vinResultContainer}>
+                {vinError ? (
+                  <View style={styles.vinErrorBox}>
+                    <Ionicons name="alert-circle" size={24} color="#F44336" />
+                    <Text style={styles.vinErrorText}>{vinError}</Text>
+                  </View>
+                ) : null}
+                
+                {vinResult ? (
+                  <View style={styles.vinResultBox}>
+                    <Text style={styles.vinResultLabel}>Result:</Text>
+                    <Text style={styles.vinResultText} selectable>{vinResult}</Text>
+                  </View>
+                ) : null}
+                
+                <TouchableOpacity 
+                  style={styles.vinCancelBtn}
+                  onPress={() => setShowVinModal(false)}
+                >
+                  <Text style={styles.vinCancelBtnText}>Close</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  style={styles.vinRetryBtn}
+                  onPress={() => {
+                    setShowVinModal(false);
+                    setTimeout(() => scanVin(), 300);
+                  }}
+                >
+                  <Text style={styles.vinRetryBtnText}>Try Again</Text>
+                </TouchableOpacity>
+              </View>
             )}
           </View>
         </View>
