@@ -124,6 +124,12 @@ export default function KatyshopScreen() {
   const [partsDistributor, setPartsDistributor] = useState('');
   const [partsEta, setPartsEta] = useState('09:00');
   const [showPartsEtaPicker, setShowPartsEtaPicker] = useState(false);
+  
+  // VIN Scanner state
+  const [showVinModal, setShowVinModal] = useState(false);
+  const [scannedVin, setScannedVin] = useState('');
+  const [vinScanning, setVinScanning] = useState(false);
+  const [vinImage, setVinImage] = useState<string | null>(null);
 
   // Track touch for swipe gesture
   const touchStartX = useRef(0);
