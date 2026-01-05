@@ -1211,6 +1211,24 @@ export default function KatyshopScreen() {
                     </Text>
                   </View>
 
+                  {/* VIN Section */}
+                  <View style={styles.detailSection}>
+                    <Text style={styles.detailSectionTitle}>VIN</Text>
+                    {selectedJob.vehicle_vin ? (
+                      <View style={styles.vinRow}>
+                        <Text style={styles.vinText}>{selectedJob.vehicle_vin}</Text>
+                        <TouchableOpacity onPress={openVinScanner} style={styles.vinEditBtn}>
+                          <Ionicons name="create-outline" size={18} color="#2196F3" />
+                        </TouchableOpacity>
+                      </View>
+                    ) : (
+                      <TouchableOpacity style={styles.scanVinBtn} onPress={openVinScanner}>
+                        <Ionicons name="camera-outline" size={20} color="#2196F3" />
+                        <Text style={styles.scanVinBtnText}>Scan VIN</Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+
                   {/* Part Number with Order Info */}
                   <View style={styles.detailSection}>
                     <Text style={styles.detailSectionTitle}>Part Number</Text>
