@@ -11,10 +11,12 @@ import {
   ActivityIndicator,
   RefreshControl,
   Switch,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
+import * as ImagePicker from 'expo-image-picker';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
