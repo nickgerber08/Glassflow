@@ -86,6 +86,11 @@ export default function CreateJobScreen() {
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
   const [saveCustomerToggle, setSaveCustomerToggle] = useState(false);
   const [isNewCustomer, setIsNewCustomer] = useState(true);
+  
+  // VIN Scanner state
+  const [showVinModal, setShowVinModal] = useState(false);
+  const [vinScanning, setVinScanning] = useState(false);
+  const [vinImage, setVinImage] = useState<string | null>(null);
 
   useEffect(() => {
     fetchUsers();
