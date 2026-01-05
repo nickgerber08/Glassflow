@@ -1,10 +1,14 @@
-import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useJobStore } from '../../stores/jobStore';
 import { useRouter } from 'expo-router';
+import { useAuth } from '../../contexts/AuthContext';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, parseISO } from 'date-fns';
+import Constants from 'expo-constants';
+
+const BACKEND_URL = Constants.expoConfig?.extra?.EXPO_BACKEND_URL || '';
 
 const STATUS_COLORS: Record<string, string> = {
   pending: '#FF9800',
@@ -13,6 +17,23 @@ const STATUS_COLORS: Record<string, string> = {
   completed: '#4CAF50',
   cancelled: '#F44336',
 };
+
+const NOTE_COLORS: Record<string, { bg: string; text: string; border: string }> = {
+  yellow: { bg: '#FFF9C4', text: '#5D4037', border: '#FBC02D' },
+  red: { bg: '#FFCDD2', text: '#B71C1C', border: '#E53935' },
+  green: { bg: '#C8E6C9', text: '#1B5E20', border: '#43A047' },
+  cyan: { bg: '#B2EBF2', text: '#006064', border: '#00ACC1' },
+  magenta: { bg: '#F8BBD9', text: '#880E4F', border: '#D81B60' },
+};
+
+interface OfficeNote {
+  note_id: string;
+  title: string;
+  content: string;
+  color: string;
+  category: string;
+  order: number;
+}
 
 // Helper function to group jobs by location
 function groupJobsByLocation(jobs: any[]) {
