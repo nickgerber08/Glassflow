@@ -1171,13 +1171,23 @@ export default function CreateJobScreen() {
         visible={showVinModal}
         animationType="fade"
         transparent={true}
-        onRequestClose={() => setShowVinModal(false)}
+        onRequestClose={() => {
+          setShowVinModal(false);
+          setVinScanning(false);
+        }}
       >
         <View style={styles.vinModalOverlay}>
           <View style={styles.vinModalContent}>
             <View style={styles.vinModalHeader}>
-              <Text style={styles.vinModalTitle}>Scanning VIN...</Text>
-              <TouchableOpacity onPress={() => setShowVinModal(false)}>
+              <Text style={styles.vinModalTitle}>
+                {vinScanning ? 'Scanning VIN...' : 'VIN Scanner'}
+              </Text>
+              <TouchableOpacity 
+                onPress={() => {
+                  setShowVinModal(false);
+                  setVinScanning(false);
+                }}
+              >
                 <Ionicons name="close-circle" size={28} color="#666" />
               </TouchableOpacity>
             </View>
@@ -1186,11 +1196,28 @@ export default function CreateJobScreen() {
               <Image source={{ uri: vinImage }} style={styles.vinPreviewImage} />
             )}
             
-            {vinScanning && (
+            {vinScanning ? (
               <View style={styles.vinScanningIndicator}>
                 <ActivityIndicator size="large" color="#2196F3" />
                 <Text style={styles.vinScanningText}>Reading VIN from image...</Text>
+                <Text style={styles.vinScanningHint}>This may take up to 20 seconds</Text>
+                <TouchableOpacity 
+                  style={styles.vinCancelBtn}
+                  onPress={() => {
+                    setShowVinModal(false);
+                    setVinScanning(false);
+                  }}
+                >
+                  <Text style={styles.vinCancelBtnText}>Cancel</Text>
+                </TouchableOpacity>
               </View>
+            ) : (
+              <TouchableOpacity 
+                style={styles.vinCancelBtn}
+                onPress={() => setShowVinModal(false)}
+              >
+                <Text style={styles.vinCancelBtnText}>Close</Text>
+              </TouchableOpacity>
             )}
           </View>
         </View>
