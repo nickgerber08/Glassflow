@@ -1304,16 +1304,20 @@ export default function KatyshopScreen() {
                     
                     {/* Parts Order Actions */}
                     {selectedJob.parts_order_status === 'none' || !selectedJob.parts_order_status ? (
-                      <TouchableOpacity
-                        style={styles.requestPartBtn}
+                      <Pressable
+                        style={({ pressed }) => [
+                          styles.requestPartBtn,
+                          pressed && { opacity: 0.7 }
+                        ]}
                         onPress={() => {
+                          console.log('Request Part button pressed');
                           setPartsInvoice('');
                           setShowPartsRequestModal(true);
                         }}
                       >
                         <Ionicons name="cart-outline" size={18} color="#2196F3" />
                         <Text style={styles.requestPartBtnText}>Request Part</Text>
-                      </TouchableOpacity>
+                      </Pressable>
                     ) : selectedJob.parts_order_status === 'requested' ? (
                       <View style={styles.partsStatusContainer}>
                         <View style={styles.partsRequestedBadge}>
@@ -1321,16 +1325,20 @@ export default function KatyshopScreen() {
                           <Text style={styles.partsRequestedText}>Part Requested (Invoice #{selectedJob.omega_invoice})</Text>
                         </View>
                         {user?.role === 'admin' && (
-                          <TouchableOpacity
-                            style={styles.respondPartBtn}
+                          <Pressable
+                            style={({ pressed }) => [
+                              styles.respondPartBtn,
+                              pressed && { opacity: 0.7 }
+                            ]}
                             onPress={() => {
+                              console.log('Respond button pressed');
                               setPartsDistributor('');
                               setPartsEta('09:00');
                               setShowPartsResponseModal(true);
                             }}
                           >
                             <Text style={styles.respondPartBtnText}>Respond</Text>
-                          </TouchableOpacity>
+                          </Pressable>
                         )}
                       </View>
                     ) : (
