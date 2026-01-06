@@ -249,9 +249,9 @@ export default function KatyshopScreen() {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await loadData();
+    await Promise.all([fetchJobs(), fetchMonthlyCalibrations()]);
     setRefreshing(false);
-  }, [loadData]);
+  }, [fetchJobs, fetchMonthlyCalibrations]);
 
   const formatDateForApi = (date: Date) => {
     const year = date.getFullYear();
