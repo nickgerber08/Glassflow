@@ -776,7 +776,7 @@ export default function KatyshopScreen() {
                         {job.parts_distributor} - {formatTime(job.parts_eta || '')}
                       </Text>
                     ) : (
-                      <Text style={styles.jobBlockAdvisor}>ADV: {job.service_advisor_name}</Text>
+                      <Text style={styles.jobBlockAdvisor}>{job.service_advisor_name}</Text>
                     )}
                     {job.needs_calibration && (
                       <Text style={styles.jobBlockCalibration}>Calibration</Text>
