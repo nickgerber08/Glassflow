@@ -181,6 +181,28 @@ export default function KatyshopScreen() {
     }
   }, [selectedDate, sessionToken]);
 
+  const fetchMonthlyCalibrations = useCallback(async () => {
+    try {
+      const year = selectedDate.getFullYear();
+      const month = selectedDate.getMonth() + 1;
+      const response = await fetch(
+        `${BACKEND_URL}/api/katyshop/monthly-calibrations?year=${year}&month=${month}`,
+        {
+          headers: {
+            Authorization: `Bearer ${sessionToken}`,
+          },
+        }
+      );
+      
+      if (response.ok) {
+        const data = await response.json();
+        setMonthlyCalibrations(data.calibration_count);
+      }
+    } catch (error) {
+      console.error('Error fetching monthly calibrations:', error);
+    }
+  }, [selectedDate, sessionToken]);
+
   const fetchAdvisors = useCallback(async () => {
     try {
       const response = await fetch(`${BACKEND_URL}/api/service-advisors`, {
@@ -200,9 +222,9 @@ export default function KatyshopScreen() {
 
   const loadData = useCallback(async () => {
     setLoading(true);
-    await Promise.all([fetchJobs(), fetchAdvisors()]);
+    await Promise.all([fetchJobs(), fetchAdvisors(), fetchMonthlyCalibrations()]);
     setLoading(false);
-  }, [fetchJobs, fetchAdvisors]);
+  }, [fetchJobs, fetchAdvisors, fetchMonthlyCalibrations]);
 
   useEffect(() => {
     loadData();
