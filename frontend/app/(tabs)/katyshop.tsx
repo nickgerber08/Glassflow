@@ -1307,12 +1307,16 @@ export default function KatyshopScreen() {
                       <Pressable
                         style={({ pressed }) => [
                           styles.requestPartBtn,
-                          pressed && { opacity: 0.7 }
+                          pressed && { opacity: 0.7, backgroundColor: '#E3F2FD' }
                         ]}
                         onPress={() => {
                           console.log('Request Part button pressed');
                           setPartsInvoice('');
-                          setShowPartsRequestModal(true);
+                          // Close the detail modal first, then open parts request
+                          setShowJobDetailModal(false);
+                          setTimeout(() => {
+                            setShowPartsRequestModal(true);
+                          }, 300);
                         }}
                       >
                         <Ionicons name="cart-outline" size={18} color="#2196F3" />
@@ -1334,7 +1338,11 @@ export default function KatyshopScreen() {
                               console.log('Respond button pressed');
                               setPartsDistributor('');
                               setPartsEta('09:00');
-                              setShowPartsResponseModal(true);
+                              // Close the detail modal first, then open response modal
+                              setShowJobDetailModal(false);
+                              setTimeout(() => {
+                                setShowPartsResponseModal(true);
+                              }, 300);
                             }}
                           >
                             <Text style={styles.respondPartBtnText}>Respond</Text>
