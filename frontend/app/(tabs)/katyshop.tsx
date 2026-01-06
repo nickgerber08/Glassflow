@@ -238,14 +238,15 @@ export default function KatyshopScreen() {
     if (sessionToken) {
       fetchJobs();
     }
-  }, [selectedDate, sessionToken]);
+  }, [selectedDate, sessionToken, fetchJobs]);
 
-  // Fetch monthly calibrations when month changes
+  // Fetch monthly calibrations only on initial load and when explicitly refreshed
+  // The counter will update when user refreshes the page
   useEffect(() => {
     if (sessionToken) {
       fetchMonthlyCalibrations();
     }
-  }, [selectedDate.getMonth(), selectedDate.getFullYear(), sessionToken]);
+  }, [sessionToken, fetchMonthlyCalibrations]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
