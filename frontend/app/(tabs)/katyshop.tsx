@@ -221,15 +221,31 @@ export default function KatyshopScreen() {
     }
   }, [sessionToken]);
 
-  const loadData = useCallback(async () => {
-    setLoading(true);
-    await Promise.all([fetchJobs(), fetchAdvisors(), fetchMonthlyCalibrations()]);
-    setLoading(false);
-  }, [fetchJobs, fetchAdvisors, fetchMonthlyCalibrations]);
-
+  // Initial load - only runs once on mount
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    const loadInitialData = async () => {
+      setLoading(true);
+      await fetchAdvisors();
+      setLoading(false);
+    };
+    if (sessionToken) {
+      loadInitialData();
+    }
+  }, [sessionToken]);
+
+  // Fetch jobs when date changes
+  useEffect(() => {
+    if (sessionToken) {
+      fetchJobs();
+    }
+  }, [selectedDate, sessionToken]);
+
+  // Fetch monthly calibrations when month changes
+  useEffect(() => {
+    if (sessionToken) {
+      fetchMonthlyCalibrations();
+    }
+  }, [selectedDate.getMonth(), selectedDate.getFullYear(), sessionToken]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
