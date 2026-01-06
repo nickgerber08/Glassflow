@@ -1430,22 +1430,34 @@ export default function KatyshopScreen() {
                   </View>
 
                   {/* Reschedule Button */}
-                  <TouchableOpacity
-                    style={styles.rescheduleBtn}
-                    onPress={openRescheduleModal}
+                  <Pressable
+                    style={({ pressed }) => [
+                      styles.rescheduleBtn,
+                      pressed && { opacity: 0.7 }
+                    ]}
+                    onPress={() => {
+                      console.log('Reschedule button pressed');
+                      openRescheduleModal();
+                    }}
                   >
                     <Ionicons name="calendar-outline" size={20} color="#2196F3" />
                     <Text style={styles.rescheduleBtnText}>Reschedule Job</Text>
-                  </TouchableOpacity>
+                  </Pressable>
 
                   {/* Delete Button */}
-                  <TouchableOpacity
-                    style={styles.deleteJobBtn}
-                    onPress={() => deleteJob(selectedJob.job_id)}
+                  <Pressable
+                    style={({ pressed }) => [
+                      styles.deleteJobBtn,
+                      pressed && { opacity: 0.7 }
+                    ]}
+                    onPress={() => {
+                      console.log('Delete button pressed');
+                      deleteJob(selectedJob.job_id);
+                    }}
                   >
                     <Ionicons name="trash-outline" size={20} color="#F44336" />
                     <Text style={styles.deleteJobBtnText}>Delete Job</Text>
-                  </TouchableOpacity>
+                  </Pressable>
                 </ScrollView>
               </>
             )}
