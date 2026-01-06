@@ -1459,6 +1459,38 @@ async def respond_to_part_request(job_id: str, parts_response: PartsResponseCrea
     updated_job = await db.katyshop_jobs.find_one({"job_id": job_id}, {"_id": 0})
     return updated_job
 
+@api_router.get("/katyshop/monthly-calibrations")
+async def get_monthly_calibrations(request: Request, year: int = None, month: int = None):
+    """Get count of completed calibrations for the month"""
+    await require_auth(request)
+    
+    # Default to current month if not specified
+    now = datetime.now()
+    if year is None:
+        year = now.year
+    if month is None:
+        month = now.month
+    
+    # Get first and last day of the month
+    first_day = f"{year}-{month:02d}-01"
+    if month == 12:
+        last_day = f"{year + 1}-01-01"
+    else:
+        last_day = f"{year}-{month + 1:02d}-01"
+    
+    # Count completed jobs with calibration in this month
+    count = await db.katyshop_jobs.count_documents({
+        "date": {"$gte": first_day, "$lt": last_day},
+        "status": "completed",
+        "needs_calibration": True
+    })
+    
+    return {
+        "year": year,
+        "month": month,
+        "calibration_count": count
+    }
+
 # ==================== JENNY'S NOTES (Office Reference Notes) ====================
 
 @api_router.get("/office-notes")
