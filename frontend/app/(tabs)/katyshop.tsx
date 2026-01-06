@@ -2043,15 +2043,19 @@ const styles = StyleSheet.create({
   techBanner: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: '#E3F2FD',
     marginHorizontal: 16,
     marginTop: 12,
     padding: 12,
     borderRadius: 10,
+  },
+  techBannerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
   },
   techBannerText: {
-    flex: 1,
     fontSize: 14,
     color: '#1976D2',
   },
@@ -2062,6 +2066,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#1976D2',
+  },
+  calibrationCounter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E8F5E9',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    gap: 4,
+  },
+  calibrationCountText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#4CAF50',
   },
   scheduleWrapper: {
     flex: 1,
