@@ -1274,7 +1274,7 @@ export default function KatyshopScreen() {
                     </View>
                   )}
 
-                  {/* Customer Type & Advisor */}
+                  {/* Customer Type & Last Name */}
                   <View style={styles.detailRow}>
                     <View style={styles.detailHalf}>
                       <Text style={styles.detailSectionTitle}>Customer</Text>
@@ -1283,7 +1283,7 @@ export default function KatyshopScreen() {
                       </Text>
                     </View>
                     <View style={styles.detailHalf}>
-                      <Text style={styles.detailSectionTitle}>Advisor</Text>
+                      <Text style={styles.detailSectionTitle}>Last Name</Text>
                       <Text style={styles.detailValue}>{selectedJob.service_advisor_name}</Text>
                     </View>
                   </View>
