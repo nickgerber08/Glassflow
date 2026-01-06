@@ -850,11 +850,19 @@ export default function KatyshopScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Tech Info Banner */}
+      {/* Tech Info Banner with Calibration Counter */}
       <View style={styles.techBanner}>
-        <Ionicons name="person" size={18} color="#1976D2" />
-        <Text style={styles.techBannerText}>Dedicated Tech: <Text style={styles.techName}>Sina</Text></Text>
-        <Text style={styles.jobCount}>{jobs.length} jobs</Text>
+        <View style={styles.techBannerLeft}>
+          <Ionicons name="person" size={18} color="#1976D2" />
+          <Text style={styles.techBannerText}>Tech: <Text style={styles.techName}>Sina</Text></Text>
+          <Text style={styles.jobCount}>{jobs.length} jobs</Text>
+        </View>
+        <View style={styles.calibrationCounter}>
+          <Ionicons name="speedometer" size={14} color="#4CAF50" />
+          <Text style={styles.calibrationCountText}>
+            {jobs.filter(j => j.status === 'completed' && j.needs_calibration).length} cal
+          </Text>
+        </View>
       </View>
 
       {/* Block Schedule with Swipe Gesture */}
