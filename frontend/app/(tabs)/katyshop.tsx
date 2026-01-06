@@ -978,40 +978,18 @@ export default function KatyshopScreen() {
                 </TouchableOpacity>
               </View>
 
-              {/* Service Advisor */}
-              <Text style={styles.formSectionTitle}>Service Advisor *</Text>
-              {advisors.length === 0 ? (
-                <TouchableOpacity 
-                  style={styles.noAdvisorsBtn}
-                  onPress={() => {
-                    setShowAddJobModal(false);
-                    setShowAdvisorModal(true);
-                  }}
-                >
-                  <Ionicons name="add-circle" size={20} color="#2196F3" />
-                  <Text style={styles.noAdvisorsBtnText}>Add Service Advisors First</Text>
-                </TouchableOpacity>
-              ) : (
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.advisorScroll}>
-                  {advisors.map((advisor) => (
-                    <TouchableOpacity
-                      key={advisor.advisor_id}
-                      style={[
-                        styles.advisorChip,
-                        formAdvisorId === advisor.advisor_id && styles.advisorChipActive
-                      ]}
-                      onPress={() => selectAdvisor(advisor)}
-                    >
-                      <Text style={[
-                        styles.advisorChipText,
-                        formAdvisorId === advisor.advisor_id && styles.advisorChipTextActive
-                      ]}>
-                        {advisor.name}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              )}
+              {/* Last Name */}
+              <Text style={styles.formSectionTitle}>Last Name *</Text>
+              <TextInput
+                style={styles.formInput}
+                value={formAdvisorName}
+                onChangeText={(text) => {
+                  setFormAdvisorName(text);
+                  setFormAdvisorId(text); // Use the name as ID for simplicity
+                }}
+                placeholder="Enter customer last name"
+                placeholderTextColor="#999"
+              />
 
               {/* Date Selection */}
               <Text style={styles.formSectionTitle}>Date</Text>
