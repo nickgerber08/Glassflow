@@ -873,7 +873,7 @@ export default function KatyshopScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Tech Info Banner with Calibration Counter */}
+      {/* Tech Info Banner with Monthly Calibration Counter */}
       <View style={styles.techBanner}>
         <View style={styles.techBannerLeft}>
           <Ionicons name="person" size={18} color="#1976D2" />
@@ -883,7 +883,7 @@ export default function KatyshopScreen() {
         <View style={styles.calibrationCounter}>
           <Ionicons name="speedometer" size={14} color="#4CAF50" />
           <Text style={styles.calibrationCountText}>
-            {jobs.filter(j => j.status === 'completed' && j.needs_calibration).length} cal
+            {monthlyCalibrations} cal ({format(selectedDate, 'MMM')})
           </Text>
         </View>
       </View>
