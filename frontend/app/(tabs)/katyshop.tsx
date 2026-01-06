@@ -221,7 +221,7 @@ export default function KatyshopScreen() {
     }
   }, [sessionToken]);
 
-  // Initial load - only runs once on mount
+  // Initial load - fetch advisors once
   useEffect(() => {
     const loadInitialData = async () => {
       setLoading(true);
@@ -231,28 +231,31 @@ export default function KatyshopScreen() {
     if (sessionToken) {
       loadInitialData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionToken]);
 
-  // Fetch jobs when date changes
+  // Fetch jobs when date changes - DO NOT include fetchJobs in deps to avoid infinite loop
   useEffect(() => {
     if (sessionToken) {
       fetchJobs();
     }
-  }, [selectedDate, sessionToken, fetchJobs]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDate, sessionToken]);
 
-  // Fetch monthly calibrations only on initial load and when explicitly refreshed
-  // The counter will update when user refreshes the page
+  // Fetch monthly calibrations on initial load only
   useEffect(() => {
     if (sessionToken) {
       fetchMonthlyCalibrations();
     }
-  }, [sessionToken, fetchMonthlyCalibrations]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionToken]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await Promise.all([fetchJobs(), fetchMonthlyCalibrations()]);
     setRefreshing(false);
-  }, [fetchJobs, fetchMonthlyCalibrations]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const formatDateForApi = (date: Date) => {
     const year = date.getFullYear();
