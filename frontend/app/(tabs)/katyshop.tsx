@@ -359,8 +359,8 @@ export default function KatyshopScreen() {
   };
 
   const createJob = async () => {
-    if (!formYear || !formModel || !formPartNumber || !formAdvisorId) {
-      Alert.alert('Error', 'Please fill in all required fields');
+    if (!formYear || !formModel || !formPartNumber || !formAdvisorName.trim()) {
+      Alert.alert('Error', 'Please fill in all required fields (Year, Model, Part #, Last Name)');
       return;
     }
 
