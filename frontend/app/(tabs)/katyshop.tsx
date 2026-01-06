@@ -87,6 +87,10 @@ export default function KatyshopScreen() {
   const [advisors, setAdvisors] = useState<ServiceAdvisor[]>([]);
   const [monthlyCalibrations, setMonthlyCalibrations] = useState(0);
   
+  // Use ref to track if initial load is done
+  const initialLoadDone = useRef(false);
+  const currentDateRef = useRef(selectedDate);
+  
   // Modal states
   const [showAddJobModal, setShowAddJobModal] = useState(false);
   const [showAdvisorModal, setShowAdvisorModal] = useState(false);
@@ -164,104 +168,129 @@ export default function KatyshopScreen() {
     }
   };
 
-  const fetchJobs = useCallback(async () => {
-    try {
-      const dateStr = formatDateForApi(selectedDate);
-      const response = await fetch(`${BACKEND_URL}/api/katyshop/jobs?date=${dateStr}`, {
-        headers: {
-          Authorization: `Bearer ${sessionToken}`,
-        },
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setJobs(data);
-      }
-    } catch (error) {
-      console.error('Error fetching jobs:', error);
-    }
-  }, [selectedDate, sessionToken]);
-
-  const fetchMonthlyCalibrations = useCallback(async () => {
-    try {
-      const year = selectedDate.getFullYear();
-      const month = selectedDate.getMonth() + 1;
-      const response = await fetch(
-        `${BACKEND_URL}/api/katyshop/monthly-calibrations?year=${year}&month=${month}`,
-        {
-          headers: {
-            Authorization: `Bearer ${sessionToken}`,
-          },
-        }
-      );
-      
-      if (response.ok) {
-        const data = await response.json();
-        setMonthlyCalibrations(data.calibration_count);
-      }
-    } catch (error) {
-      console.error('Error fetching monthly calibrations:', error);
-    }
-  }, [selectedDate, sessionToken]);
-
-  const fetchAdvisors = useCallback(async () => {
-    try {
-      const response = await fetch(`${BACKEND_URL}/api/service-advisors`, {
-        headers: {
-          Authorization: `Bearer ${sessionToken}`,
-        },
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setAdvisors(data);
-      }
-    } catch (error) {
-      console.error('Error fetching advisors:', error);
-    }
-  }, [sessionToken]);
-
-  // Initial load - fetch advisors once
-  useEffect(() => {
-    const loadInitialData = async () => {
-      setLoading(true);
-      await fetchAdvisors();
-      setLoading(false);
-    };
-    if (sessionToken) {
-      loadInitialData();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionToken]);
-
-  // Fetch jobs when date changes - DO NOT include fetchJobs in deps to avoid infinite loop
-  useEffect(() => {
-    if (sessionToken) {
-      fetchJobs();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDate, sessionToken]);
-
-  // Fetch monthly calibrations on initial load only
-  useEffect(() => {
-    if (sessionToken) {
-      fetchMonthlyCalibrations();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionToken]);
-
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await Promise.all([fetchJobs(), fetchMonthlyCalibrations()]);
-    setRefreshing(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
+  // Helper to format date for API
   const formatDateForApi = (date: Date) => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  };
+
+  // Stable fetch functions that don't depend on state
+  const fetchJobsForDate = async (date: Date, token: string) => {
+    try {
+      const dateStr = formatDateForApi(date);
+      const response = await fetch(`${BACKEND_URL}/api/katyshop/jobs?date=${dateStr}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.ok) {
+        return await response.json();
+      }
+    } catch (error) {
+      console.error('Error fetching jobs:', error);
+    }
+    return [];
+  };
+
+  const fetchMonthlyCalibrationCount = async (date: Date, token: string) => {
+    try {
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1;
+      const response = await fetch(
+        `${BACKEND_URL}/api/katyshop/monthly-calibrations?year=${year}&month=${month}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (response.ok) {
+        const data = await response.json();
+        return data.calibration_count;
+      }
+    } catch (error) {
+      console.error('Error fetching monthly calibrations:', error);
+    }
+    return 0;
+  };
+
+  const fetchAdvisorsList = async (token: string) => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/service-advisors`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.ok) {
+        return await response.json();
+      }
+    } catch (error) {
+      console.error('Error fetching advisors:', error);
+    }
+    return [];
+  };
+
+  // Initial load effect - runs once
+  useEffect(() => {
+    if (!sessionToken || initialLoadDone.current) return;
+    
+    const loadInitialData = async () => {
+      setLoading(true);
+      const [jobsData, advisorsData, calibrationCount] = await Promise.all([
+        fetchJobsForDate(selectedDate, sessionToken),
+        fetchAdvisorsList(sessionToken),
+        fetchMonthlyCalibrationCount(selectedDate, sessionToken),
+      ]);
+      setJobs(jobsData);
+      setAdvisors(advisorsData);
+      setMonthlyCalibrations(calibrationCount);
+      setLoading(false);
+      initialLoadDone.current = true;
+    };
+    
+    loadInitialData();
+  }, [sessionToken]);
+
+  // Effect for date changes (after initial load)
+  useEffect(() => {
+    if (!sessionToken || !initialLoadDone.current) return;
+    
+    // Skip if date hasn't actually changed
+    if (currentDateRef.current.toDateString() === selectedDate.toDateString()) return;
+    currentDateRef.current = selectedDate;
+    
+    const loadJobsForNewDate = async () => {
+      const jobsData = await fetchJobsForDate(selectedDate, sessionToken);
+      setJobs(jobsData);
+    };
+    
+    loadJobsForNewDate();
+  }, [selectedDate, sessionToken]);
+
+  // Refresh function for pull-to-refresh
+  const onRefresh = async () => {
+    if (!sessionToken) return;
+    setRefreshing(true);
+    const [jobsData, calibrationCount] = await Promise.all([
+      fetchJobsForDate(selectedDate, sessionToken),
+      fetchMonthlyCalibrationCount(selectedDate, sessionToken),
+    ]);
+    setJobs(jobsData);
+    setMonthlyCalibrations(calibrationCount);
+    setRefreshing(false);
+  };
+
+  // Wrapper functions for use in other parts of the component
+  const fetchJobs = async () => {
+    if (!sessionToken) return;
+    const jobsData = await fetchJobsForDate(selectedDate, sessionToken);
+    setJobs(jobsData);
+  };
+
+  const fetchMonthlyCalibrations = async () => {
+    if (!sessionToken) return;
+    const count = await fetchMonthlyCalibrationCount(selectedDate, sessionToken);
+    setMonthlyCalibrations(count);
+  };
+
+  const fetchAdvisors = async () => {
+    if (!sessionToken) return;
+    const data = await fetchAdvisorsList(sessionToken);
+    setAdvisors(data);
   };
 
   const formatDisplayDate = (date: Date) => {
