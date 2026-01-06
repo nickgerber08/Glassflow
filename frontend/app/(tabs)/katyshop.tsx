@@ -1441,11 +1441,21 @@ export default function KatyshopScreen() {
                   <Pressable
                     style={({ pressed }) => [
                       styles.rescheduleBtn,
-                      pressed && { opacity: 0.7 }
+                      pressed && { opacity: 0.7, backgroundColor: '#E3F2FD' }
                     ]}
                     onPress={() => {
                       console.log('Reschedule button pressed');
-                      openRescheduleModal();
+                      // Close the detail modal first, then open reschedule
+                      if (selectedJob) {
+                        const [year, month, day] = selectedJob.date.split('-').map(Number);
+                        setRescheduleDate(new Date(year, month - 1, day));
+                        setRescheduleStartTime(selectedJob.start_time);
+                        setRescheduleEndTime(selectedJob.end_time);
+                      }
+                      setShowJobDetailModal(false);
+                      setTimeout(() => {
+                        setShowRescheduleModal(true);
+                      }, 300);
                     }}
                   >
                     <Ionicons name="calendar-outline" size={20} color="#2196F3" />
