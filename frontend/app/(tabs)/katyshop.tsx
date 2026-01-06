@@ -84,6 +84,7 @@ export default function KatyshopScreen() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [jobs, setJobs] = useState<KatyshopJob[]>([]);
   const [advisors, setAdvisors] = useState<ServiceAdvisor[]>([]);
+  const [monthlyCalibrations, setMonthlyCalibrations] = useState(0);
   
   // Modal states
   const [showAddJobModal, setShowAddJobModal] = useState(false);
