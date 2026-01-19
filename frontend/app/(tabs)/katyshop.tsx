@@ -20,8 +20,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import * as ImagePicker from 'expo-image-picker';
 import { format } from 'date-fns';
-
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
+import { BACKEND_URL } from '../../utils/config';
 
 // Time slots for the block schedule (7 AM to 6 PM) - HOURLY
 const TIME_SLOTS = [
