@@ -1,10 +1,29 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
-import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function LoginScreen() {
-  const { login } = useAuth();
+  const { login, user, loading } = useAuth();
+  const router = useRouter();
+
+  // If user is authenticated, redirect to main app
+  useEffect(() => {
+    if (!loading && user) {
+      router.replace('/(tabs)/jobs');
+    }
+  }, [user, loading]);
+
+  // Show loading while checking auth state
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#2196F3" />
+        <Text style={styles.loadingText}>Signing in...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
