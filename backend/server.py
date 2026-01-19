@@ -1688,6 +1688,16 @@ async def seed_office_notes(request: Request):
 # Include router
 app.include_router(api_router)
 
+# Root route for health checks and deployment verification
+@app.get("/")
+async def root():
+    return {"status": "ok", "app": "GlassFlow API", "version": "1.0.0"}
+
+# Health check endpoint
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy"}
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
