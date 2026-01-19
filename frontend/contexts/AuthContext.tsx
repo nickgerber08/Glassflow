@@ -226,8 +226,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       let redirectUrl: string;
       
       if (Platform.OS === 'web') {
-        // Use window.location.origin for web to work across all environments
-        redirectUrl = typeof window !== 'undefined' ? window.location.origin + '/' : `${BACKEND_URL}/`;
+        // Use full current URL for web to work with deployed apps at paths like /share?app=xxx
+        if (typeof window !== 'undefined') {
+          // For e1ectron.ai deployed apps, we need to preserve the full URL including path and query
+          const currentUrl = new URL(window.location.href);
+          // Remove any existing session_id params to avoid confusion
+          currentUrl.searchParams.delete('session_id');
+          currentUrl.hash = '';
+          redirectUrl = currentUrl.toString();
+        } else {
+          redirectUrl = `${BACKEND_URL}/`;
+        }
       } else {
         redirectUrl = Linking.createURL('/');
       }
