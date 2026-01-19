@@ -45,36 +45,62 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Check for existing session on mount
+  // Combined initialization - check URL for session_id first, then existing session
   useEffect(() => {
-    checkExistingSession();
+    const initializeAuth = async () => {
+      try {
+        // On web, first check if we're returning from OAuth with session_id
+        if (Platform.OS === 'web' && typeof window !== 'undefined') {
+          const currentUrl = window.location.href;
+          const sessionId = extractSessionId(currentUrl);
+          
+          if (sessionId) {
+            console.log('Found session_id in URL, exchanging...');
+            await exchangeSessionId(sessionId);
+            // Clear the session_id from URL after processing
+            const url = new URL(window.location.href);
+            url.searchParams.delete('session_id');
+            url.hash = '';
+            window.history.replaceState({}, '', url.pathname + url.search);
+            return; // Auth complete, don't check existing session
+          }
+        }
+
+        // No session_id in URL, check for existing session
+        const token = await AsyncStorage.getItem('session_token');
+        if (token) {
+          setSessionToken(token);
+          await fetchUser(token);
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeAuth();
   }, []);
 
-  // Handle deep links and web URL params
+  // Handle deep links for native apps (URL changes after initial load)
   useEffect(() => {
     const handleUrl = async (url: string) => {
       const sessionId = extractSessionId(url);
       if (sessionId) {
-        console.log('Found session_id, exchanging...');
+        console.log('Found session_id in deep link, exchanging...');
         await exchangeSessionId(sessionId);
       }
     };
 
-    // On web, check the current URL directly
-    if (Platform.OS === 'web' && typeof window !== 'undefined') {
-      const currentUrl = window.location.href;
-      if (currentUrl.includes('session_id=')) {
-        handleUrl(currentUrl);
-        return;
-      }
+    // Only for native - web is handled in initializeAuth
+    if (Platform.OS !== 'web') {
+      // Check initial URL (cold start)
+      Linking.getInitialURL().then((url) => {
+        if (url) {
+          handleUrl(url);
+        }
+      });
     }
-
-    // Check initial URL (cold start) - for native apps
-    Linking.getInitialURL().then((url) => {
-      if (url) {
-        handleUrl(url);
-      }
-    });
 
     // Listen for URL changes (hot link)
     const subscription = Linking.addEventListener('url', (event) => {
@@ -85,20 +111,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       subscription.remove();
     };
   }, []);
-
-  const checkExistingSession = async () => {
-    try {
-      const token = await AsyncStorage.getItem('session_token');
-      if (token) {
-        setSessionToken(token);
-        await fetchUser(token);
-      }
-    } catch (error) {
-      console.error('Error checking session:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const extractSessionId = (url: string): string | null => {
     // Check hash first (#session_id=...)
