@@ -1,6 +1,5 @@
 import { create } from 'zustand';
-
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
+import { BACKEND_URL } from '../utils/config';
 
 interface Job {
   job_id: string;
