@@ -40,6 +40,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": "https://app.emergent.sh",
+        "headOrigin": "https://e1ectron.ai"
+      }
     }
   }
 }
