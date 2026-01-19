@@ -50,16 +50,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkExistingSession();
   }, []);
 
-  // Handle deep links
+  // Handle deep links and web URL params
   useEffect(() => {
     const handleUrl = async (url: string) => {
       const sessionId = extractSessionId(url);
       if (sessionId) {
+        console.log('Found session_id, exchanging...');
         await exchangeSessionId(sessionId);
       }
     };
 
-    // Check initial URL (cold start)
+    // On web, check the current URL directly
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      const currentUrl = window.location.href;
+      if (currentUrl.includes('session_id=')) {
+        handleUrl(currentUrl);
+        return;
+      }
+    }
+
+    // Check initial URL (cold start) - for native apps
     Linking.getInitialURL().then((url) => {
       if (url) {
         handleUrl(url);
