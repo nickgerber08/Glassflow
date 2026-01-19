@@ -5,7 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
+import { BACKEND_URL } from '../../utils/config';
 
 export default function ProfileScreen() {
   const { user, logout, sessionToken } = useAuth();
