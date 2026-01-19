@@ -14,7 +14,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import { useJobStore } from '../stores/jobStore';
 import { formatDistanceToNow } from 'date-fns';
-import { BACKEND_URL } from '../utils/config';
+import { SAFE_BACKEND_URL as BACKEND_URL } from '../utils/config';
 
 export default function NotificationsScreen() {
   const { sessionToken } = useAuth();

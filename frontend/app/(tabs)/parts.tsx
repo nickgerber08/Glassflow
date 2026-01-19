@@ -17,7 +17,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import { useJobStore } from '../../stores/jobStore';
 
-import { BACKEND_URL } from '../../utils/config';
+import { SAFE_BACKEND_URL as BACKEND_URL } from '../../utils/config';
 
 // Default technicians list - must match create-job.tsx
 const DEFAULT_TECHNICIANS = [

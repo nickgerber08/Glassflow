@@ -7,7 +7,7 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '../../contexts/AuthContext';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, parseISO } from 'date-fns';
 
-import { BACKEND_URL } from '../../utils/config';
+import { SAFE_BACKEND_URL as BACKEND_URL } from '../../utils/config';
 
 const STATUS_COLORS: Record<string, string> = {
   pending: '#FF9800',

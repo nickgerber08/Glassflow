@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { BACKEND_URL } from '../utils/config';
+import { SAFE_BACKEND_URL as BACKEND_URL } from '../utils/config';
 
 interface Job {
   job_id: string;

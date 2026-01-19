@@ -19,7 +19,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { FlashList } from '@shopify/flash-list';
 import { format, isSameDay, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths, isSameMonth } from 'date-fns';
 import { Swipeable, GestureHandlerRootView } from 'react-native-gesture-handler';
-import { BACKEND_URL } from '../../utils/config';
+import { SAFE_BACKEND_URL as BACKEND_URL } from '../../utils/config';
 
 // Default technicians - must match other pages
 const DEFAULT_TECHNICIANS = [

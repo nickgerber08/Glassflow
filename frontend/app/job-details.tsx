@@ -21,7 +21,7 @@ import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths, isSameDay } from 'date-fns';
 
-import { BACKEND_URL } from '../utils/config';
+import { SAFE_BACKEND_URL as BACKEND_URL } from '../utils/config';
 
 // Default technicians - must match create-job.tsx
 const DEFAULT_TECHNICIANS = [

@@ -38,7 +38,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-import { BACKEND_URL } from '../utils/config';
+import { SAFE_BACKEND_URL as BACKEND_URL } from '../utils/config';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);

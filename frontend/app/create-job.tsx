@@ -21,7 +21,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { BACKEND_URL } from '../utils/config';
+import { SAFE_BACKEND_URL as BACKEND_URL } from '../utils/config';
 
 const JOB_TYPES = [
   { label: 'Windshield Replacement', value: 'windshield' },
