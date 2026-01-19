@@ -43,8 +43,7 @@
     },
     "extra": {
       "router": {
-        "origin": "https://app.emergent.sh",
-        "headOrigin": "https://e1ectron.ai"
+        "origin": "https://glassflow-4.preview.emergentagent.com"
       }
     }
   }
