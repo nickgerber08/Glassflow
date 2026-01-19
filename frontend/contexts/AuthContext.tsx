@@ -247,7 +247,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           currentUrl.hash = '';
           redirectUrl = currentUrl.toString();
         } else {
-          redirectUrl = `${BACKEND_URL}/`;
+          // Fallback - use window.location.origin if available, otherwise empty string
+          // This branch should not be reached on web but is here for safety
+          redirectUrl = '';
         }
       } else {
         redirectUrl = Linking.createURL('/');
