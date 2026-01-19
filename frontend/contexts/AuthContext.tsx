@@ -7,6 +7,8 @@ import Constants from 'expo-constants';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 
+// Platform is already imported above
+
 WebBrowser.maybeCompleteAuthSession();
 
 // Configure notifications
